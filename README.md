@@ -17,8 +17,11 @@ Dự án được thiết kế theo mô hình tách biệt (Frontend và Backend
 
 ## Hướng dẫn xem Demo trực tiếp
 Dự án hiện đã được đưa lên mạng đầy đủ, bạn không cần phải cài đặt phức tạp ở dưới máy tính cá nhân.
-- **Cổng Giao Diện Web (Frontend)**: [Gắn link Vercel của bạn vào đây]
-- **Tài liệu API Backend (Swagger)**: [https://medibook-api-yd85.onrender.com/swagger-ui.html](https://medibook-api-yd85.onrender.com/swagger-ui.html)
+
+- **Cổng Giao Diện Web Dành Cho Người Dùng (Frontend)**: [https://mediplus.vercel.app](https://mediplus.vercel.app) *(Link chính thức để đặt lịch và quản trị)*
+- **Máy Chủ Xử Lý Dữ Liệu (Backend API)**: [https://medibook-api-yd85.onrender.com](https://medibook-api-yd85.onrender.com) *(Trang này chạy ngầm, không có giao diện trừ tài liệu API)*
+- **Tài liệu API Backend (Swagger UI)**: [https://medibook-api-yd85.onrender.com/swagger-ui/index.html](https://medibook-api-yd85.onrender.com/swagger-ui/index.html)
+- **Mã Nguồn (Source Code)**: [https://github.com/Thooooo1/Mediplus](https://github.com/Thooooo1/Mediplus)
 
 ## Tài khoản dùng thử
 Bạn có thể dùng các tài khoản mình đã tạo sẵn dưới đây để test thử các chức năng:
