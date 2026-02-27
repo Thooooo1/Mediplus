@@ -20,4 +20,5 @@ public interface AppUserRepository extends JpaRepository<AppUser, UUID> {
 
     Page<AppUser> findByFullNameContainingIgnoreCaseOrEmailContainingIgnoreCase(String name, String email, Pageable pageable);
     Page<AppUser> findByRole(Role role, Pageable pageable);
+    java.util.List<AppUser> findByRole(Role role);
 }

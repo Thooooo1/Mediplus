@@ -67,6 +67,22 @@ const setNav = (me) => {
   const nav = document.getElementById("nav") || document.getElementById("topNav");
   if (!nav) return;
 
+  const notifHtml = (me && (me.role === 'ADMIN' || me.role === 'DOCTOR')) ? `
+    <div class="nav-notif-container">
+      <button class="notif-bell-btn" onclick="toggleNotifDropdown(event)">
+        <span class="material-icons-round">notifications</span>
+        <span id="notifBadge" class="notif-badge">0</span>
+      </button>
+      <div id="notifDropdown" class="notif-dropdown">
+        <div class="notif-header">
+          <h4>Thông báo</h4>
+          <span class="material-icons-round" style="font-size:18px;color:var(--neutral-400)">notifications_active</span>
+        </div>
+        <div id="notifList" class="notif-list"></div>
+      </div>
+    </div>
+  ` : '';
+
   // Nếu là trang index.html có style khác, ta sẽ giữ nguyên CSS nhưng thay đổi link
   const navLinks = document.getElementById("navLinks");
   if (navLinks) {
@@ -76,6 +92,7 @@ const setNav = (me) => {
         ${me.role === 'USER' ? '<a href="my-appointments.html" class="nav-link-ghost">Lịch hẹn</a>' : ''}
         ${me.role === 'DOCTOR' ? '<a href="doctor-overview.html" class="nav-link-ghost">Dashboard</a>' : ''}
         ${me.role === 'ADMIN' ? '<a href="admin-dashboard.html" class="nav-link-ghost">Admin</a>' : ''}
+        ${notifHtml}
         <a href="#" onclick="logout()" class="nav-link-outline" style="border-color:var(--primary);color:var(--primary)">Đăng xuất</a>
       `;
     } else {
@@ -85,6 +102,7 @@ const setNav = (me) => {
         <a href="register.html" class="nav-link-solid">Đăng ký miễn phí</a>
       `;
     }
+    if (me && (me.role === 'ADMIN' || me.role === 'DOCTOR')) initNotifications();
     return;
   }
 
@@ -102,6 +120,7 @@ const setNav = (me) => {
         ${me.role === "USER" ? `<a href="my-appointments.html" style="text-decoration:none; color:var(--neutral-600); font-weight:600; font-size:14px">Lịch hẹn</a>` : ""}
         ${me.role === "DOCTOR" ? `<a href="doctor-overview.html" style="text-decoration:none; color:var(--neutral-600); font-weight:600; font-size:14px">Dashboard</a>` : ""}
         ${me.role === "ADMIN" ? `<a href="admin-dashboard.html" style="text-decoration:none; color:var(--neutral-600); font-weight:600; font-size:14px">Admin</a>` : ""}
+        ${notifHtml}
         <div style="width:1px; height:20px; background:var(--neutral-200)"></div>
         <div style="display:flex; flex-direction:column; align-items:flex-end">
           <span style="font-size:12px; font-weight:700; color:var(--neutral-900)">${me.fullName}</span>
@@ -114,6 +133,97 @@ const setNav = (me) => {
       `}
     </div>
   `;
+  if (me && (me.role === 'ADMIN' || me.role === 'DOCTOR')) initNotifications();
+};
+
+/* --- Notifications --- */
+let notifInterval = null;
+
+const updateNotificationBadge = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    try {
+        const r = await API("/api/notifications/unread-count");
+        if (r.ok) {
+            const count = await r.json();
+            const badge = document.getElementById("notifBadge");
+            if (badge) {
+                badge.textContent = count > 99 ? "99+" : count;
+                badge.classList.toggle("show", count > 0);
+            }
+        }
+    } catch(e) {}
+};
+
+const renderNotifications = async () => {
+    const list = document.getElementById("notifList");
+    if (!list) return;
+    list.innerHTML = '<div class="p-6 text-center"><div class="loader-spinner" style="width:24px;height:24px;border-width:2px"></div></div>';
+    
+    try {
+        const r = await API("/api/notifications?size=10");
+        if (r.ok) {
+            const data = await r.json();
+            if (data.content.length === 0) {
+                list.innerHTML = '<div class="notif-empty"><span class="material-icons-round">notifications_off</span><span>Không có thông báo nào</span></div>';
+            } else {
+                list.innerHTML = data.content.map(n => `
+                    <div class="notif-item ${n.read ? '' : 'unread'}" onclick="markNotifAsRead('${n.id}', '${n.type}', '${n.relatedId}')">
+                        <div class="notif-title">${n.title}</div>
+                        <div class="notif-msg">${n.message}</div>
+                        <div class="notif-time">${fmt(n.createdAt)}</div>
+                    </div>
+                `).join('');
+            }
+        }
+    } catch(e) {
+        list.innerHTML = '<div class="notif-empty">Lỗi tải thông báo</div>';
+    }
+};
+
+const markNotifAsRead = async (id, type, relatedId) => {
+    try {
+        await API(`/api/notifications/${id}/read`, { method: 'POST' });
+        updateNotificationBadge();
+        // Redirect based on type if needed
+        if (type === 'APPOINTMENT_BOOKED') {
+            const role = localStorage.getItem("role");
+            if (role === 'DOCTOR') location.href = 'doctor-appointments.html';
+            else if (role === 'ADMIN') location.href = 'admin-appointments.html';
+            else renderNotifications();
+        } else {
+            renderNotifications();
+        }
+    } catch(e) {}
+};
+
+const toggleNotifDropdown = (e) => {
+    if (e) e.stopPropagation();
+    const dropdown = document.getElementById("notifDropdown");
+    if (dropdown) {
+        const isShowing = dropdown.classList.toggle("show");
+        if (isShowing) renderNotifications();
+    }
+};
+
+const initNotifications = () => {
+    const role = localStorage.getItem("role");
+    if (role !== 'ADMIN' && role !== 'DOCTOR') return;
+
+    // Close on outside click
+    if (!window.notifInitialized) {
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById("notifDropdown");
+            if (dropdown && !dropdown.contains(e.target) && !e.target.closest('.notif-bell-btn')) {
+                dropdown.classList.remove("show");
+            }
+        });
+        window.notifInitialized = true;
+    }
+
+    updateNotificationBadge();
+    if (notifInterval) clearInterval(notifInterval);
+    notifInterval = setInterval(updateNotificationBadge, 30000); // 30s
 };
 
 const initNav = async () => {
