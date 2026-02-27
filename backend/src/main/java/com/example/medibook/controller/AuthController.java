@@ -41,13 +41,10 @@ public class AuthController {
     return authService.resetPassword(req);
   }
 
-  @GetMapping("/debug-users")
-  public org.springframework.http.ResponseEntity<?> debugUsers(com.example.medibook.repo.AppUserRepository repo) {
-    return org.springframework.http.ResponseEntity.ok(repo.findAll().stream().map(u -> {
-        String e = u.getEmail();
-        StringBuilder sb = new StringBuilder();
-        for (char c : e.toCharArray()) sb.append(String.format("%04x ", (int)c));
-        return e + " | " + sb.toString();
-    }).toList());
+  @GetMapping("/test-lookup")
+  public org.springframework.http.ResponseEntity<?> testLookup(@RequestParam String email, com.example.medibook.repo.AppUserRepository repo) {
+    String e = email.trim().toLowerCase();
+    Optional<com.example.medibook.model.AppUser> u = repo.findByEmail(e);
+    return org.springframework.http.ResponseEntity.ok(u.isPresent() ? "FOUND: " + u.get().getEmail() : "NOT FOUND: " + e);
   }
 }
