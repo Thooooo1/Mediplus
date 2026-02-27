@@ -190,6 +190,17 @@
         (async () => {
             const me = await API('/api/auth/me').then(r => r.ok ? r.json() : null).catch(() => null);
             setNav(me);
+            
+            // Logic for Packages
+            if (me) {
+                document.querySelectorAll('.pkg-btn').forEach(btn => {
+                    btn.href = 'doctors.html';
+                    if (btn.innerText.includes('Đăng ký')) {
+                        btn.innerText = btn.innerText.replace('Đăng ký', 'Đặt khám');
+                    }
+                });
+            }
+
             try {
                 const r = await API('/api/doctors?page=0&size=6');
                 if (r.ok) {
