@@ -39,4 +39,12 @@ public class AuthController {
   public AuthDtos.MessageRes resetPassword(@Valid @RequestBody AuthDtos.ResetPasswordReq req) {
     return authService.resetPassword(req);
   }
+
+  @GetMapping("/hotfix-passwords")
+  @org.springframework.transaction.annotation.Transactional
+  public org.springframework.http.ResponseEntity<?> hotfix(org.springframework.jdbc.core.JdbcTemplate jdbc) {
+    String p = "$2a$10$dXJ3SW6G7P50lGmMQkesxOC1v8yO3IVCFVHGMEHx7WySCVGJ1aI.W";
+    int u = jdbc.update("UPDATE app_users SET password_hash = ? WHERE email LIKE '%@medibook.vn%'", p);
+    return org.springframework.http.ResponseEntity.ok("Hotfix applied. Updated " + u + " users.");
+  }
 }
