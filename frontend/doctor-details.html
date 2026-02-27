@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Thông tin bác sĩ — MediBook</title>
+    <link rel="stylesheet" href="app_v2.css"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+    <style>
+        .page-header { background: linear-gradient(135deg, #1e3a8a, #2563eb); color: white; padding: 48px 0 80px; }
+        .profile-card { background: white; border-radius: var(--radius-xl); box-shadow: var(--shadow-lg); margin-top: -48px; position: relative; z-index: 10; display: flex; gap: 32px; padding: 32px; }
+        .profile-avatar { width: 120px; height: 120px; border-radius: var(--radius-xl); background: var(--primary-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .profile-avatar .material-icons-round { font-size: 56px; color: var(--primary); }
+        .profile-details h1 { font-size: 28px; margin-bottom: 4px; }
+        .profile-details .specialty { color: var(--primary); font-weight: 600; font-size: 16px; }
+        .profile-details .clinic { color: var(--neutral-500); font-size: 14px; margin-top: 4px; }
+        .profile-stats { display: flex; gap: 24px; margin-top: 16px; }
+        .profile-stat { font-size: 14px; color: var(--neutral-500); display: flex; align-items: center; gap: 6px; }
+        .profile-stat .material-icons-round { font-size: 18px; }
+
+        .content-grid { display: grid; grid-template-columns: 1fr 380px; gap: 24px; margin-top: 24px; }
+        .bio-section { background: white; border-radius: var(--radius-xl); padding: 24px; border: 1px solid var(--neutral-100); }
+        .bio-section h2 { font-size: 18px; margin-bottom: 12px; }
+        .bio-section p { color: var(--neutral-600); line-height: 1.8; font-size: 14px; }
+
+        .booking-sidebar { background: white; border-radius: var(--radius-xl); padding: 24px; border: 1px solid var(--neutral-100); height: fit-content; position: sticky; top: 80px; }
+        .booking-sidebar h3 { font-size: 16px; margin-bottom: 16px; }
+        .booking-sidebar .price { font-size: 28px; font-weight: 800; color: var(--primary); margin-bottom: 4px; }
+        .booking-sidebar .price-label { font-size: 13px; color: var(--neutral-500); margin-bottom: 20px; }
+
+        .slots-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+        .slot-btn { padding: 10px 8px; border: 1px solid var(--neutral-200); border-radius: var(--radius-md); background: white; cursor: pointer; font-size: 13px; font-weight: 500; text-align: center; transition: all 0.2s; font-family: var(--font-sans); color: var(--neutral-700); }
+        .slot-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-50); }
+        .slot-btn.selected { background: var(--primary); color: white; border-color: var(--primary); }
+        .slot-btn.booked { opacity: 0.4; cursor: not-allowed; text-decoration: line-through; }
+
+        @media (max-width: 768px) {
+            .profile-card { flex-direction: column; align-items: center; text-align: center; }
+            .profile-stats { justify-content: center; }
+            .content-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="nav" id="nav"><div style="flex:1"><a href="index.html"><b>MediBook</b></a></div></div>
+
+    <div class="page-header"><div class="container"></div></div>
+
+    <div class="container">
+        <div id="profileCard" class="profile-card">
+            <div class="skeleton-card" style="width:100%"><div class="skeleton-line w-60"></div><div class="skeleton-line w-40"></div></div>
+        </div>
+
+        <div class="content-grid">
+            <div id="bioSection" class="bio-section">
+                <div class="skeleton-card"><div class="skeleton-line w-80"></div><div class="skeleton-line w-60"></div><div class="skeleton-line w-80"></div></div>
+            </div>
+            <div class="booking-sidebar" id="bookingSidebar">
+                <div class="skeleton-card"><div class="skeleton-line w-40"></div><div class="skeleton-line w-60"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app_v2.js"></script>
+    <script>
+        const doctorId = new URLSearchParams(location.search).get('id');
+        if (!doctorId) { location.href = 'doctors.html'; }
+
+        let selectedSlotId = null;
+        let me = null;
+
+        (async () => {
+            // Check auth
+            const token = localStorage.getItem('token');
+            if (token) {
+                try { const r = await API('/api/auth/me'); if (r.ok) { me = await r.json(); setNav(me); } } catch(e) {}
+            }
+
+            // Load doctor
+            try {
+                const r = await API(`/api/doctors/${doctorId}`);
+                if (!r.ok) throw new Error('Không tìm thấy bác sĩ');
+                const d = await r.json();
+
+                document.title = `${d.fullName} — MediBook`;
+                document.getElementById('profileCard').innerHTML = `
+                    <div class="profile-avatar"><span class="material-icons-round">person</span></div>
+                    <div class="profile-details">
+                        <h1>${d.title ? d.title + ' ' : ''}${d.fullName}</h1>
+                        <div class="specialty">${d.specialtyName}</div>
+                        ${d.clinicName ? `<div class="clinic">${d.clinicName}</div>` : ''}
+                        <div class="profile-stats">
+                            ${d.yearsExperience ? `<div class="profile-stat"><span class="material-icons-round">work</span>${d.yearsExperience} năm kinh nghiệm</div>` : ''}
+                            ${d.rating ? `<div class="profile-stat"><span class="material-icons-round" style="color:var(--warning)">star</span>${d.rating.toFixed(1)} (${d.ratingCount || 0} đánh giá)</div>` : ''}
+                            ${d.country ? `<div class="profile-stat"><span class="material-icons-round">location_on</span>${d.country}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('bioSection').innerHTML = `
+                    <h2>Giới thiệu</h2>
+                    <p>${d.bio || 'Bác sĩ chưa cập nhật thông tin giới thiệu.'}</p>
+                `;
+
+                document.getElementById('bookingSidebar').innerHTML = `
+                    <div class="price">${d.consultFeeVnd ? new Intl.NumberFormat('vi-VN').format(d.consultFeeVnd) + 'đ' : 'Liên hệ'}</div>
+                    <div class="price-label">Phí khám / lần</div>
+                    <hr/>
+                    <h3>Chọn ngày khám</h3>
+                    <input type="date" id="dateInput" class="form-input" min="${new Date().toISOString().split('T')[0]}" value="${new Date().toISOString().split('T')[0]}"/>
+                    <div id="slotsContainer" style="margin-top:16px">
+                        <p style="color:var(--neutral-500);font-size:13px;text-align:center">Chọn ngày để xem lịch trống</p>
+                    </div>
+                    <hr/>
+                    <div class="form-group">
+                        <label class="form-label">Ghi chú triệu chứng</label>
+                        <textarea id="noteInput" class="form-input" rows="3" placeholder="Mô tả triệu chứng hoặc yêu cầu..."></textarea>
+                    </div>
+                    <button class="btn-primary btn-lg" style="width:100%" id="bookBtn" disabled onclick="bookAppointment()">
+                        <span class="material-icons-round" style="font-size:20px">event_available</span>
+                        Đặt lịch hẹn
+                    </button>
+                `;
+
+                // Load today's slots
+                loadSlots(document.getElementById('dateInput').value);
+                document.getElementById('dateInput').addEventListener('change', (e) => loadSlots(e.target.value));
+            } catch (err) {
+                showErrorState('profileCard', err.message);
+            }
+        })();
+
+        async function loadSlots(date) {
+            const container = document.getElementById('slotsContainer');
+            container.innerHTML = '<div class="skeleton-line w-80"></div><div class="skeleton-line w-60"></div>';
+            selectedSlotId = null;
+            document.getElementById('bookBtn').disabled = true;
+
+            try {
+                const r = await API(`/api/doctors/${doctorId}/slots?date=${date}`);
+                if (!r.ok) throw new Error('Lỗi tải lịch trống');
+                const slots = await r.json();
+
+                const available = slots.filter(s => s.status === 'AVAILABLE');
+                if (available.length === 0) {
+                    container.innerHTML = '<p style="color:var(--neutral-500);font-size:13px;text-align:center;padding:16px">Không có lịch trống cho ngày này. Vui lòng chọn ngày khác.</p>';
+                    return;
+                }
+
+                container.innerHTML = `<p style="font-size:13px;color:var(--neutral-500);margin-bottom:8px">${available.length} khung giờ trống</p>
+                <div class="slots-grid">
+                    ${slots.map(s => {
+                        const isAvailable = s.status === 'AVAILABLE';
+                        return `<button class="slot-btn ${isAvailable ? '' : 'booked'}" 
+                            ${isAvailable ? `onclick="selectSlot(this, '${s.id}')"` : 'disabled'}
+                            >${fmtTime(s.startAt)}</button>`;
+                    }).join('')}
+                </div>`;
+            } catch (err) {
+                container.innerHTML = `<p style="color:var(--danger);font-size:13px">${err.message}</p>`;
+            }
+        }
+
+        function selectSlot(el, slotId) {
+            document.querySelectorAll('.slot-btn.selected').forEach(b => b.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedSlotId = slotId;
+            document.getElementById('bookBtn').disabled = false;
+        }
+
+        async function bookAppointment() {
+            if (!selectedSlotId) return;
+            if (!me) { showToast('Vui lòng đăng nhập để đặt lịch.', 'warning'); location.href = 'login.html'; return; }
+            if (me.role !== 'USER') { showToast('Chỉ bệnh nhân mới có thể đặt lịch.', 'warning'); return; }
+
+            const btn = document.getElementById('bookBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loader-spinner" style="width:20px;height:20px;border-width:2px"></span> Đang đặt lịch...';
+
+            const note = document.getElementById('noteInput').value.trim();
+            try {
+                const r = await API('/api/appointments/book', {
+                    method: 'POST',
+                    body: JSON.stringify({ timeSlotId: selectedSlotId, note })
+                });
+                if (!r.ok) {
+                    const data = await r.json().catch(() => ({}));
+                    throw new Error(data.error || 'Đặt lịch thất bại');
+                }
+                showToast('Đặt lịch thành công! 🎉', 'success');
+                setTimeout(() => { location.href = 'my-appointments.html'; }, 1000);
+            } catch (err) {
+                showToast(err.message, 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<span class="material-icons-round" style="font-size:20px">event_available</span> Đặt lịch hẹn';
+            }
+        }
+    </script>
+</body>
+</html>

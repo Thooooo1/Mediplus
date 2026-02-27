@@ -1,0 +1,56 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: medibook-db
+    environment:
+      POSTGRES_DB: medibook
+      POSTGRES_USER: medibook
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-medibook}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U medibook"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - medibook-net
+
+  backend:
+    build: 
+      context: ./backend
+    container_name: medibook-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/medibook
+      SPRING_DATASOURCE_USERNAME: medibook
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-medibook}
+      SPRING_PROFILES_ACTIVE: prod
+      MAIL_ENABLED: ${MAIL_ENABLED:-false}
+      JWT_SECRET: ${JWT_SECRET:-2b44b0bce5b5b4e4n88g5f2ee3b876ca9b8e235a96bf}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - medibook-net
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: medibook-frontend
+    ports:
+      - "80:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+    depends_on:
+      - backend
+    networks:
+      - medibook-net
+
+networks:
+  medibook-net:
+    driver: bridge
+
+volumes:
+  postgres_data:

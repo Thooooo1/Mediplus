@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Cài đặt — MediBook</title>
+    <link rel="stylesheet" href="app_v2.css"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="material-icons-round">medical_services</span>
+                    <span>MediBook</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="admin-dashboard.html" class="nav-item">
+                    <span class="material-icons-round">dashboard</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="admin-appointments.html" class="nav-item">
+                    <span class="material-icons-round">event</span>
+                    <span>Lịch hẹn</span>
+                </a>
+                <a href="admin-doctors.html" class="nav-item">
+                    <span class="material-icons-round">medical_information</span>
+                    <span>Bác sĩ</span>
+                </a>
+                <a href="admin-users.html" class="nav-item">
+                    <span class="material-icons-round">people</span>
+                    <span>Người dùng</span>
+                </a>
+                <a href="admin-settings.html" class="nav-item active">
+                    <span class="material-icons-round">settings</span>
+                    <span>Cài đặt</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">A</div>
+                    <div class="user-details">
+                        <div class="user-name" id="userName">Admin</div>
+                        <div class="user-role">Quản trị viên</div>
+                    </div>
+                </div>
+                <button class="btn-logout" onclick="logout()">
+                    <span class="material-icons-round">logout</span>
+                    <span>Đăng xuất</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <h1>Cài đặt hệ thống</h1>
+                    <p class="text-secondary">Quản lý cấu hình và bảo mật tài khoản</p>
+                </div>
+            </header>
+
+            <div class="content-body" style="max-width: 800px;">
+                <div class="card p-6 mb-6">
+                    <h2 class="mb-4">Thông tin tài khoản</h2>
+                    <div class="row gap-4 mb-4">
+                        <div class="col-6">
+                            <label class="label">Họ và tên</label>
+                            <input type="text" id="profileName" class="input" readonly>
+                        </div>
+                        <div class="col-6">
+                            <label class="label">Email</label>
+                            <input type="text" id="profileEmail" class="input" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card p-6 mb-6">
+                    <h2 class="mb-4">Bảo mật</h2>
+                    <div class="mb-4">
+                        <label class="label">Mật khẩu mới</label>
+                        <div class="row gap-2">
+                            <input type="password" class="input flex-grow" placeholder="Nhập mật khẩu mới nếu muốn thay đổi">
+                            <button class="btn btn-ghost">Cập nhật</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card p-6 border-danger-light">
+                    <h2 class="mb-2 text-danger">Khu vực nguy hiểm</h2>
+                    <p class="text-secondary text-sm mb-4">Các thao tác dưới đây có thể ảnh hưởng nghiêm trọng đến dữ liệu hệ thống.</p>
+                    <button class="btn btn-danger-ghost">Khôi phục cài đặt gốc</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="app_v2.js"></script>
+    <script>
+        (async () => {
+            const me = await requireAuth('ADMIN');
+            if (!me) return;
+            document.getElementById('userName').textContent = me.fullName || 'Admin';
+            document.getElementById('userAvatar').textContent = (me.fullName || 'A').charAt(0);
+            
+            document.getElementById('profileName').value = me.fullName || '';
+            document.getElementById('profileEmail').value = me.email || '';
+        })();
+    </script>
+</body>
+</html>

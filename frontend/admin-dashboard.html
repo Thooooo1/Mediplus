@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Admin Dashboard — MediBook</title>
+    <link rel="stylesheet" href="app_v2.css"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="material-icons-round">medical_services</span>
+                    <span>MediBook</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="admin-dashboard.html" class="nav-item active">
+                    <span class="material-icons-round">dashboard</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="admin-appointments.html" class="nav-item">
+                    <span class="material-icons-round">event</span>
+                    <span>Lịch hẹn</span>
+                </a>
+                <a href="admin-doctors.html" class="nav-item">
+                    <span class="material-icons-round">medical_information</span>
+                    <span>Bác sĩ</span>
+                </a>
+                <a href="admin-users.html" class="nav-item">
+                    <span class="material-icons-round">people</span>
+                    <span>Người dùng</span>
+                </a>
+                <a href="admin-settings.html" class="nav-item">
+                    <span class="material-icons-round">settings</span>
+                    <span>Cài đặt</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">A</div>
+                    <div class="user-details">
+                        <div class="user-name" id="userName">Admin</div>
+                        <div class="user-role">Quản trị viên</div>
+                    </div>
+                </div>
+                <button class="btn-logout" onclick="logout()">
+                    <span class="material-icons-round">logout</span>
+                    <span>Đăng xuất</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <h1>Tổng quan hệ thống</h1>
+                    <p class="text-secondary" id="todayDate"></p>
+                </div>
+                <div class="header-right">
+                    <button class="btn btn-primary" onclick="location.href='admin-doctors.html'">
+                        <span class="material-icons-round">add</span>
+                        Thêm bác sĩ
+                    </button>
+                </div>
+            </header>
+
+            <div class="content-body">
+                <!-- Stats Grid -->
+                <div class="grid-4 mb-6" id="statsRow">
+                    <div class="stat-card skeleton-card"></div>
+                    <div class="stat-card skeleton-card"></div>
+                    <div class="stat-card skeleton-card"></div>
+                    <div class="stat-card skeleton-card"></div>
+                </div>
+
+                <!-- Recent Appointments -->
+                <section class="section">
+                    <div class="section-header">
+                        <h2 class="section-title">Lịch hẹn gần đây</h2>
+                        <a href="admin-appointments.html" class="text-link">Xem tất cả</a>
+                    </div>
+                    <div class="card">
+                        <div id="recentAppointments">
+                            <div class="skeleton-table"></div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="app_v2.js"></script>
+    <script>
+        (async () => {
+            const me = await requireAuth('ADMIN');
+            if (!me) return;
+            
+            document.getElementById('userName').textContent = me.fullName || 'Admin';
+            document.getElementById('userAvatar').textContent = (me.fullName || 'A').charAt(0);
+            document.getElementById('todayDate').textContent = new Date().toLocaleDateString('vi-VN', { 
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+            });
+
+            // Load Stats
+            try {
+                const r = await API('/api/admin/stats');
+                if (r.ok) {
+                    const s = await r.json();
+                    document.getElementById('statsRow').innerHTML = `
+                        <div class="stat-card" style="--icon-bg: rgba(0, 113, 186, 0.15); --icon-shadow: rgba(0, 113, 186, 0.2);">
+                            <div class="stat-card-header">
+                                <div class="stat-icon" style="background: linear-gradient(135deg, #e0f2fe, #bae6fd); color: #0284c7;">
+                                    <span class="material-icons-round">people</span>
+                                </div>
+                                <span class="material-icons-round text-neutral-300" style="font-size: 32px; opacity: 0.5;">trending_up</span>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value">${s.totalUsers}</div>
+                                <div class="stat-label">Tổng người dùng</div>
+                            </div>
+                        </div>
+                        <div class="stat-card" style="--icon-bg: rgba(16, 185, 129, 0.15); --icon-shadow: rgba(16, 185, 129, 0.2);">
+                            <div class="stat-card-header">
+                                <div class="stat-icon" style="background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: #059669;">
+                                    <span class="material-icons-round">medical_information</span>
+                                </div>
+                                <span class="material-icons-round text-neutral-300" style="font-size: 32px; opacity: 0.5;">health_and_safety</span>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value">${s.totalDoctors}</div>
+                                <div class="stat-label">Tổng bác sĩ</div>
+                            </div>
+                        </div>
+                        <div class="stat-card" style="--icon-bg: rgba(245, 158, 11, 0.15); --icon-shadow: rgba(245, 158, 11, 0.2);">
+                            <div class="stat-card-header">
+                                <div class="stat-icon" style="background: linear-gradient(135deg, #fef3c7, #fde68a); color: #d97706;">
+                                    <span class="material-icons-round">event_available</span>
+                                </div>
+                                <span class="material-icons-round text-neutral-300" style="font-size: 32px; opacity: 0.5;">analytics</span>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value">${s.totalAppointments}</div>
+                                <div class="stat-label">Tổng lịch hẹn</div>
+                            </div>
+                        </div>
+                        <div class="stat-card" style="--icon-bg: rgba(139, 92, 246, 0.15); --icon-shadow: rgba(139, 92, 246, 0.2);">
+                            <div class="stat-card-header">
+                                <div class="stat-icon" style="background: linear-gradient(135deg, #ede9fe, #ddd6fe); color: #7c3aed;">
+                                    <span class="material-icons-round">today</span>
+                                </div>
+                                <span class="material-icons-round text-neutral-300" style="font-size: 32px; opacity: 0.5;">flash_on</span>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value">${s.todayAppointments}</div>
+                                <div class="stat-label">Lịch hẹn hôm nay</div>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch(e) { console.error(e); }
+
+            // Recent Appointments
+            try {
+                const r = await API('/api/admin/appointments?page=0&size=6');
+                if (r.ok) {
+                    const data = await r.json();
+                    const container = document.getElementById('recentAppointments');
+                    if (data.content && data.content.length > 0) {
+                        container.innerHTML = `
+                            <div class="table-responsive">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Bệnh nhân</th>
+                                            <th>Bác sĩ phụ trách</th>
+                                            <th>Thời gian hẹn</th>
+                                            <th>Trạng thái</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${data.content.map(a => `
+                                            <tr onclick="location.href='appointment-detail.html?id=${a.id}'">
+                                                <td>
+                                                    <div class="font-bold text-neutral-900" style="font-size: 15px;">${a.patientName}</div>
+                                                    <div class="text-secondary" style="font-size: 13px; font-family: monospace;">#${a.id.substring(0,8).toUpperCase()}</div>
+                                                </td>
+                                                <td>
+                                                    <div class="font-medium text-neutral-800">${a.doctorName}</div>
+                                                </td>
+                                                <td>
+                                                    <div class="font-medium text-primary">${fmt(a.startAt)}</div>
+                                                </td>
+                                                <td>${statusBadge(a.status)}</td>
+                                                <td class="text-right">
+                                                    <button class="btn btn-ghost btn-sm icon-only">
+                                                        <span class="material-icons-round">chevron_right</span>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        `;
+                    } else {
+                        showEmptyState(container, 'event_busy', 'Chưa có lịch hẹn', 'Hệ thống hiện chưa có lịch hẹn nào được ghi nhận.');
+                    }
+                }
+            } catch(e) { console.error(e); }
+        })();
+    </script>
+</body>
+</html>

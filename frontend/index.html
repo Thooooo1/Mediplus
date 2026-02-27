@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>MediBook — Đặt lịch khám bệnh trực tuyến</title>
+    <meta name="description" content="MediBook giúp bạn dễ dàng tìm bác sĩ chuyên khoa và đặt lịch khám bệnh trực tuyến."/>
+    <link rel="stylesheet" href="app_v2.css"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <style>
+        *{font-family:'Inter',var(--font-sans),sans-serif}
+
+        /* ── Animated Navbar ── */
+        .top-nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 32px;display:flex;align-items:center;transition:all .4s ease}
+        .top-nav.scrolled{background:rgba(255,255,255,.85);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);box-shadow:0 1px 40px rgba(0,0,0,.08);padding:10px 32px}
+        .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex:1}
+        .nav-logo .material-icons-round{font-size:32px;color:#fff;background:linear-gradient(135deg,#2563eb,#7c3aed);border-radius:10px;padding:6px;transition:transform .3s}
+        .nav-logo:hover .material-icons-round{transform:rotate(-10deg) scale(1.1)}
+        .nav-logo span{font-size:22px;font-weight:900;background:linear-gradient(135deg,#1e40af,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-.5px}
+        .scrolled .nav-logo span{background:linear-gradient(135deg,#1e40af,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .nav-links{display:flex;align-items:center;gap:8px}
+        .nav-links a{padding:8px 16px;border-radius:10px;font-weight:600;font-size:14px;text-decoration:none;transition:all .25s}
+        .nav-link-ghost{color:#fff}
+        .nav-link-ghost:hover{background:rgba(255,255,255,.15)}
+        .scrolled .nav-link-ghost{color:var(--neutral-700)}
+        .scrolled .nav-link-ghost:hover{background:var(--neutral-100)}
+        .nav-link-outline{border:2px solid rgba(255,255,255,.4)!important;color:#fff!important}
+        .nav-link-outline:hover{background:rgba(255,255,255,.15)!important;border-color:#fff!important}
+        .scrolled .nav-link-outline{border-color:var(--primary)!important;color:var(--primary)!important}
+        .scrolled .nav-link-outline:hover{background:var(--primary-50)!important}
+        .nav-link-solid{background:linear-gradient(135deg,#f59e0b,#ef4444)!important;color:#fff!important;border:none!important;box-shadow:0 4px 15px rgba(245,158,11,.3)}
+        .nav-link-solid:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(245,158,11,.4)!important}
+
+        /* ── Hero ── */
+        .hero{background:linear-gradient(160deg,#0f172a 0%,#1e3a5f 30%,#1e40af 60%,#3b82f6 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:120px 24px 80px}
+        .hero::before{content:'';position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(99,102,241,.3) 0%,transparent 70%);top:-200px;right:-100px;animation:float 8s ease-in-out infinite}
+        .hero::after{content:'';position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(59,130,246,.2) 0%,transparent 70%);bottom:-100px;left:-50px;animation:float 10s ease-in-out infinite reverse}
+        @keyframes float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-30px) scale(1.05)}}
+        .hero-content{position:relative;z-index:2;text-align:center;max-width:800px;margin:0 auto}
+        .hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);padding:8px 20px;border-radius:50px;color:rgba(255,255,255,.9);font-size:14px;font-weight:600;margin-bottom:28px;animation:fadeInDown .8s ease}
+        .hero-badge .dot{width:8px;height:8px;border-radius:50%;background:#22c55e;animation:pulse 2s infinite}
+        @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.6)}50%{box-shadow:0 0 0 8px rgba(34,197,94,0)}}
+        .hero h1{font-size:56px;font-weight:900;color:#fff;line-height:1.1;margin-bottom:20px;letter-spacing:-1.5px;animation:fadeInUp .8s ease .2s both}
+        .hero h1 .gradient-text{background:linear-gradient(135deg,#60a5fa,#a78bfa,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-size:200% auto;animation:shimmer 4s linear infinite}
+        @keyframes shimmer{0%{background-position:0% center}100%{background-position:200% center}}
+        .hero-sub{font-size:20px;color:rgba(255,255,255,.7);line-height:1.6;max-width:600px;margin:0 auto 40px;animation:fadeInUp .8s ease .4s both}
+        .hero-stats{display:flex;justify-content:center;gap:40px;margin-top:48px;animation:fadeInUp .8s ease .8s both}
+        .hero-stat{text-align:center}
+        .hero-stat .num{font-size:36px;font-weight:900;color:#fff;display:block}
+        .hero-stat .label{font-size:13px;color:rgba(255,255,255,.5);font-weight:500;margin-top:4px}
+        @keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes fadeInDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+
+        /* ── Search Box ── */
+        .search-box{background:rgba(255,255,255,.1);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:8px;display:flex;gap:8px;max-width:640px;margin:0 auto;animation:fadeInUp .8s ease .6s both}
+        .search-box input{flex:1;border:none;background:rgba(255,255,255,.12);border-radius:14px;padding:16px 20px;font-size:16px;color:#fff;outline:none;font-family:inherit}
+        .search-box input::placeholder{color:rgba(255,255,255,.4)}
+        .search-box button{background:linear-gradient(135deg,#f59e0b,#ef4444);border:none;border-radius:14px;padding:16px 28px;font-size:15px;font-weight:700;color:#fff;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .3s;font-family:inherit}
+        .search-box button:hover{transform:scale(1.03);box-shadow:0 8px 25px rgba(245,158,11,.4)}
+
+        /* ── Service Cards ── */
+        .services-section{padding:0 24px;margin-top:-50px;position:relative;z-index:10}
+        .services-grid{display:flex;gap:20px;justify-content:center;max-width:900px;margin:0 auto;flex-wrap:wrap}
+        .svc-card{background:#fff;border-radius:20px;width:190px;text-align:center;padding:28px 16px;box-shadow:0 8px 40px rgba(0,0,0,.08);border:1px solid rgba(0,0,0,.04);text-decoration:none;transition:all .35s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden}
+        .svc-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 40%,rgba(37,99,235,.04) 100%);opacity:0;transition:opacity .3s}
+        .svc-card:hover{transform:translateY(-8px);box-shadow:0 20px 60px rgba(37,99,235,.15);border-color:rgba(37,99,235,.15)}
+        .svc-card:hover::before{opacity:1}
+        .svc-icon{width:64px;height:64px;margin:0 auto 16px;border-radius:18px;display:flex;align-items:center;justify-content:center;transition:all .35s}
+        .svc-card:hover .svc-icon{transform:scale(1.1) rotate(-5deg)}
+        .svc-icon .material-icons-round{font-size:30px}
+        .svc-card span{display:block;color:var(--neutral-900);font-weight:700;font-size:15px;position:relative;z-index:1}
+
+        /* ── Sections ── */
+        section{padding:80px 0}
+        .container{max-width:1100px;margin:0 auto;padding:0 24px}
+        .section-header{text-align:center;margin-bottom:56px}
+        .section-header h2{font-size:36px;font-weight:900;color:var(--neutral-900);margin-bottom:16px;letter-spacing:-.5px}
+        .section-header p{color:var(--neutral-500);font-size:17px;max-width:550px;margin:0 auto;line-height:1.6}
+        .section-header .tag{display:inline-block;background:var(--primary-50);color:var(--primary);font-size:13px;font-weight:700;padding:6px 16px;border-radius:50px;margin-bottom:16px;text-transform:uppercase;letter-spacing:1px}
+
+        /* ── Steps ── */
+        .steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;max-width:1000px;margin:0 auto}
+        .step-card{text-align:center;padding:40px 28px;background:#fff;border-radius:24px;border:1px solid var(--neutral-200);position:relative;transition:all .35s;overflow:hidden}
+        .step-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#2563eb,#7c3aed);transform:scaleX(0);transition:transform .4s;transform-origin:left}
+        .step-card:hover{transform:translateY(-6px);box-shadow:0 16px 50px rgba(0,0,0,.08);border-color:transparent}
+        .step-card:hover::after{transform:scaleX(1)}
+        .step-num{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;font-weight:900;font-size:22px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 6px 20px rgba(37,99,235,.3)}
+        .step-card h3{margin-bottom:10px;font-size:19px;color:var(--neutral-900);font-weight:800}
+        .step-card p{color:var(--neutral-500);font-size:14px;line-height:1.7}
+
+        /* ── Features ── */
+        .features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:1200px;margin:0 auto;padding:0 24px}
+        .feature-card{background:#fff;border-radius:20px;padding:32px 24px;border:1px solid var(--neutral-200);transition:all .35s;position:relative;overflow:hidden}
+        .feature-card::before{content:'';position:absolute;top:0;right:0;width:80px;height:80px;border-radius:0 0 0 80px;opacity:0;transition:all .4s}
+        .feature-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,.06);border-color:transparent}
+        .feature-card:hover::before{opacity:.15}
+        .feature-icon{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;transition:transform .3s}
+        .feature-card:hover .feature-icon{transform:scale(1.1)}
+        .feature-card h3{font-size:18px;margin-bottom:10px;color:var(--neutral-900);font-weight:800}
+        .feature-card p{color:var(--neutral-500);font-size:14px;line-height:1.7}
+
+        /* ── Trust Counter ── */
+        .trust-section{background:linear-gradient(135deg,#0f172a,#1e3a5f);color:#fff;border:none}
+        .trust-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:32px;max-width:900px;margin:0 auto}
+        .trust-item{text-align:center}
+        .trust-item .material-icons-round{font-size:36px;margin-bottom:12px;background:linear-gradient(135deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .trust-item .count{font-size:32px;font-weight:900;display:block;margin-bottom:4px}
+        .trust-item .label{font-size:14px;color:rgba(255,255,255,.5);font-weight:500}
+
+        /* ── CTA Banner ── */
+        .cta-wrap{padding:0 24px 80px}
+        .cta-section{background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;text-align:center;border-radius:32px;max-width:1000px;margin:0 auto;padding:64px 40px;position:relative;overflow:hidden}
+        .cta-section::before{content:'';position:absolute;width:300px;height:300px;border-radius:50%;background:rgba(255,255,255,.06);top:-100px;right:-60px}
+        .cta-section::after{content:'';position:absolute;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.04);bottom:-60px;left:-40px}
+        .cta-section h2{font-size:32px;font-weight:900;margin-bottom:16px;position:relative;z-index:1}
+        .cta-section p{font-size:17px;opacity:.85;max-width:500px;margin:0 auto 32px;position:relative;z-index:1}
+        .cta-btn{display:inline-flex;align-items:center;gap:8px;background:#fff;color:var(--primary);padding:16px 36px;border-radius:16px;font-weight:800;font-size:16px;text-decoration:none;transition:all .3s;position:relative;z-index:1;box-shadow:0 8px 30px rgba(0,0,0,.15)}
+        .cta-btn:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 12px 40px rgba(0,0,0,.2)}
+
+        /* ── Footer ── */
+        footer{background:#0f172a;color:rgba(255,255,255,.5);padding:40px 24px;text-align:center;font-size:14px}
+        footer a{color:rgba(255,255,255,.7);text-decoration:none;transition:color .2s}
+        footer a:hover{color:#fff}
+        footer strong{color:#fff}
+
+        /* ── Scroll Reveal ── */
+        .reveal{opacity:0;transform:translateY(40px);transition:all .7s cubic-bezier(.4,0,.2,1)}
+        .reveal.visible{opacity:1;transform:translateY(0)}
+
+        /* ── Responsive ── */
+        @media(max-width:768px){
+            .hero h1{font-size:32px}.hero-sub{font-size:16px}.hero-stats{gap:24px}.hero-stat .num{font-size:24px}
+            .steps-grid,.features-grid{grid-template-columns:1fr}.trust-grid{grid-template-columns:repeat(2,1fr)}
+            .services-grid{gap:12px}.svc-card{width:calc(50% - 6px)}
+            .search-box{flex-direction:column}.top-nav{padding:12px 16px}
+            .section-header h2{font-size:26px}
+        }
+    </style>
+</head>
+<body>
+    <!-- Nav -->
+    <nav class="top-nav" id="topNav">
+        <a href="index.html" class="nav-logo">
+            <span class="material-icons-round">medical_services</span>
+            <span>MediBook</span>
+        </a>
+        <div class="nav-links" id="navLinks">
+            <a href="doctors.html" class="nav-link-ghost">Bác sĩ</a>
+            <a href="login.html" class="nav-link-outline">Đăng nhập</a>
+            <a href="register.html" class="nav-link-solid">Đăng ký miễn phí</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <!-- floating particles -->
+        <div style="position:absolute;inset:0;z-index:1;overflow:hidden;pointer-events:none">
+            <div style="position:absolute;width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.15);top:20%;left:15%;animation:float 6s ease-in-out infinite"></div>
+            <div style="position:absolute;width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.1);top:60%;left:80%;animation:float 8s ease-in-out infinite 1s"></div>
+            <div style="position:absolute;width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.2);top:40%;left:50%;animation:float 7s ease-in-out infinite 2s"></div>
+            <div style="position:absolute;width:8px;height:8px;border-radius:50%;background:rgba(99,102,241,.3);top:75%;left:30%;animation:float 9s ease-in-out infinite 3s"></div>
+            <div style="position:absolute;width:5px;height:5px;border-radius:50%;background:rgba(167,139,250,.2);top:30%;left:70%;animation:float 10s ease-in-out infinite 1.5s"></div>
+        </div>
+
+        <div class="hero-content">
+            <div class="hero-badge"><div class="dot"></div> Nền tảng y tế #1 Việt Nam</div>
+            <h1>Đặt lịch khám bệnh<br><span class="gradient-text">thông minh & nhanh chóng</span></h1>
+            <p class="hero-sub">Kết nối với hơn 500+ bác sĩ chuyên khoa hàng đầu. Đặt lịch chỉ trong 30 giây — không chờ đợi, không phiền hà.</p>
+
+            <div class="search-box">
+                <input type="text" id="homeSearch" placeholder="🔍 Tìm bác sĩ, chuyên khoa, bệnh viện..."/>
+                <button onclick="handleHomeSearch()">
+                    <span class="material-icons-round" style="font-size:20px">search</span> Tìm kiếm
+                </button>
+            </div>
+
+            <div class="hero-stats">
+                <div class="hero-stat"><span class="num">500+</span><span class="label">Bác sĩ</span></div>
+                <div class="hero-stat"><span class="num" id="specialtyCount">12</span><span class="label">Chuyên khoa</span></div>
+                <div class="hero-stat"><span class="num">10K+</span><span class="label">Bệnh nhân</span></div>
+                <div class="hero-stat"><span class="num">99%</span><span class="label">Hài lòng</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Services -->
+    <div class="services-section">
+        <div class="services-grid">
+            <a href="service-specialist.html" class="svc-card reveal">
+                <div class="svc-icon" style="background:linear-gradient(135deg,#dbeafe,#bfdbfe)"><span class="material-icons-round" style="color:#2563eb">medical_services</span></div>
+                <span>Khám Chuyên Khoa</span>
+            </a>
+            <a href="service-general.html" class="svc-card reveal">
+                <div class="svc-icon" style="background:linear-gradient(135deg,#dbeafe,#bfdbfe)"><span class="material-icons-round" style="color:#2563eb">vaccines</span></div>
+                <span>Khám Tổng Quát</span>
+            </a>
+            <a href="service-lab.html" class="svc-card reveal">
+                <div class="svc-icon" style="background:linear-gradient(135deg,#dbeafe,#bfdbfe)"><span class="material-icons-round" style="color:#2563eb">biotech</span></div>
+                <span>Xét Nghiệm Y Học</span>
+            </a>
+            <a href="service-telemedicine.html" class="svc-card reveal">
+                <div class="svc-icon" style="background:linear-gradient(135deg,#dbeafe,#bfdbfe)"><span class="material-icons-round" style="color:#2563eb">video_camera_front</span></div>
+                <span>Khám Từ Xa</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- How it Works -->
+    <section style="background:var(--neutral-50)">
+        <div class="container">
+            <div class="section-header reveal">
+                <div class="tag">Quy trình</div>
+                <h2>Đặt lịch dễ dàng trong 3 bước</h2>
+                <p>Không cần gọi điện, không cần xếp hàng. Mọi thứ chỉ trên đầu ngón tay.</p>
+            </div>
+            <div class="steps-grid">
+                <div class="step-card reveal">
+                    <div class="step-num">1</div>
+                    <h3>Tìm bác sĩ</h3>
+                    <p>Lọc theo chuyên khoa, tên bác sĩ, đánh giá hoặc kinh nghiệm để tìm bác sĩ phù hợp.</p>
+                </div>
+                <div class="step-card reveal">
+                    <div class="step-num">2</div>
+                    <h3>Chọn ngày giờ</h3>
+                    <p>Xem lịch trống theo ngày, chọn khung giờ thuận tiện chỉ bằng một lần bấm.</p>
+                </div>
+                <div class="step-card reveal">
+                    <div class="step-num">3</div>
+                    <h3>Xác nhận lịch hẹn</h3>
+                    <p>Mô tả triệu chứng, xác nhận đặt lịch và nhận thông báo qua email ngay lập tức.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section>
+        <div class="container">
+            <div class="section-header reveal">
+                <div class="tag">Tính năng</div>
+                <h2>Tại sao chọn MediBook?</h2>
+                <p>Nền tảng y tế số được thiết kế với trọng tâm là trải nghiệm bệnh nhân.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card reveal">
+                    <div class="feature-icon" style="background:linear-gradient(135deg,#dbeafe,#bfdbfe)"><span class="material-icons-round" style="color:#2563eb;font-size:28px">event_available</span></div>
+                    <h3>Đặt lịch 24/7</h3>
+                    <p>Đặt lịch mọi lúc, mọi nơi. Không chờ giờ hành chính hay gọi hotline.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon" style="background:linear-gradient(135deg,#d1fae5,#a7f3d0)"><span class="material-icons-round" style="color:#059669;font-size:28px">verified</span></div>
+                    <h3>Bác sĩ uy tín</h3>
+                    <p>Hệ thống bác sĩ chuyên khoa được xác minh, nhiều năm kinh nghiệm lâm sàng.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon" style="background:linear-gradient(135deg,#fef3c7,#fde68a)"><span class="material-icons-round" style="color:#d97706;font-size:28px">speed</span></div>
+                    <h3>Nhanh chóng</h3>
+                    <p>Chỉ mất 30 giây để đặt lịch. Kết quả xác nhận ngay lập tức.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon" style="background:linear-gradient(135deg,#ede9fe,#ddd6fe)"><span class="material-icons-round" style="color:#7c3aed;font-size:28px">history</span></div>
+                    <h3>Quản lý lịch sử</h3>
+                    <p>Xem lại toàn bộ lịch sử khám, ghi chú bác sĩ và hồ sơ y tế cá nhân.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon" style="background:linear-gradient(135deg,#fce7f3,#fbcfe8)"><span class="material-icons-round" style="color:#db2777;font-size:28px">notifications_active</span></div>
+                    <h3>Nhắc lịch tự động</h3>
+                    <p>Nhận nhắc nhở qua email trước ngày khám để không quên lịch hẹn.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon" style="background:linear-gradient(135deg,#d1fae5,#bbf7d0)"><span class="material-icons-round" style="color:#16a34a;font-size:28px">security</span></div>
+                    <h3>Bảo mật tuyệt đối</h3>
+                    <p>Dữ liệu mã hóa end-to-end, bảo mật theo tiêu chuẩn y tế quốc tế.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust Section -->
+    <section class="trust-section">
+        <div class="container">
+            <div class="section-header reveal" style="color:white">
+                <div class="tag" style="background:rgba(255,255,255,.1);color:#60a5fa">Thành tựu</div>
+                <h2 style="color:white">Được tin tưởng bởi hàng nghìn người</h2>
+            </div>
+            <div class="trust-grid reveal">
+                <div class="trust-item">
+                    <span class="material-icons-round">local_hospital</span>
+                    <span class="count">50+</span>
+                    <span class="label">Bệnh viện đối tác</span>
+                </div>
+                <div class="trust-item">
+                    <span class="material-icons-round">workspace_premium</span>
+                    <span class="count">500+</span>
+                    <span class="label">Bác sĩ chuyên khoa</span>
+                </div>
+                <div class="trust-item">
+                    <span class="material-icons-round">groups</span>
+                    <span class="count">10.000+</span>
+                    <span class="label">Bệnh nhân tin dùng</span>
+                </div>
+                <div class="trust-item">
+                    <span class="material-icons-round">star</span>
+                    <span class="count">4.9/5</span>
+                    <span class="label">Đánh giá trung bình</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-wrap">
+        <div class="cta-section reveal">
+            <h2>Sẵn sàng chăm sóc sức khỏe?</h2>
+            <p>Đăng ký miễn phí và đặt lịch với bác sĩ chuyên khoa ngay hôm nay. Chỉ mất 30 giây.</p>
+            <a href="register.html" class="cta-btn">
+                <span class="material-icons-round" style="font-size:20px">rocket_launch</span> Bắt đầu ngay — Miễn phí
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 <strong>MediBook</strong>. Nền tảng đặt lịch khám bệnh trực tuyến hàng đầu Việt Nam.</p>
+        <p style="margin-top:12px">
+            <a href="doctors.html">Bác sĩ</a> · 
+            <a href="service-specialist.html">Chuyên khoa</a> · 
+            <a href="service-general.html">Khám tổng quát</a> · 
+            <a href="login.html">Đăng nhập</a> · 
+            <a href="register.html">Đăng ký</a>
+        </p>
+    </footer>
+
+    <script src="app_v2.js"></script>
+    <script>
+        // ── Navbar scroll effect ──
+        const nav = document.getElementById('topNav');
+        window.addEventListener('scroll', () => {
+            nav.classList.toggle('scrolled', window.scrollY > 50);
+        });
+
+        // ── Search ──
+        const handleHomeSearch = () => {
+            const q = document.getElementById('homeSearch').value.trim();
+            location.href = q ? `doctors.html?q=${encodeURIComponent(q)}` : 'doctors.html';
+        };
+        document.getElementById('homeSearch').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleHomeSearch();
+        });
+
+        // ── Scroll Reveal Animation ──
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry, i) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => entry.target.classList.add('visible'), i * 100);
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+        document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+        // ── Auth & Data ──
+        (async () => {
+            // Navbar is now handled automatically by initNav in app_v2.js
+
+            try {
+                const r = await API('/api/specialties');
+                if (r.ok) {
+                    const list = await r.json();
+                    const counter = document.getElementById('specialtyCount');
+                    if (counter) counter.textContent = list.length;
+                }
+            } catch(e) {}
+        })();
+    </script>
+</body>
+</html>

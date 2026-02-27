@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Hồ sơ bệnh án - MediBook Doctor</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+    <link rel="stylesheet" href="app_v2.css"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+    <style>
+        .sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 260px; background: var(--neutral-900); color: white; padding: 24px 0; z-index: 30; display: flex; flex-direction: column; }
+        .sidebar-logo { padding: 0 24px 24px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-logo .material-icons-round { font-size: 28px; color: var(--primary); }
+        .sidebar-logo span { font-size: 20px; font-weight: 800; }
+        .sidebar-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
+        .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-radius: var(--radius-lg); color: var(--neutral-400); font-size: 14px; font-weight: 500; text-decoration: none; transition: all 0.2s; }
+        .sidebar-link:hover { background: rgba(255,255,255,0.08); color: white; }
+        .sidebar-link.active { background: var(--primary); color: white; }
+        .sidebar-link .material-icons-round { font-size: 20px; }
+        .sidebar-footer { padding: 16px 24px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-footer .user-name { font-size: 14px; font-weight: 600; }
+        .sidebar-footer .user-email { font-size: 12px; color: var(--neutral-400); }
+        .main-content { margin-left: 260px; padding: 32px; background: var(--neutral-50); min-height: 100vh; }
+        @media (max-width: 768px) { .sidebar { display: none; } .main-content { margin-left: 0; } }
+        
+        .records-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <span class="material-icons-round">medical_services</span>
+            <span>MediBook</span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="doctor-overview.html" class="sidebar-link"><span class="material-icons-round">dashboard</span>Dashboard</a>
+            <a href="doctor-dashboard.html" class="sidebar-link"><span class="material-icons-round">calendar_today</span>Lịch hẹn</a>
+            <a href="doctor-patients.html" class="sidebar-link"><span class="material-icons-round">people</span>Bệnh nhân</a>
+            <a href="doctor-records.html" class="sidebar-link active"><span class="material-icons-round">description</span>Hồ sơ bệnh án</a>
+
+            <a href="doctor-settings.html" class="sidebar-link"><span class="material-icons-round">settings</span>Cài đặt</a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-name" id="userName">Bác sĩ</div>
+            <div class="user-email" id="userEmail"></div>
+            <button class="btn-ghost btn-sm" style="margin-top:8px;color:var(--neutral-400);width:100%;justify-content:flex-start" onclick="logout()">
+                <span class="material-icons-round" style="font-size:18px">logout</span> Đăng xuất
+            </button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+            <h1 style="font-size:28px">Hồ sơ bệnh án</h1>
+            <div style="display:flex;gap:12px">
+                <div style="position:relative">
+                    <span class="material-icons-round" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--neutral-400)">search</span>
+                    <input type="text" id="search-records" placeholder="Tìm hồ sơ..." class="form-input" style="padding-left:40px;width:260px" oninput="filterRecords()"/>
+                </div>
+                <button onclick="showNewRecord()" class="btn-primary">
+                    <span class="material-icons-round" style="font-size:18px">add</span> Tạo hồ sơ
+                </button>
+            </div>
+        </div>
+
+        <div id="records-grid" class="records-grid">
+            <div class="skeleton-card" style="width:100%"><div class="skeleton-line w-60"></div><div class="skeleton-line w-40"></div></div>
+        </div>
+    </div>
+
+<!-- New Record Modal -->
+<div id="new-record-modal" class="modal-overlay">
+    <div class="modal-content">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+            <h3 style="font-size:20px;font-weight:700">Tạo hồ sơ bệnh án mới</h3>
+            <button onclick="closeNewRecord()" class="btn-ghost btn-icon"><span class="material-icons-round">close</span></button>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Bệnh nhân</label>
+            <select id="rec-patient-select" class="form-input"><option>Đang tải...</option></select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Chẩn đoán</label>
+            <input type="text" id="rec-diagnosis" class="form-input" placeholder="Chẩn đoán bệnh"/>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Ghi chú điều trị</label>
+            <textarea id="rec-notes" rows="4" class="form-input" placeholder="Chi tiết điều trị, thuốc kê đơn..."></textarea>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
+            <div class="form-group">
+                <label class="form-label">Ngày khám</label>
+                <input type="date" id="rec-date" class="form-input"/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Loại</label>
+                <select id="rec-type" class="form-input">
+                    <option>Khám tổng quát</option><option>Tái khám</option><option>Cấp cứu</option><option>Phẫu thuật</option><option>Tư vấn</option>
+                </select>
+            </div>
+        </div>
+        <div style="display:flex;gap:12px">
+            <button onclick="saveRecord()" class="btn-primary" style="flex:1">Lưu hồ sơ</button>
+            <button onclick="closeNewRecord()" class="btn-secondary" style="flex:1">Hủy</button>
+        </div>
+    </div>
+</div>
+
+<script src="app_v2.js"></script>
+<script>
+let records = [];
+const typeIcons = { 'Khám tổng quát': 'health_and_safety', 'Tái khám': 'replay', 'Cấp cứu': 'emergency', 'Phẫu thuật': 'local_hospital', 'Tư vấn': 'support_agent' };
+const typeColors = { 'Khám tổng quát': '#2563eb', 'Tái khám': '#16a34a', 'Cấp cứu': '#dc2626', 'Phẫu thuật': '#9333ea', 'Tư vấn': '#f59e0b' };
+
+(async () => {
+    try {
+        const user = await requireAuth("DOCTOR");
+        if (!user) return;
+        document.getElementById("userName").textContent = user.fullName || "Bác sĩ";
+        document.getElementById("userEmail").textContent = user.email;
+        document.getElementById("rec-date").value = new Date().toISOString().substring(0, 10);
+
+        const r = await API("/api/doctor/records");
+        if (r.ok) {
+            records = await r.json();
+            renderRecords(records);
+        }
+        loadPatientsDropdown();
+    } catch(e) { console.error(e); showToast("Lỗi khi tải dữ liệu", "error"); }
+})();
+
+function renderRecords(list) {
+    const grid = document.getElementById("records-grid");
+    if (list.length === 0) {
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:64px;color:var(--neutral-400)">
+            <span class="material-icons-round" style="font-size:48px;display:block;margin-bottom:12px">description</span>
+            <div>Chưa có hồ sơ bệnh án nào</div>
+        </div>`;
+        return;
+    }
+    grid.innerHTML = list.map((r, i) => {
+        const color = typeColors[r.type] || '#2563eb';
+        const icon = typeIcons[r.type] || 'description';
+        return `
+            <div class="card p-relative" style="cursor:pointer" onclick="viewRecord(${i})">
+                <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:16px">
+                    <div style="width:40px;height:40px;border-radius:var(--radius-lg);background:${color}15;color:${color};display:flex;align-items:center;justify-content:center">
+                        <span class="material-icons-round">${icon}</span>
+                    </div>
+                    <div style="display:flex;gap:8px;align-items:center">
+                        <span class="badge" style="background:${color}15;color:${color}">${r.type}</span>
+                        <button class="btn-ghost btn-icon btn-sm text-danger" onclick="event.stopPropagation(); deleteRecord('${r.id}')" title="Xóa hồ sơ">
+                            <span class="material-icons-round" style="font-size:18px">delete_outline</span>
+                        </button>
+                    </div>
+                </div>
+                <h4 style="font-size:16px;font-weight:700;margin-bottom:4px">${r.patientName}</h4>
+                <div style="font-size:13px;color:var(--neutral-500);margin-bottom:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.diagnosis}</div>
+                <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--neutral-400)">
+                    <span class="material-icons-round" style="font-size:14px">calendar_today</span>
+                    <span>${fmtDate(r.visitDate)}</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function filterRecords() {
+    const q = document.getElementById("search-records").value.trim().toLowerCase();
+    const filtered = q ? records.filter(r => r.patientName.toLowerCase().includes(q) || r.diagnosis.toLowerCase().includes(q)) : records;
+    renderRecords(filtered);
+}
+
+function showNewRecord() { 
+    loadPatientsDropdown();
+    document.getElementById("new-record-modal").classList.add("show"); 
+}
+
+function closeNewRecord() { 
+    document.getElementById("new-record-modal").classList.remove("show"); 
+}
+
+async function loadPatientsDropdown() {
+    const select = document.getElementById("rec-patient-select");
+    if (select.children.length > 1) return;
+    try {
+        const r = await API("/api/doctor/patients");
+        if(r.ok) {
+            const patients = await r.json();
+            select.innerHTML = '<option value="">Chọn bệnh nhân</option>' + patients.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+        }
+    } catch(e) {}
+}
+
+async function saveRecord() {
+    const patientId = document.getElementById("rec-patient-select").value;
+    const diagnosis = document.getElementById("rec-diagnosis").value.trim();
+    const notes = document.getElementById("rec-notes").value.trim();
+    const date = document.getElementById("rec-date").value;
+    const type = document.getElementById("rec-type").value;
+
+    if (!patientId || !diagnosis) { showToast("Vui lòng chọn bệnh nhân và nhập chẩn đoán.", "error"); return; }
+
+    try {
+        const r = await API("/api/doctor/records", {
+            method: "POST",
+            body: JSON.stringify({ patientId, diagnosis, notes, date, type })
+        });
+        
+        if (r.ok) {
+            showToast("Đã lưu hồ sơ bệnh án", "success");
+            location.reload();
+        } else {
+            showToast("Lỗi khi lưu hồ sơ", "error");
+        }
+    } catch(e) { console.error(e); showToast("Có lỗi xảy ra", "error"); }
+}
+
+function viewRecord(idx) {
+    const r = records[idx];
+    if (r) {
+        showConfirm(`Hồ sơ: ${r.patientName}<br/>Chẩn đoán: ${r.diagnosis}<br/>Ghi chú: ${r.notes || '—'}<br/>Ngày: ${fmtDate(r.visitDate)}<br/>Loại: ${r.type}`, {title:'Chi tiết hồ sơ', okText:'Đóng'});
+    }
+}
+
+async function deleteRecord(id) {
+    const confirmed = await showConfirm("Bạn có chắc chắn muốn xóa hồ sơ bệnh án này không? Hành động này không thể hoàn tác.", { danger: true });
+    if (!confirmed) return;
+
+    try {
+        const r = await API(`/api/doctor/records/${id}`, { method: "DELETE" });
+        if (r.ok) {
+            showToast("Đã xóa hồ sơ bệnh án thành công", "success");
+            // Cập nhật lại danh sách tại chỗ
+            records = records.filter(rec => rec.id !== id);
+            renderRecords(records);
+        } else {
+            const err = await r.text();
+            showToast(err || "Lỗi khi xóa hồ sơ", "error");
+        }
+    } catch(e) { 
+        console.error(e); 
+        showToast("Có lỗi xảy ra khi kết nối máy chủ", "error"); 
+    }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Khám Chuyên Khoa — MediBook Master</title>
+    <link rel="stylesheet" href="app_v2.css"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <style>
+        :root{--primary:#2563eb;--primary-light:#eff6ff;--neutral-900:#0f172a;--neutral-600:#475569;--neutral-500:#64748b;--neutral-200:#e2e8f0;--radius-lg:16px}
+        *{font-family:'Inter',sans-serif}
+        
+        /* ── Master Hero ── */
+        .service-hero{background:linear-gradient(135deg,#1e40af 0%,#2563eb 100%);color:#fff;padding:80px 0 48px;text-align:center}
+        .hero-badge{display:inline-block;padding:6px 16px;background:rgba(255,255,255,0.1);border-radius:100px;font-weight:700;font-size:13px;margin-bottom:16px;letter-spacing:1px;text-transform:uppercase}
+        .service-hero h1{font-size:42px;font-weight:800;margin-bottom:16px;letter-spacing:-1px}
+        .service-hero p{font-size:18px;max-width:640px;margin:0 auto;opacity:0.9;line-height:1.6}
+
+        /* ── Master Filter ── */
+        .master-section{padding:60px 0}
+        .container{max-width:1100px;margin:0 auto;padding:0 24px}
+        .filter-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;border-bottom:2px solid var(--neutral-200);padding-bottom:12px}
+        .filter-header h2{font-size:22px;font-weight:800;color:var(--neutral-900)}
+        
+        .specialties-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:48px}
+        .spec-btn{background:#fff;border:1.5px solid var(--neutral-200);border-radius:12px;padding:16px;text-align:center;font-weight:700;font-size:14px;color:var(--neutral-600);cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:8px}
+        .spec-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
+        .spec-btn.active{border-color:var(--primary);background:var(--primary);color:#fff;box-shadow:0 4px 12px rgba(37,99,235,0.2)}
+        .spec-btn .material-icons-round{font-size:28px}
+
+        /* ── Master Doctor Card ── */
+        .doctor-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:24px}
+        .doc-card{background:#fff;border:1px solid var(--neutral-200);border-radius:20px;padding:20px;display:flex;gap:16px;transition:all .3s ease;text-decoration:none;color:inherit;position:relative;overflow:hidden}
+        .doc-card:hover{border-color:var(--primary);box-shadow:0 12px 30px rgba(0,0,0,0.05);transform:translateY(-4px)}
+        .doc-avatar{width:90px;height:90px;border-radius:16px;object-fit:cover;background:var(--primary-light)}
+        .doc-body{flex:1;display:flex;flex-direction:column;justify-content:center}
+        .doc-body .spec{font-size:13px;color:var(--primary);font-weight:800;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
+        .doc-body h4{font-size:18px;font-weight:800;color:var(--neutral-900);margin-bottom:4px}
+        .doc-body .clinic{font-size:14px;color:var(--neutral-500);margin-bottom:12px}
+        .doc-footer{display:flex;align-items:center;justify-content:space-between;margin-top:auto}
+        .btn-book{padding:8px 16px;background:var(--primary);color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s}
+        .btn-book:hover{background:#1e40af}
+
+        /* ── Master CTA ── */
+        /* ── Master Master CTA ── */
+        .master-cta{background:linear-gradient(145deg,#0f172a 0%,#1e3a8a 100%);border-radius:40px;padding:80px 48px;text-align:center;color:#fff;margin-top:80px;position:relative;overflow:hidden;box-shadow:0 30px 60px -15px rgba(15,23,42,0.3)}
+        .master-cta::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at top right,rgba(37,99,235,0.15),transparent);pointer-events:none}
+        .master-cta::after{content:'';position:absolute;top:-50px;left:-50px;width:150px;height:150px;background:rgba(255,255,255,0.03);border-radius:50%}
+        .cta-content{position:relative;z-index:1}
+        .cta-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:rgba(255,255,255,0.1);border-radius:100px;font-size:12px;font-weight:700;margin-bottom:24px;color:rgba(255,255,255,0.9);letter-spacing:1px}
+        .master-cta h2{font-size:36px;font-weight:900;margin-bottom:20px;letter-spacing:-1px;line-height:1.2}
+        .master-cta p{opacity:0.75;margin-bottom:40px;max-width:580px;margin-left:auto;margin-right:auto;font-size:17px;line-height:1.6}
+        .cta-actions{display:flex;align-items:center;justify-content:center;gap:16px}
+        .master-btn-primary{display:inline-flex;align-items:center;gap:10px;background:#fff;color:var(--neutral-900);padding:18px 36px;border-radius:16px;font-weight:800;text-decoration:none;transition:all .3s ease;font-size:16px;box-shadow:0 10px 20px rgba(0,0,0,0.1)}
+        .master-btn-primary:hover{transform:translateY(-4px);box-shadow:0 20px 30px rgba(0,0,0,0.2);background:var(--primary-light);color:var(--primary)}
+        .master-btn-outline{display:inline-flex;align-items:center;gap:10px;background:transparent;color:#fff;padding:18px 32px;border-radius:16px;font-weight:700;text-decoration:none;transition:all .3s ease;font-size:16px;border:1.5px solid rgba(255,255,255,0.2)}
+        .master-btn-outline:hover{background:rgba(255,255,255,0.05);border-color:#fff}
+        .cta-trust{margin-top:40px;display:flex;align-items:center;justify-content:center;gap:32px;opacity:0.5;font-size:13px}
+        .cta-trust-item{display:flex;align-items:center;gap:8px}
+
+        @media(max-width:768px){
+            .service-hero h1{font-size:32px}
+            .doctor-grid{grid-template-columns:1fr}
+        }
+    </style>
+</head>
+<body>
+    <nav id="nav" style="display:flex;align-items:center;padding:12px 32px;background:white;border-bottom:1px solid var(--neutral-200);position:sticky;top:0;z-index:100"></nav>
+
+    <div class="service-hero">
+        <div class="container">
+            <div class="hero-badge">Medical Excellence</div>
+            <h1>Khám Chuyên Khoa</h1>
+            <p>Hệ thống kết nối trực tiếp với các giáo sư, bác sĩ đầu ngành. Chẩn đoán chính xác, điều trị tận tâm, quy trình chuyên nghiệp.</p>
+        </div>
+    </div>
+
+    <section class="master-section">
+        <div class="container">
+            <div class="filter-header">
+                <h2>Chọn chuyên khoa</h2>
+                <div style="font-size:14px;color:var(--neutral-500)">Hiển thị theo nhu cầu của bạn</div>
+            </div>
+            
+            <div id="specialtiesList" class="specialties-grid">
+                <!-- Data from API -->
+            </div>
+
+            <div class="filter-header" style="margin-top:48px">
+                <h2 id="gridTitle">Bác sĩ chuyên khoa</h2>
+                <div id="resultsCount" style="font-size:14px;color:var(--neutral-500)">Đang tải...</div>
+            </div>
+
+            <div id="doctorGrid" class="doctor-grid">
+                <!-- Data from API -->
+            </div>
+
+            <div class="master-cta">
+                <div class="cta-content">
+                    <div class="cta-badge">
+                        <span class="material-icons-round" style="font-size:16px">verified</span>
+                        CHĂM SÓC SỨC KHỎE TOÀN DIỆN
+                    </div>
+                    <h2>Bạn cần tìm chuyên khoa phù hợp?</h2>
+                    <p>Đội ngũ chuyên gia y tế của MediBook sẵn sàng lắng nghe và tư vấn miễn phí để giúp bạn chọn đúng bác sĩ, đúng lộ trình điều trị ngay hôm nay.</p>
+                    <div class="cta-actions">
+                        <a href="service-telemedicine.html" class="master-btn-primary">
+                            Tư vấn trực tuyến ngay
+                            <span class="material-icons-round">arrow_forward</span>
+                        </a>
+                        <a href="doctors.html" class="master-btn-outline">Xem tất cả bác sĩ</a>
+                    </div>
+                    <div class="cta-trust">
+                        <div class="cta-trust-item"><span class="material-icons-round">security</span> 100% Bảo mật</div>
+                        <div class="cta-trust-item"><span class="material-icons-round">groups</span> 500+ Chuyên gia</div>
+                        <div class="cta-trust-item"><span class="material-icons-round">support_agent</span> Hỗ trợ 24/7</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="app_v2.js"></script>
+    <script>
+        let currentSpecId = null;
+
+        (async () => {
+            const me = await API('/api/auth/me').then(r => r.ok ? r.json() : null).catch(() => null);
+            setNav(me);
+
+            // Load specialties
+            try {
+                const r = await API('/api/specialties');
+                if (r.ok) {
+                    const specs = await r.json();
+                    document.getElementById('specialtiesList').innerHTML = specs.map(s => `
+                        <button onclick="filterBySpecialty('${s.id}', '${s.name}')" class="spec-btn" id="spec-${s.id}">
+                            <span class="material-icons-round">medical_services</span>
+                            ${s.name}
+                        </button>
+                    `).join('');
+                }
+            } catch(e) {}
+
+            // Load everything initially
+            loadDoctors();
+        })();
+
+        async function loadDoctors(specialtyId = null) {
+            const grid = document.getElementById('doctorGrid');
+            const countLabel = document.getElementById('resultsCount');
+            grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:100px 0"><span class="material-icons-round" style="font-size:48px;color:var(--neutral-200);animation:rotate 2s linear infinite">sync</span></div>';
+            
+            try {
+                let url = '/api/doctors?page=0&size=12';
+                if (specialtyId) {
+                    url = `/api/doctors?specialtyId=${specialtyId}&page=0&size=12`;
+                }
+                
+                const r = await API(url);
+                if (r.ok) {
+                    const data = await r.json();
+                    const docs = data.content || data;
+                    
+                    countLabel.textContent = `Tìm thấy ${docs.length} bác sĩ`;
+                    
+                    if (docs.length === 0) {
+                        grid.innerHTML = `
+                            <div style="grid-column:1/-1;text-align:center;padding:80px;background:var(--neutral-50);border-radius:24px">
+                                <span class="material-icons-round" style="font-size:64px;color:var(--neutral-200)">person_search</span>
+                                <p style="margin-top:16px;color:var(--neutral-500);font-weight:600">Hiện chưa có bác sĩ nào cho chuyên khoa này.</p>
+                                <button onclick="filterBySpecialty(null, 'Tất cả')" style="margin-top:16px;color:var(--primary);font-weight:700;background:none;border:none;cursor:pointer">Xem tất cả bác sĩ</button>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    grid.innerHTML = docs.map(d => `
+                        <a href="doctor-details.html?id=${d.id}" class="doc-card">
+                            <img src="${d.avatarUrl || 'img/default-avatar.png'}" class="doc-avatar" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(d.fullName)}&background=eff6ff&color=2563eb'"/>
+                            <div class="doc-body">
+                                <div class="spec">${d.specialty || 'Chuyên gia'}</div>
+                                <h4>${d.title || 'Bác sĩ'} ${d.fullName}</h4>
+                                <div class="clinic">${d.clinicName || 'Bệnh viện MediBook'}</div>
+                                <div class="doc-footer">
+                                    <div style="font-size:13px;color:var(--neutral-500);font-weight:600">${d.yearsExperience || 10}+ năm KN</div>
+                                    <span class="btn-book">Đặt khám</span>
+                                </div>
+                            </div>
+                        </a>
+                    `).join('');
+                } else {
+                    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:red">Lỗi kết nối dữ liệu!</div>';
+                }
+            } catch(e) {
+                grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:red">Lỗi hệ thống!</div>';
+            }
+        }
+
+        function filterBySpecialty(id, name) {
+            currentSpecId = id;
+            document.getElementById('gridTitle').textContent = `Bác sĩ chuyên khoa: ${name}`;
+            
+            // UI Active State
+            document.querySelectorAll('.spec-btn').forEach(btn => btn.classList.remove('active'));
+            if (id) {
+                document.getElementById('spec-' + id).classList.add('active');
+            }
+            
+            loadDoctors(id);
+        }
+    </script>
+</body>
+</html>

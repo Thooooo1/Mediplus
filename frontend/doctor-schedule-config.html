@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>09. Cấu hình giờ làm việc bác sĩ</title>
+    <link rel="stylesheet" href="app_v2.css"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+    <style>
+        .sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 260px; background: var(--neutral-900); color: white; padding: 24px 0; z-index: 30; display: flex; flex-direction: column; }
+        .sidebar-logo { padding: 0 24px 24px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-logo .material-icons-round { font-size: 28px; color: var(--primary); }
+        .sidebar-logo span { font-size: 20px; font-weight: 800; }
+        .sidebar-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
+        .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-radius: var(--radius-lg); color: var(--neutral-400); font-size: 14px; font-weight: 500; text-decoration: none; transition: all 0.2s; }
+        .sidebar-link:hover { background: rgba(255,255,255,0.08); color: white; }
+        .sidebar-link.active { background: var(--primary); color: white; }
+        .sidebar-link .material-icons-round { font-size: 20px; }
+        .sidebar-footer { padding: 16px 24px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-footer .user-name { font-size: 14px; font-weight: 600; }
+        .sidebar-footer .user-email { font-size: 12px; color: var(--neutral-400); }
+        .main-content { margin-left: 260px; padding: 32px; background: var(--neutral-50); min-height: 100vh; }
+        @media (max-width: 1024px) { .sidebar { display: none; } .main-content { margin-left: 0; } }
+
+        .schedule-grid { display: grid; grid-template-columns: 320px 1fr 320px; gap: 24px; align-items: start; }
+        @media (max-width: 1280px) { .schedule-grid { grid-template-columns: 300px 1fr; } .preview-col { display: none; } }
+        
+        .doctor-item { padding: 12px 16px; border-radius: var(--radius-lg); cursor: pointer; transition: all 0.2s; border: 1px solid transparent; display: flex; align-items: center; gap: 12px; }
+        .doctor-item:hover { background: var(--neutral-100); }
+        .doctor-item.active { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
+        
+        .day-row { padding: 20px; border-radius: var(--radius-xl); background: white; border: 1px solid var(--neutral-100); margin-bottom: 12px; transition: all 0.2s; }
+        .day-row:hover { box-shadow: var(--shadow-sm); border-color: var(--neutral-200); }
+        .day-row.off { opacity: 0.6; background: var(--neutral-50); }
+
+        .toggle-switch { width: 44px; height: 24px; background: var(--neutral-200); border-radius: 12px; position: relative; cursor: pointer; transition: all 0.2s; }
+        .toggle-switch.active { background: var(--primary); }
+        .toggle-dot { width: 18px; height: 18px; background: white; border-radius: 50%; position: absolute; top: 3px; left: 3px; transition: all 0.2s; }
+        .toggle-switch.active .toggle-dot { left: 23px; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <span class="material-icons-round">medical_services</span>
+            <span>MediBook</span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="doctor-overview.html" class="sidebar-link"><span class="material-icons-round">dashboard</span>Dashboard</a>
+            <a href="doctor-dashboard.html" class="sidebar-link active"><span class="material-icons-round">calendar_today</span>Lịch hẹn</a>
+            <a href="doctor-patients.html" class="sidebar-link"><span class="material-icons-round">people</span>Bệnh nhân</a>
+            <a href="doctor-records.html" class="sidebar-link"><span class="material-icons-round">description</span>Hồ sơ bệnh án</a>
+
+            <a href="doctor-settings.html" class="sidebar-link"><span class="material-icons-round">settings</span>Cài đặt</a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-name" id="userName">Bác sĩ</div>
+            <div class="user-email" id="userEmail"></div>
+            <button class="btn-ghost btn-sm" style="margin-top:8px;color:var(--neutral-400);width:100%;justify-content:flex-start" onclick="logout()">
+                <span class="material-icons-round" style="font-size:18px">logout</span> Đăng xuất
+            </button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:32px">
+            <div>
+                <h1 style="font-size:28px; font-weight:800; color:var(--neutral-900)">Cấu hình lịch làm việc</h1>
+                <p style="color:var(--neutral-500); font-size:14px; margin-top:4px">Thiết lập giờ làm việc và tạo slot khám tự động.</p>
+            </div>
+            <div id="admin-actions" style="display:none">
+                <button class="btn-secondary btn-sm" onclick="copyLastWeek()"><span class="material-icons-round" style="font-size:18px">content_copy</span> Sao chép tuần trước</button>
+            </div>
+        </div>
+
+        <div class="schedule-grid">
+            <!-- Sidebar: Doctor List (Admin only) -->
+            <div class="card" id="doctor-aside" style="display:none; padding:16px">
+                <div style="margin-bottom:16px; position:relative">
+                    <span class="material-icons-round" style="position:absolute; left:12px; top:10px; color:var(--neutral-400); font-size:20px">search</span>
+                    <input type="text" class="form-input" placeholder="Tìm bác sĩ..." style="padding-left:40px" onkeyup="filterDoctors(this.value)"/>
+                </div>
+                <div id="doctor-list" style="display:grid; gap:4px"></div>
+            </div>
+
+            <!-- Form -->
+            <div style="display:grid; gap:24px">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="material-icons-round" style="color:var(--primary)">tune</span>
+                        <div class="card-title">Cấu hình chung</div>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; padding:24px">
+                        <div class="form-group">
+                            <label class="form-label">Thời lượng mỗi ca (phút)</label>
+                            <input type="number" id="slotMinutes" class="form-input" value="30"/>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Khoảng nghỉ (phút)</label>
+                            <input type="number" id="breakMinutes" class="form-input" value="5"/>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header" style="justify-content:space-between">
+                        <div style="display:flex; align-items:center; gap:12px">
+                            <span class="material-icons-round" style="color:var(--primary)">calendar_today</span>
+                            <div class="card-title">Lịch biểu hàng tuần</div>
+                        </div>
+                        <button class="btn-ghost btn-sm" style="color:var(--primary)" onclick="applyWeekdays()">Áp dụng T2-T6 giống nhau</button>
+                    </div>
+                    <div id="schedule-form" style="padding:24px; display:grid; gap:12px">
+                        <!-- Days list -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview -->
+            <div class="preview-col" style="display:grid; gap:24px">
+                <div id="doctor-preview-card" class="card" style="background:var(--primary); color:white; text-align:center; padding:32px">
+                    <img id="selected-dr-img" style="width:80px; height:80px; border-radius:50%; margin:0 auto 16px; border:3px solid rgba(255,255,255,0.2)" src="/assets/default-avatar.svg" alt=""/>
+                    <h3 id="selected-dr-name" style="font-size:18px; font-weight:700">Chọn bác sĩ</h3>
+                    <p id="selected-dr-spec" style="font-size:14px; opacity:0.8; margin-bottom:24px">...</p>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px">
+                        <div style="background:rgba(255,255,255,0.1); padding:12px; border-radius:var(--radius-lg)">
+                            <div style="font-size:20px; font-weight:800">--</div>
+                            <div style="font-size:10px; opacity:0.7">Slot/Ngày</div>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.1); padding:12px; border-radius:var(--radius-lg)">
+                            <div style="font-size:20px; font-weight:800">4.8</div>
+                            <div style="font-size:10px; opacity:0.7">Đánh giá</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="padding:20px">
+                    <button class="btn-primary" style="width:100%" onclick="saveSchedule()">
+                        <span class="material-icons-round" style="font-size:18px; margin-right:8px">save</span> Lưu cấu hình
+                    </button>
+                    <button class="btn-ghost" style="width:100%; margin-top:12px" onclick="history.back()">Hủy bỏ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="app_v2.js"></script>
+<script>
+    let currentDoctorId = null;
+    let doctors = [];
+    let workingHours = [];
+    const DAYS = [
+        { val: 1, label: "Thứ 2" }, { val: 2, label: "Thứ 3" }, { val: 3, label: "Thứ 4" },
+        { val: 4, label: "Thứ 5" }, { val: 5, label: "Thứ 6" }, { val: 6, label: "Thứ 7" }, { val: 7, label: "Chủ Nhật" }
+    ];
+
+    (async () => {
+        const user = await requireAuth(null);
+        if (!user) return;
+        document.getElementById("userName").textContent = user.fullName || "Bác sĩ";
+        document.getElementById("userEmail").textContent = user.email;
+
+        if (user.role === "ADMIN") {
+            document.getElementById("admin-actions").style.display = "flex";
+            document.getElementById("doctor-aside").style.display = "block";
+            document.querySelector(".schedule-grid").style.gridTemplateColumns = "300px 1fr 300px";
+            await loadDoctors();
+            const id = new URLSearchParams(location.search).get("id");
+            if (id) {
+                currentDoctorId = id;
+                await selectDoctor(id);
+            }
+        } else if (user.role === "DOCTOR") {
+            currentDoctorId = user.id;
+            await selectDoctor(user.id);
+        } else {
+            location.href = "index.html";
+        }
+    })();
+
+    async function loadDoctors() {
+        try {
+            const r = await API("/api/doctors");
+            const data = await r.json();
+            doctors = data.content ? data.content : data;
+            if (!doctors || !Array.isArray(doctors)) doctors = [];
+            renderDoctorList(doctors);
+        } catch(e) { console.error(e); }
+    }
+
+    function renderDoctorList(list) {
+        document.getElementById("doctor-list").innerHTML = list.map(d => `
+            <div class="doctor-item ${d.id == currentDoctorId ? 'active' : ''}" onclick="selectDoctor('${d.id}')">
+                <img style="width:32px; height:32px; border-radius:50%; object-fit:cover;" src="${d.avatarUrl || 'https://ui-avatars.com/api/?name='+encodeURIComponent(d.fullName)+'&background=random'}"/>
+                <div style="flex:1; min-width:0">
+                    <div style="font-size:13px; font-weight:600" class="truncate">${d.fullName}</div>
+                    <div style="font-size:11px; opacity:0.6" class="truncate">${d.specialtyName || ''}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function filterDoctors(q) {
+        const filtered = doctors.filter(d => d.fullName.toLowerCase().includes(q.toLowerCase()));
+        renderDoctorList(filtered);
+    }
+
+    async function selectDoctor(id) {
+        currentDoctorId = id;
+        if (document.getElementById("doctor-aside").style.display === "block") {
+            renderDoctorList(doctors);
+        }
+        
+        try {
+            const r = await API("/api/doctors/" + id);
+            const d = await r.json();
+            document.getElementById("selected-dr-name").innerText = d.fullName;
+            document.getElementById("selected-dr-spec").innerText = d.specialtyName || "Chuyên khoa";
+            document.getElementById("selected-dr-img").src = d.avatarUrl || `/assets/default-avatar.svg`;
+            document.getElementById("selected-dr-img").style.objectFit = 'cover';
+            
+            await loadSchedule(id);
+        } catch(e) { console.error(e); }
+    }
+
+    async function loadSchedule(id) {
+        try {
+            const r = await API(`/api/admin/doctors/${id}/working-hours`);
+            workingHours = r.ok ? await r.json() : [];
+            renderScheduleForm();
+        } catch(e) { console.error(e); }
+    }
+
+    function renderScheduleForm() {
+        const container = document.getElementById("schedule-form");
+        container.innerHTML = DAYS.map(day => {
+            const wh = workingHours.find(w => w.dayOfWeek === day.val);
+            const isOn = !!wh;
+            const start = wh ? wh.startTime.substring(0, 5) : "08:00";
+            const end = wh ? wh.endTime.substring(0, 5) : "17:00";
+            
+            return `
+            <div class="day-row ${isOn ? '' : 'off'}" id="day-row-${day.val}">
+                <div style="display:flex; align-items:center; justify-content:space-between">
+                    <div style="display:flex; align-items:center; gap:16px">
+                        <div class="toggle-switch ${isOn ? 'active' : ''}" onclick="toggleDay(${day.val})">
+                            <div class="toggle-dot"></div>
+                        </div>
+                        <span style="font-weight:700; font-size:16px">${day.label}</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:12px; ${isOn ? '' : 'display:none'}" id="inputs-${day.val}">
+                        <div style="display:flex; align-items:center; gap:8px; background:var(--neutral-50); padding:8px 12px; border-radius:var(--radius-lg); border:1px solid var(--neutral-100)">
+                            <input type="time" id="start-${day.val}" value="${start}" class="form-input" style="padding:4px; border:none; background:none; width:80px; font-weight:600"/>
+                            <span style="color:var(--neutral-300)">-</span>
+                            <input type="time" id="end-${day.val}" value="${end}" class="form-input" style="padding:4px; border:none; background:none; width:80px; font-weight:600"/>
+                        </div>
+                    </div>
+                    ${!isOn ? '<span style="font-size:13px; color:var(--neutral-400)">Nghỉ</span>' : ''}
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function toggleDay(val) {
+        const row = document.getElementById(`day-row-${val}`);
+        const inputs = document.getElementById(`inputs-${val}`);
+        const toggle = row.querySelector('.toggle-switch');
+        
+        if (toggle.classList.contains('active')) {
+            toggle.classList.remove('active');
+            row.classList.add('off');
+            inputs.style.display = 'none';
+        } else {
+            toggle.classList.add('active');
+            row.classList.remove('off');
+            inputs.style.display = 'flex';
+        }
+    }
+
+    async function saveSchedule() {
+        if (!currentDoctorId) return showToast("Vui lòng chọn bác sĩ", "error");
+
+        const slotMin = parseInt(document.getElementById("slotMinutes").value) || 30;
+        const payload = [];
+        
+        DAYS.forEach(day => {
+            const row = document.getElementById(`day-row-${day.val}`);
+            if (row && !row.classList.contains('off')) {
+                payload.push({
+                    dayOfWeek: day.val,
+                    startTime: document.getElementById(`start-${day.val}`).value + ":00",
+                    endTime: document.getElementById(`end-${day.val}`).value + ":00",
+                    slotMinutes: slotMin
+                });
+            }
+        });
+
+        try {
+            showPageLoader();
+            const r = await API(`/api/admin/doctors/${currentDoctorId}/working-hours`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            hidePageLoader();
+            
+            if (r.ok) {
+                showToast("Đã lưu cấu hình!", "success");
+                const gen = await showConfirm("Bạn có muốn tự động tạo lịch khám cho 30 ngày tới dựa trên cấu hình này không?");
+                if (gen) generateSlots();
+            } else {
+                showToast("Lỗi khi lưu cấu hình", "error");
+            }
+        } catch(e) { hidePageLoader(); showToast("Lỗi kết nối", "error"); }
+    }
+
+    async function generateSlots() {
+        const from = new Date().toISOString().split('T')[0];
+        const toDate = new Date(); toDate.setDate(toDate.getDate() + 30);
+        const to = toDate.toISOString().split('T')[0];
+
+        try {
+            showPageLoader();
+            const r = await API(`/api/admin/doctors/${currentDoctorId}/generate-slots?from=${from}&to=${to}`, { method: "POST" });
+            hidePageLoader();
+            if (r.ok) {
+                const count = await r.json();
+                showToast(`Đã tạo ${count} slot khám cho 30 ngày tới.`, "success");
+            }
+        } catch(e) { hidePageLoader(); }
+    }
+
+    function applyWeekdays() {
+        const t2Start = document.getElementById("start-1").value;
+        const t2End = document.getElementById("end-1").value;
+        const t2Active = !document.getElementById("day-row-1").classList.contains('off');
+        
+        [2,3,4,5].forEach(val => {
+            const row = document.getElementById(`day-row-${val}`);
+            const toggle = row.querySelector('.toggle-switch');
+            if (t2Active) {
+                toggle.classList.add('active');
+                row.classList.remove('off');
+                document.getElementById(`inputs-${val}`).style.display = 'flex';
+                document.getElementById(`start-${val}`).value = t2Start;
+                document.getElementById(`end-${val}`).value = t2End;
+            } else {
+                toggle.classList.remove('active');
+                row.classList.add('off');
+                document.getElementById(`inputs-${val}`).style.display = 'none';
+            }
+        });
+    }
+</script>
+</body>
+</html>
+</body>
+</html>

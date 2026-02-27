@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Cài đặt - MediBook Doctor</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+    <link rel="stylesheet" href="app_v2.css"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+    <style>
+        .sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 260px; background: var(--neutral-900); color: white; padding: 24px 0; z-index: 30; display: flex; flex-direction: column; }
+        .sidebar-logo { padding: 0 24px 24px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-logo .material-icons-round { font-size: 28px; color: var(--primary); }
+        .sidebar-logo span { font-size: 20px; font-weight: 800; }
+        .sidebar-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
+        .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-radius: var(--radius-lg); color: var(--neutral-400); font-size: 14px; font-weight: 500; text-decoration: none; transition: all 0.2s; }
+        .sidebar-link:hover { background: rgba(255,255,255,0.08); color: white; }
+        .sidebar-link.active { background: var(--primary); color: white; }
+        .sidebar-link .material-icons-round { font-size: 20px; }
+        .sidebar-footer { padding: 16px 24px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-footer .user-name { font-size: 14px; font-weight: 600; }
+        .sidebar-footer .user-email { font-size: 12px; color: var(--neutral-400); }
+        .main-content { margin-left: 260px; padding: 32px; background: var(--neutral-50); min-height: 100vh; }
+        @media (max-width: 768px) { .sidebar { display: none; } .main-content { margin-left: 0; } }
+
+        .settings-card { background: white; border-radius: var(--radius-2xl); border: 1px solid var(--neutral-200); overflow: hidden; margin-bottom: 24px; }
+        .settings-header { padding: 20px 24px; border-bottom: 1px solid var(--neutral-100); display: flex; align-items: center; gap: 12px; }
+        .settings-body { padding: 24px; }
+        .toggle-switch { width: 44px; height: 24px; background: var(--neutral-200); border-radius: 12px; position: relative; cursor: pointer; transition: all 0.2s; }
+        .toggle-switch.active { background: var(--primary); }
+        .toggle-dot { width: 18px; height: 18px; background: white; border-radius: 50%; position: absolute; top: 3px; left: 3px; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .toggle-switch.active .toggle-dot { left: 23px; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <span class="material-icons-round">medical_services</span>
+            <span>MediBook</span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="doctor-overview.html" class="sidebar-link"><span class="material-icons-round">dashboard</span>Dashboard</a>
+            <a href="doctor-dashboard.html" class="sidebar-link"><span class="material-icons-round">calendar_today</span>Lịch hẹn</a>
+            <a href="doctor-patients.html" class="sidebar-link"><span class="material-icons-round">people</span>Bệnh nhân</a>
+            <a href="doctor-records.html" class="sidebar-link"><span class="material-icons-round">description</span>Hồ sơ bệnh án</a>
+
+            <a href="doctor-settings.html" class="sidebar-link active"><span class="material-icons-round">settings</span>Cài đặt</a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-name" id="userName">Bác sĩ</div>
+            <div class="user-email" id="userEmail"></div>
+            <button class="btn-ghost btn-sm" style="margin-top:8px;color:var(--neutral-400);width:100%;justify-content:flex-start" onclick="logout()">
+                <span class="material-icons-round" style="font-size:18px">logout</span> Đăng xuất
+            </button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div style="max-width:800px; margin:0 auto">
+            <h1 style="font-size:28px; margin-bottom:32px">Cài đặt</h1>
+
+            <!-- Profile Section -->
+            <div class="settings-card">
+                <div class="settings-header">
+                    <span class="material-icons-round" style="color:var(--primary)">person</span>
+                    <h3 style="font-size:18px; font-weight:700">Thông tin cá nhân</h3>
+                </div>
+                <div class="settings-body">
+                    <div style="display:flex; align-items:center; gap:24px; margin-bottom:32px">
+                        <img id="profile-avatar" style="width:80px; height:80px; border-radius:var(--radius-full); border:2px solid var(--neutral-100)" src="" alt=""/>
+                        <div>
+                            <h4 id="profile-name" style="font-size:20px; font-weight:700">Loading...</h4>
+                            <p id="profile-email" style="color:var(--neutral-500); font-size:14px; margin-bottom:8px">Loading...</p>
+                            <button class="btn-ghost btn-sm" style="padding-left:0; color:var(--primary)">Thay đổi ảnh đại diện</button>
+                        </div>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px">
+                        <div class="form-group">
+                            <label class="form-label">Họ và tên</label>
+                            <input type="text" id="set-name" class="form-input"/>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" id="set-email" class="form-input" readonly style="background:var(--neutral-50)"/>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Số điện thoại</label>
+                            <input type="tel" id="set-phone" class="form-input" placeholder="0xxx xxx xxx"/>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Chuyên khoa</label>
+                            <input type="text" id="set-specialty" class="form-input" placeholder="VD: Tim mạch"/>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom:24px">
+                        <label class="form-label">Giới thiệu bản thân</label>
+                        <textarea id="set-bio" rows="4" class="form-input" placeholder="Viết vài dòng giới thiệu về bạn..."></textarea>
+                    </div>
+                    <button onclick="saveProfile()" class="btn-primary">Lưu thay đổi</button>
+                </div>
+            </div>
+
+            <!-- Notification Settings -->
+            <div class="settings-card">
+                <div class="settings-header">
+                    <span class="material-icons-round" style="color:var(--primary)">notifications</span>
+                    <h3 style="font-size:18px; font-weight:700">Thông báo</h3>
+                </div>
+                <div class="settings-body" style="display:flex; flex-direction:column; gap:20px">
+                    <div style="display:flex; justify-content:space-between; align-items:center">
+                        <div>
+                            <div style="font-weight:600; font-size:14px">Thông báo email</div>
+                            <div style="font-size:12px; color:var(--neutral-500)">Nhận email khi có lịch hẹn mới</div>
+                        </div>
+                        <div class="toggle-switch active" onclick="toggleSwitch(this)"><div class="toggle-dot"></div></div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding-top:20px; border-top:1px solid var(--neutral-100)">
+                        <div>
+                            <div style="font-weight:600; font-size:14px">Thông báo tin nhắn</div>
+                            <div style="font-size:12px; color:var(--neutral-500)">Nhận thông báo khi có tin nhắn mới</div>
+                        </div>
+                        <div class="toggle-switch active" onclick="toggleSwitch(this)"><div class="toggle-dot"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Section -->
+            <div class="settings-card">
+                <div class="settings-header">
+                    <span class="material-icons-round" style="color:var(--primary)">security</span>
+                    <h3 style="font-size:18px; font-weight:700">Bảo mật</h3>
+                </div>
+                <div class="settings-body">
+                    <div class="form-group">
+                        <label class="form-label">Mật khẩu hiện tại</label>
+                        <input type="password" class="form-input" placeholder="••••••••"/>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:20px; margin-bottom:24px">
+                        <div class="form-group">
+                            <label class="form-label">Mật khẩu mới</label>
+                            <input type="password" class="form-input" placeholder="••••••••"/>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Xác nhận mật khẩu</label>
+                            <input type="password" class="form-input" placeholder="••••••••"/>
+                        </div>
+                    </div>
+                    <button onclick="changePassword()" class="btn-secondary">Đổi mật khẩu</button>
+                </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="settings-card" style="border-color:var(--danger)">
+                <div class="settings-header" style="background:var(--danger)05">
+                    <span class="material-icons-round" style="color:var(--danger)">warning</span>
+                    <h3 style="font-size:18px; font-weight:700; color:var(--danger)">Vùng nguy hiểm</h3>
+                </div>
+                <div class="settings-body" style="display:flex; justify-content:space-between; align-items:center">
+                    <div>
+                        <div style="font-weight:600; font-size:14px">Đăng xuất tất cả thiết bị</div>
+                        <div style="font-size:12px; color:var(--neutral-500)">Đăng xuất khỏi tất cả phiên đăng nhập</div>
+                    </div>
+                    <button onclick="logoutAll()" class="btn-ghost" style="color:var(--danger); border:1px solid var(--danger)">Đăng xuất tất cả</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="app_v2.js"></script>
+<script>
+(async () => {
+    try {
+        const user = await requireAuth("DOCTOR");
+        if (!user) return;
+        document.getElementById("userName").textContent = user.fullName || "Bác sĩ";
+        document.getElementById("userEmail").textContent = user.email;
+
+        // Load profile from API
+        const r = await API("/api/doctor/profile");
+        if (r.ok) {
+            const profile = await r.json();
+            document.getElementById("profile-name").textContent = profile.fullName;
+            document.getElementById("profile-email").textContent = profile.email;
+            document.getElementById("profile-avatar").src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.fullName)}&background=f0f9ff&color=2563eb&bold=true`;
+            
+            document.getElementById("set-name").value = profile.fullName;
+            document.getElementById("set-email").value = profile.email;
+            document.getElementById("set-phone").value = profile.phone || '';
+            document.getElementById("set-specialty").value = profile.specialty || '';
+            document.getElementById("set-bio").value = profile.bio || '';
+        }
+    } catch(e) { console.error(e); }
+})();
+
+function toggleSwitch(btn) {
+    btn.classList.toggle('active');
+}
+
+async function saveProfile() {
+    const data = {
+        fullName: document.getElementById("set-name").value,
+        phone: document.getElementById("set-phone").value,
+        specialty: document.getElementById("set-specialty").value,
+        bio: document.getElementById("set-bio").value,
+    };
+    try {
+        const r = await API("/api/doctor/profile", {
+            method: "PUT",
+            body: JSON.stringify(data)
+        });
+        if (r.ok) {
+            showToast('Đã lưu thông tin thành công!', 'success');
+            document.getElementById("userName").textContent = data.fullName;
+            document.getElementById("profile-name").textContent = data.fullName;
+        } else {
+            showToast('Lỗi khi lưu thông tin', 'error');
+        }
+    } catch(e) { showToast('Có lỗi xảy ra', 'error'); }
+}
+
+function changePassword() {
+    showToast('Tính năng đổi mật khẩu đang được bảo trì', 'info');
+}
+
+function logoutAll() {
+    showConfirm('Bạn có chắc chắn muốn đăng xuất khỏi tất cả thiết bị?', {
+        onOk: () => logout()
+    });
+}
+</script>
+</body>
+</html>

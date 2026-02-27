@@ -1,0 +1,32 @@
+services:
+  # 1. Spring Boot Backend
+  - type: web
+    name: medibook-api
+    env: docker
+    rootDir: backend
+    plan: free
+    dockerCommand: "java -jar target/medibook-1.0.0.jar"
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:postgresql://your-db-host:5432/medibook # Render will supply a database URL if you create a managed Postgres
+      - key: SPRING_DATASOURCE_USERNAME
+        value: postgres
+      - key: SPRING_DATASOURCE_PASSWORD
+        value: postgres
+      - key: APP_TIMEZONE
+        value: Asia/Ho_Chi_Minh
+      - key: MAIL_ENABLED
+        value: true
+      - key: MAIL_HOST
+        value: smtp.gmail.com
+      - key: MAIL_PORT
+        value: 587
+      - key: MAIL_USERNAME
+        value: tnguyenanh189@gmail.com
+      - key: MAIL_PASSWORD
+        value: xbqqbxmdftwrguvr
+      - key: MAIL_FROM
+        value: Medibook Support <tnguyenanh189@gmail.com>
+

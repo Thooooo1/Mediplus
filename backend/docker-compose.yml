@@ -1,0 +1,35 @@
+services:
+  app:
+    build: .
+    container_name: medibook-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/medibook
+      - SPRING_DATASOURCE_USERNAME=medibook
+      - SPRING_DATASOURCE_PASSWORD=medibook
+      - APP_MAIL_ENABLED=false
+    depends_on:
+      - postgres
+    networks:
+      - medibook-net
+
+  postgres:
+    image: postgres:16
+    container_name: medibook-postgres
+    environment:
+      POSTGRES_DB: medibook
+      POSTGRES_USER: medibook
+      POSTGRES_PASSWORD: medibook
+    ports:
+      - "5432:5432"
+    volumes:
+      - medibook_pg:/var/lib/postgresql/data
+    networks:
+      - medibook-net
+
+volumes:
+  medibook_pg:
+
+networks:
+  medibook-net:

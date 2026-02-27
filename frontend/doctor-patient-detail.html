@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Chi tiết bệnh nhân - MediBook Doctor</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+    <link rel="stylesheet" href="app_v2.css"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+    <style>
+        .sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 260px; background: var(--neutral-900); color: white; padding: 24px 0; z-index: 30; display: flex; flex-direction: column; }
+        .sidebar-logo { padding: 0 24px 24px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-logo .material-icons-round { font-size: 28px; color: var(--primary); }
+        .sidebar-logo span { font-size: 20px; font-weight: 800; }
+        .sidebar-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
+        .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-radius: var(--radius-lg); color: var(--neutral-400); font-size: 14px; font-weight: 500; text-decoration: none; transition: all 0.2s; }
+        .sidebar-link:hover { background: rgba(255,255,255,0.08); color: white; }
+        .sidebar-link.active { background: var(--primary); color: white; }
+        .sidebar-link .material-icons-round { font-size: 20px; }
+        .sidebar-footer { padding: 16px 24px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-footer .user-name { font-size: 14px; font-weight: 600; }
+        .sidebar-footer .user-email { font-size: 12px; color: var(--neutral-400); }
+        .main-content { margin-left: 260px; padding: 32px; background: var(--neutral-50); min-height: 100vh; }
+        @media (max-width: 768px) { .sidebar { display: none; } .main-content { margin-left: 0; } }
+
+        .patient-header { display: flex; align-items: center; gap: 24px; margin-bottom: 32px; }
+        .patient-avatar { width: 100px; height: 100px; border-radius: var(--radius-full); border: 4px solid white; box-shadow: var(--shadow-sm); }
+        .tab-nav { display: flex; gap: 32px; border-bottom: 1px solid var(--neutral-200); margin-bottom: 24px; }
+        .tab-btn { padding: 12px 0; font-size: 14px; font-weight: 600; color: var(--neutral-500); cursor: pointer; position: relative; border: none; background: none; }
+        .tab-btn.active { color: var(--primary); }
+        .tab-btn.active::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: var(--primary); }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <span class="material-icons-round">medical_services</span>
+            <span>MediBook</span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="doctor-overview.html" class="sidebar-link"><span class="material-icons-round">dashboard</span>Dashboard</a>
+            <a href="doctor-dashboard.html" class="sidebar-link"><span class="material-icons-round">calendar_today</span>Lịch hẹn</a>
+            <a href="doctor-patients.html" class="sidebar-link active"><span class="material-icons-round">people</span>Bệnh nhân</a>
+            <a href="doctor-records.html" class="sidebar-link"><span class="material-icons-round">description</span>Hồ sơ bệnh án</a>
+            <a href="doctor-settings.html" class="sidebar-link"><span class="material-icons-round">settings</span>Cài đặt</a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-name" id="userName">Bác sĩ</div>
+            <div class="user-email" id="userEmail"></div>
+            <button class="btn-ghost btn-sm" style="margin-top:8px;color:var(--neutral-400);width:100%;justify-content:flex-start" onclick="logout()">
+                <span class="material-icons-round" style="font-size:18px">logout</span> Đăng xuất
+            </button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:32px">
+            <button onclick="history.back()" class="btn-ghost btn-sm" style="padding:8px; border-radius:50%"><span class="material-icons-round">arrow_back</span></button>
+            <h1 style="font-size:24px" id="page-title">Chi tiết bệnh nhân</h1>
+        </div>
+
+        <div class="grid" style="grid-template-columns: 320px 1fr; gap:32px; align-items:start">
+            <!-- Left Profile -->
+            <div class="card" style="text-align:center">
+                <img id="p-avatar" class="patient-avatar" src="" alt=""/>
+                <h2 id="p-name" style="margin:16px 0 4px; font-size:20px">Đang tải...</h2>
+                <p id="p-email" style="color:var(--neutral-500); font-size:14px; margin-bottom:24px">...</p>
+                
+
+                <div style="margin-top:32px; text-align:left; border-top:1px solid var(--neutral-100); padding-top:24px; display:grid; gap:16px">
+                    <div>
+                        <div style="font-size:12px; color:var(--neutral-400); text-transform:uppercase; font-weight:700">Số điện thoại</div>
+                        <div id="p-phone" style="font-weight:600; margin-top:4px">—</div>
+                    </div>
+                    <div>
+                        <div style="font-size:12px; color:var(--neutral-400); text-transform:uppercase; font-weight:700">Tổng số lần khám</div>
+                        <div id="p-count" style="font-weight:600; margin-top:4px">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Content -->
+            <div class="card">
+                <div class="tab-nav">
+                    <button id="tab-records" class="tab-btn active" onclick="switchTab('records')">Hồ sơ bệnh án</button>
+                    <button id="tab-history" class="tab-btn" onclick="switchTab('history')">Lịch sử khám</button>
+                </div>
+
+                <!-- Records List -->
+                <div id="view-records">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
+                        <h3 style="font-size:16px; font-weight:700">Danh sách hồ sơ</h3>
+                        <a href="doctor-records.html" class="btn-ghost btn-sm" style="color:var(--primary)">Thêm mới →</a>
+                    </div>
+                    <div id="records-list" style="display:grid; gap:16px"></div>
+                </div>
+
+                <!-- History List -->
+                <div id="view-history" style="display:none">
+                    <h3 style="font-size:16px; font-weight:700; margin-bottom:20px">Lịch sử đặt hẹn</h3>
+                    <div id="history-list" style="display:grid; gap:12px"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="app_v2.js"></script>
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const patientId = urlParams.get('id');
+    let patientData = null;
+
+    (async () => {
+        try {
+            const user = await requireAuth("DOCTOR");
+            if (!user) return;
+            document.getElementById("userName").textContent = user.fullName || "Bác sĩ";
+            document.getElementById("userEmail").textContent = user.email;
+
+            if(!patientId) {
+                location.href = 'doctor-patients.html';
+                return;
+            }
+
+            const r = await API(`/api/doctor/patients/${patientId}`);
+            if(r.ok) {
+                patientData = await r.json();
+                renderPatient(patientData);
+            } else {
+                showToast("Không thể tải thông tin bệnh nhân", "error");
+            }
+        } catch(e) { console.error(e); }
+    })();
+
+    function renderPatient(data) {
+        document.getElementById("p-name").innerText = data.fullName;
+        document.getElementById("p-email").innerText = data.email;
+        document.getElementById("p-phone").innerText = data.phone || "—";
+        document.getElementById("p-count").innerText = data.appointments.length;
+        document.getElementById("p-avatar").src = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.fullName)}&background=f0f9ff&color=2563eb&bold=true`;
+        
+        // Records
+        const rList = document.getElementById("records-list");
+        if(!data.records || data.records.length === 0) {
+            rList.innerHTML = `<div style="text-align:center; padding:40px; color:var(--neutral-400); font-size:14px">Chưa có hồ sơ bệnh án nào</div>`;
+        } else {
+            rList.innerHTML = data.records.map(r => `
+                <div class="card" style="padding:16px; border:1px solid var(--neutral-100)">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start">
+                        <div>
+                            <div style="font-weight:700; font-size:14px; color:var(--neutral-900)">${r.diagnosis}</div>
+                            <div style="font-size:12px; color:var(--neutral-400); margin-top:4px">${fmtDate(r.visitDate)}</div>
+                        </div>
+                        <span class="badge" style="background:var(--primary-light); color:var(--primary)">${r.type||'Khám'}</span>
+                    </div>
+                    <div style="font-size:14px; color:var(--neutral-600); margin-top:12px">${r.notes||''}</div>
+                </div>
+            `).join('');
+        }
+
+        // History
+        const hList = document.getElementById("history-list");
+        if(!data.appointments || data.appointments.length === 0) {
+             hList.innerHTML = `<div style="text-align:center; padding:40px; color:var(--neutral-400); font-size:14px">Chưa có lịch hẹn nào</div>`;
+        } else {
+            hList.innerHTML = data.appointments.map(a => `
+                <div class="card" style="padding:16px; border:1px solid var(--neutral-100); display:flex; justify-content:space-between; align-items:center">
+                    <div style="display:flex; align-items:center; gap:16px">
+                        <div style="width:40px; height:40px; border-radius:var(--radius-lg); background:var(--neutral-50); display:flex; align-items:center; justify-content:center; color:var(--neutral-400)">
+                            <span class="material-icons-round">event</span>
+                        </div>
+                        <div>
+                            <div style="font-weight:600; font-size:14px">${fmtDate(a.startAt)} - ${fmtTime(a.startAt)}</div>
+                            <div style="font-size:12px; color:var(--neutral-500); margin-top:2px">${a.note || 'Không có ghi chú'}</div>
+                        </div>
+                    </div>
+                    ${statusBadge(a.status)}
+                </div>
+            `).join('');
+        }
+    }
+
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(`tab-${tab}`).classList.add('active');
+        
+        document.getElementById('view-records').style.display = tab === 'records' ? 'block' : 'none';
+        document.getElementById('view-history').style.display = tab === 'history' ? 'block' : 'none';
+    }
+
+</script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Khám Từ Xa — MediBook Master</title>
+    <link rel="stylesheet" href="app_v2.css"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <style>
+        :root{--primary:#2563eb;--primary-light:#eff6ff;--neutral-900:#0f172a;--neutral-600:#475569;--neutral-500:#64748b;--neutral-200:#e2e8f0}
+        *{font-family:'Inter',sans-serif}
+        
+        .service-hero{background:linear-gradient(135deg,#1e40af 0%,#2563eb 100%);color:#fff;padding:80px 0 60px;text-align:center}
+        .hero-badge{display:inline-block;padding:6px 16px;background:rgba(255,255,255,0.1);border-radius:100px;font-weight:700;font-size:13px;margin-bottom:16px;text-transform:uppercase;letter-spacing:1px}
+        .service-hero h1{font-size:42px;font-weight:800;margin-bottom:16px;letter-spacing:-1px}
+        .service-hero p{font-size:18px;max-width:640px;margin:0 auto;opacity:0.9}
+
+        .master-section{padding:80px 0}
+        .container{max-width:1100px;margin:0 auto;padding:0 24px}
+        
+        /* ── Telehealth Cards ── */
+        .tele-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px}
+        .tele-card{background:#fff;border:1px solid var(--neutral-200);border-radius:24px;padding:32px;text-align:center;transition:all .3s}
+        .tele-card:hover{border-color:var(--primary);transform:translateY(-8px);box-shadow:0 12px 30px rgba(0,0,0,0.05)}
+        .tele-icon{width:64px;height:64px;border-radius:20px;background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+        .tele-icon .material-icons-round{font-size:32px}
+        .tele-card h3{font-size:19px;font-weight:800;color:var(--neutral-900);margin-bottom:12px}
+        .tele-card p{color:var(--neutral-500);font-size:15px;line-height:1.7}
+
+        /* ── Steps ── */
+        .steps-box{background:var(--neutral-900);border-radius:32px;padding:56px;color:#fff;margin-top:60px}
+        .steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:40px}
+        .step-item{text-align:center}
+        .step-num{width:40px;height:40px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-weight:800}
+        .step-item h4{font-size:16px;margin-bottom:8px}
+        .step-item p{font-size:13px;opacity:0.6}
+
+        /* ── Master Master CTA ── */
+        .master-cta{background:linear-gradient(145deg,#0f172a 0%,#1e3a8a 100%);border-radius:40px;padding:80px 48px;text-align:center;color:#fff;margin-top:80px;position:relative;overflow:hidden;box-shadow:0 30px 60px -15px rgba(15,23,42,0.3)}
+        .master-cta::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at top right,rgba(37,99,235,0.15),transparent);pointer-events:none}
+        .cta-content{position:relative;z-index:1}
+        .cta-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:rgba(255,255,255,0.1);border-radius:100px;font-size:12px;font-weight:700;margin-bottom:24px;color:rgba(255,255,255,0.9);letter-spacing:1px}
+        .master-cta h2{font-size:36px;font-weight:900;margin-bottom:20px;letter-spacing:-1px;line-height:1.2}
+        .master-cta p{opacity:0.75;margin-bottom:40px;max-width:600px;margin-left:auto;margin-right:auto;font-size:17px;line-height:1.6}
+        .cta-actions{display:flex;align-items:center;justify-content:center;gap:16px}
+        .master-btn-primary{display:inline-flex;align-items:center;gap:10px;background:#fff;color:var(--neutral-900);padding:18px 40px;border-radius:16px;font-weight:800;text-decoration:none;transition:all .3s ease;font-size:17px;box-shadow:0 10px 25px rgba(0,0,0,0.1)}
+        .master-btn-primary:hover{transform:translateY(-4px);box-shadow:0 20px 35px rgba(0,0,0,0.2);background:var(--primary-light);color:var(--primary)}
+        .master-btn-outline{display:inline-flex;align-items:center;gap:10px;background:transparent;color:#fff;padding:18px 32px;border-radius:16px;font-weight:700;text-decoration:none;transition:all .3s ease;font-size:16px;border:1.5px solid rgba(255,255,255,0.2)}
+        .master-btn-outline:hover{background:rgba(255,255,255,0.05);border-color:#fff}
+        .cta-trust{margin-top:48px;display:flex;align-items:center;justify-content:center;gap:32px;opacity:0.6;font-size:13px}
+        .cta-trust-item{display:flex;align-items:center;gap:8px}
+
+        @media(max-width:768px){.tele-grid,.steps-grid{grid-template-columns:1fr}.service-hero h1{font-size:32px}}
+    </style>
+</head>
+<body>
+    <nav id="nav" style="display:flex;align-items:center;padding:12px 32px;background:white;border-bottom:1px solid var(--neutral-200);position:sticky;top:0;z-index:100"></nav>
+
+    <div class="service-hero">
+        <div class="container">
+            <div class="hero-badge">Smart Healthcare</div>
+            <h1>Bác sĩ Tư vấn Từ Xa</h1>
+            <p>Xóa bỏ rào cản địa lý. Nhận tư vấn y khoa chất lượng cao ngay tại nhà qua Video Call chuyên dụng.</p>
+        </div>
+    </div>
+
+    <section class="master-section">
+        <div class="container">
+            <div style="text-align:center;margin-bottom:56px">
+                <h2 style="font-size:32px;font-weight:800;color:var(--neutral-900)">Tại sao nên khám bệnh từ xa?</h2>
+                <p style="color:var(--neutral-500);margin-top:12px">An toàn - Tiết kiệm thời gian - Hiệu quả cao</p>
+            </div>
+
+            <div class="tele-grid">
+                <div class="tele-card">
+                    <div class="tele-icon"><span class="material-icons-round">bolt</span></div>
+                    <h3>Tiết kiệm thời gian</h3>
+                    <p>Không cần di chuyển, không xếp hàng chờ đợi. Khám bệnh chỉ với một chiếc Smartphone có internet.</p>
+                </div>
+                <div class="tele-card">
+                    <div class="tele-icon"><span class="material-icons-round">verified_user</span></div>
+                    <h3>An toàn tuyệt đối</h3>
+                    <p>Hạn chế tiếp xúc nơi đông người, đặc biệt quan trọng trong các đợt dịch bệnh hoặc khi di chuyển khó khăn.</p>
+                </div>
+                <div class="tele-card">
+                    <div class="tele-icon"><span class="material-icons-round">history_edu</span></div>
+                    <h3>Kết nối chuyên gia</h3>
+                    <p>Dễ dàng đặt lịch với các bác sĩ đầu ngành tại Hồ Chí Minh và Hà Nội ngay cả khi bạn ở vùng xa.</p>
+                </div>
+            </div>
+
+            <div class="steps-box">
+                <h2 style="text-align:center;font-size:28px;font-weight:800">Quy trình Khám Master Từ Xa</h2>
+                <div class="steps-grid">
+                    <div class="step-item">
+                        <div class="step-num">1</div>
+                        <h4>Đặt lịch hẹn</h4>
+                        <p>Chọn bác sĩ và khung giờ khám trực tuyến phù hợp.</p>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-num">2</div>
+                        <h4>Thanh toán</h4>
+                        <p>Thành toán phí tư vấn nhanh qua chuyển khoản hoặc ví điện tử.</p>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-num">3</div>
+                        <h4>Tư vấn Video</h4>
+                        <p>Đúng giờ hẹn, bác sĩ sẽ gọi điện tư vấn trực tiếp cho bạn.</p>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-num">4</div>
+                        <h4>Nhận bệnh án</h4>
+                        <p>Kết quả khám và đơn thuốc được gửi vào hồ sơ điện tử ngay sau đó.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="master-cta">
+                <div class="cta-content">
+                    <div class="cta-badge">
+                        <span class="material-icons-round" style="font-size:16px">cell_tower</span>
+                        Y TẾ SỐ KHÔNG KHOẢNG CÁCH
+                    </div>
+                    <h2>Chăm sóc sức khỏe ngay tại ngôi nhà của bạn</h2>
+                    <p>MediBook Master xóa bỏ rào cản địa lý và thời gian, giúp bạn kết nối trực tiếp với những bác sĩ chuyên khoa giỏi nhất chỉ sau vài lượt chạm. Hiệu quả, an toàn và cực kỳ bảo mật.</p>
+                    <div class="cta-actions">
+                        <a href="doctors.html" class="master-btn-primary">
+                            Bắt đầu tư vấn ngay
+                            <span class="material-icons-round">video_chat</span>
+                        </a>
+                        <a href="service-specialist.html" class="master-btn-outline">Khám chuyên khoa</a>
+                    </div>
+                    <div class="cta-trust">
+                        <div class="cta-trust-item"><span class="material-icons-round">public</span> Toàn cầu</div>
+                        <div class="cta-trust-item"><span class="material-icons-round">speed</span> Kết nối 5G/Fiber</div>
+                        <div class="cta-trust-item"><span class="material-icons-round">credit_card</span> Thanh toán linh hoạt</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="app_v2.js"></script>
+    <script>
+        (async () => {
+            const me = await API('/api/auth/me').then(r => r.ok ? r.json() : null).catch(() => null);
+            setNav(me);
+        })();
+    </script>
+</body>
+</html>

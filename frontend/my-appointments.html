@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Lịch hẹn của tôi — MediBook</title>
+    <link rel="stylesheet" href="app_v2.css"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+    <style>
+        .page-header { background: linear-gradient(135deg, var(--primary-dark), var(--primary)); color: white; padding: 60px 0; margin-bottom: 40px; }
+        .appt-card { background: white; border-radius: var(--radius-xl); border: 1px solid var(--neutral-100); padding: 24px; margin-bottom: 16px; display: flex; gap: 24px; align-items: flex-start; transition: all 0.3s; }
+        .appt-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); border-color: var(--primary-light); }
+        
+        .appt-date-box { text-align: center; padding: 16px; background: var(--primary-light); border-radius: var(--radius-xl); min-width: 90px; flex-shrink: 0; }
+        .appt-date-box .month { font-size: 11px; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 2px; }
+        .appt-date-box .day { font-size: 32px; font-weight: 800; color: var(--primary); line-height: 1; }
+        .appt-date-box .time { font-size: 13px; font-weight: 600; color: var(--primary); margin-top: 6px; }
+
+        .appt-content { flex: 1; }
+        .appt-dr-info { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .appt-dr-avatar { width: 48px; height: 48px; border-radius: var(--radius-lg); object-fit: cover; border: 2px solid white; box-shadow: var(--shadow-sm); }
+        .appt-dr-name { font-size: 18px; font-weight: 800; color: var(--neutral-800); }
+        
+        .appt-meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
+        .meta-item { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--neutral-500); }
+        .meta-item .material-icons-round { font-size: 18px; color: var(--neutral-400); }
+
+        .appt-footer { display: flex; items-center: center; justify-content: space-between; pt-16: ; border-top: 1px solid var(--neutral-50); padding-top: 16px; margin-top: 16px; }
+
+        .filter-nav { display: flex; gap: 12px; margin-bottom: 32px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
+        .filter-nav::-webkit-scrollbar { display: none; }
+        .filter-btn { padding: 10px 20px; border-radius: var(--radius-full); font-size: 14px; font-weight: 700; background: white; border: 1px solid var(--neutral-200); color: var(--neutral-500); cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+        .filter-btn:hover { border-color: var(--primary-light); color: var(--primary); }
+        .filter-btn.active { background: var(--primary); border-color: var(--primary); color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+
+        @media (max-width: 768px) {
+            .appt-card { flex-direction: column; gap: 16px; }
+            .appt-date-box { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; }
+            .appt-date-box .day { font-size: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="nav" id="nav"><div style="flex:1"><a href="index.html"><b>MediBook</b></a></div></div>
+
+    <header class="page-header text-center">
+        <div class="container">
+            <h1 class="h1 mb-2">Lịch hẹn của tôi</h1>
+            <p class="mb-0 text-white" style="opacity:0.9">Theo dõi và quản lý các cuộc hẹn khám bệnh của bạn</p>
+        </div>
+    </header>
+
+    <div class="container" style="padding-bottom:100px;">
+        <div class="filter-nav">
+            <button class="filter-btn active" onclick="setFilter('ALL', this)">Tất cả</button>
+            <button class="filter-btn" onclick="setFilter('BOOKED', this)">Chờ xác nhận</button>
+            <button class="filter-btn" onclick="setFilter('CONFIRMED', this)">Đã xác nhận</button>
+            <button class="filter-btn" onclick="setFilter('COMPLETED', this)">Hoàn thành</button>
+            <button class="filter-btn" onclick="setFilter('CANCELLED', this)">Đã hủy</button>
+        </div>
+
+        <div id="appointmentsList" class="fade-in"></div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 <strong>MediBook</strong>. Chăm sóc tận tâm, mọi lúc mọi nơi.</p>
+        </div>
+    </footer>
+
+    <script src="app_v2.js"></script>
+    <script>
+        let appointments = [];
+        let currentFilter = 'ALL';
+
+        (async () => {
+            const me = await requireAuth('USER');
+            if (me) {
+                setNav(me);
+                await loadAppointments();
+            }
+        })();
+
+        async function loadAppointments() {
+            const list = document.getElementById('appointmentsList');
+            showSkeleton(list, 3);
+            try {
+                const r = await API('/api/appointments/my');
+                appointments = await r.json();
+                renderAppointments();
+            } catch (err) {
+                showErrorState(list, 'Không thể tải danh sách lịch hẹn', loadAppointments);
+            }
+        }
+
+        function setFilter(filter, btn) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderAppointments();
+        }
+
+        function renderAppointments() {
+            const list = document.getElementById('appointmentsList');
+            const filtered = currentFilter === 'ALL' ? appointments : appointments.filter(a => a.status === currentFilter);
+
+            if (filtered.length === 0) {
+                showEmptyState(list, 'calendar_today', 
+                    currentFilter === 'ALL' ? 'Bạn chưa có lịch hẹn nào' : `Không có lịch hẹn ở trạng thái này`,
+                    'Khám sức khỏe định kỳ giúp bảo vệ sức khỏe của bạn.',
+                    '<a href="booking.html" class="btn-primary" style="text-decoration:none">Đặt lịch khám ngay</a>'
+                );
+                return;
+            }
+
+            list.innerHTML = filtered.map(a => {
+                const start = new Date(a.startAt);
+                const end = new Date(a.endAt);
+                const days = ['Chủ Nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'];
+                const months = ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
+                const canCancel = ['BOOKED', 'CONFIRMED'].includes(a.status);
+
+                return `
+                    <div class="appt-card">
+                        <div class="appt-date-box">
+                            <div class="month">${months[start.getMonth()]}</div>
+                            <div class="day">${start.getDate()}</div>
+                            <div class="time">${fmtTime(a.startAt)}</div>
+                        </div>
+                        <div class="appt-content">
+                            <div class="appt-dr-info">
+                                <img src="${a.doctorAvatar || 'https://ui-avatars.com/api/?name='+encodeURIComponent(a.doctorName)}" class="appt-dr-avatar" />
+                                <div>
+                                    <h3 class="appt-dr-name">${a.doctorName}</h3>
+                                    <div class="text-primary font-bold" style="font-size:13px">${a.doctorSpecialty || ''}</div>
+                                </div>
+                            </div>
+                            <div class="appt-meta">
+                                <div class="meta-item">
+                                    <span class="material-icons-round">schedule</span>
+                                    <span>${days[start.getDay()]}, ${fmtDate(a.startAt)} · ${fmtTime(a.startAt)} - ${fmtTime(a.endAt)}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="material-icons-round">location_on</span>
+                                    <span>${a.clinicName || 'Phòng khám MediBook'}</span>
+                                </div>
+                                ${a.note ? `
+                                <div class="meta-item" style="grid-column: 1 / -1; background:var(--neutral-50); padding:12px; border-radius:var(--radius-lg); margin-top:8px">
+                                    <span class="material-icons-round" style="color:var(--primary)">edit_note</span>
+                                    <span class="text-neutral-700 italic">"${a.note}"</span>
+                                </div>` : ''}
+                            </div>
+                            <div class="appt-footer">
+                                ${statusBadge(a.status)}
+                                <div class="d-flex gap-2">
+                                    <a href="appointment-detail.html?id=${a.id}" class="btn-text btn-sm" style="text-decoration:none">Chi tiết</a>
+                                    ${canCancel ? `<button class="btn-danger btn-sm" onclick="cancelAppointment('${a.id}')">Hủy lịch</button>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function cancelAppointment(id) {
+            const confirmed = await showConfirm('Bạn có chắc chắn muốn hủy lịch hẹn này?', {
+                danger: true,
+                confirmText: 'Xác nhận hủy'
+            });
+            if (!confirmed) return;
+
+            try {
+                const r = await API(`/api/appointments/${id}/cancel`, { method: 'POST' });
+                if (!r.ok) throw new Error(await r.text());
+                showToast('Hủy lịch hẹn thành công', 'success');
+                await loadAppointments();
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

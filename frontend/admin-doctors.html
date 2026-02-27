@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Quản lý bác sĩ — MediBook</title>
+    <link rel="stylesheet" href="app_v2.css"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+    <style>
+        .sidebar { width: 260px; background: white; border-right: 1px solid var(--neutral-200); height: 100vh; position: sticky; top: 0; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 24px; border-bottom: 1px solid var(--neutral-100); }
+        .sidebar-nav { padding: 16px; flex: 1; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: var(--neutral-600); text-decoration: none; border-radius: var(--radius-md); margin-bottom: 4px; transition: all 0.2s; font-weight: 500; }
+        .nav-item:hover, .nav-item.active { background: var(--primary-50); color: var(--primary); }
+        .nav-item .material-icons-round { font-size: 20px; }
+        .main-content { flex: 1; background: var(--neutral-50); min-height: 100vh; }
+        .admin-header { background: white; padding: 16px 32px; border-bottom: 1px solid var(--neutral-200); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
+        .user-menu { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--primary-100); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: bold; overflow: hidden; }
+        .avatar-sm { width: 32px; height: 32px; }
+        .avatar img, .avatar-sm img { width: 100%; height: 100%; object-fit: cover; }
+        
+        /* Table overrides & avatar boundaries */
+        .table img { max-width: 48px; max-height: 48px; border-radius: 8px; object-fit: cover; border: 1px solid var(--neutral-200); }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="material-icons-round">medical_services</span>
+                    <span>MediBook</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="admin-dashboard.html" class="nav-item">
+                    <span class="material-icons-round">dashboard</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="admin-appointments.html" class="nav-item">
+                    <span class="material-icons-round">event</span>
+                    <span>Lịch hẹn</span>
+                </a>
+                <a href="admin-doctors.html" class="nav-item active">
+                    <span class="material-icons-round">medical_information</span>
+                    <span>Bác sĩ</span>
+                </a>
+                <a href="admin-users.html" class="nav-item">
+                    <span class="material-icons-round">people</span>
+                    <span>Người dùng</span>
+                </a>
+                <a href="admin-settings.html" class="nav-item">
+                    <span class="material-icons-round">settings</span>
+                    <span>Cài đặt</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">A</div>
+                    <div class="user-details">
+                        <div class="user-name" id="userName">Admin</div>
+                        <div class="user-role">Quản trị viên</div>
+                    </div>
+                </div>
+                <button class="btn-logout" onclick="logout()">
+                    <span class="material-icons-round">logout</span>
+                    <span>Đăng xuất</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <h1>Danh sách bác sĩ</h1>
+                    <p class="text-secondary" id="doctorCount">Đang tải...</p>
+                </div>
+                <div class="header-right">
+                    <button class="btn btn-primary" onclick="showAddDoctorModal()">
+                        <span class="material-icons-round">add</span>
+                        Thêm bác sĩ mới
+                    </button>
+                </div>
+            </header>
+
+            <div class="content-body">
+                <!-- Search & Filters -->
+                <div class="card mb-6 p-4">
+                    <div class="row items-center gap-4">
+                        <div class="col flex-grow">
+                            <div class="input-group">
+                                <span class="material-icons-round text-secondary">search</span>
+                                <input type="text" id="searchInput" class="input" placeholder="Tìm kiếm theo tên hoặc email..." oninput="handleSearch()">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <select id="specialtyFilter" class="input" onchange="handleFilter()">
+                                <option value="">Tất cả chuyên khoa</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Doctor Table -->
+                <div class="card">
+                    <div id="doctorTableContainer">
+                        <div class="skeleton-table"></div>
+                    </div>
+                    <!-- Pagination -->
+                    <div class="pagination-container" id="pagination"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Doctor Modal -->
+    <div class="modal-overlay" id="addDoctorModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2>Thêm bác sĩ mới</h2>
+                <button class="btn-icon" onclick="hideAddDoctorModal()">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+            <form id="addDoctorForm" onsubmit="handleAddDoctor(event)">
+                <div class="modal-body row gap-4">
+                    <div class="col-6">
+                        <label class="label">Họ và tên *</label>
+                        <input type="text" name="fullName" class="input" required placeholder="Nguyễn Văn A">
+                    </div>
+                    <div class="col-6">
+                        <label class="label">Email *</label>
+                        <input type="email" name="email" class="input" required placeholder="name@example.com">
+                    </div>
+                    <div class="col-6">
+                        <label class="label">Mật khẩu *</label>
+                        <input type="password" name="password" class="input" required placeholder="********">
+                    </div>
+                    <div class="col-6">
+                        <label class="label">Chuyên khoa *</label>
+                        <select name="specialtyId" id="modalSpecialty" class="input" required>
+                            <option value="">Chọn chuyên khoa</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label class="label">Học hàm/Học vị</label>
+                        <input type="text" name="title" class="input" placeholder="PGS.TS.BS">
+                    </div>
+                    <div class="col-6">
+                        <label class="label">Kinh nghiệm (năm)</label>
+                        <input type="number" name="yearsExperience" class="input" placeholder="10">
+                    </div>
+                    <div class="col-12">
+                        <label class="label">Phòng khám / Bệnh viện</label>
+                        <input type="text" name="clinicName" class="input" placeholder="Bệnh viện Bạch Mai">
+                    </div>
+                    <div class="col-12">
+                        <label class="label">Tiểu sử ngắn</label>
+                        <textarea name="bio" class="input" rows="3" placeholder="Giới thiệu về bác sĩ..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-ghost" onclick="hideAddDoctorModal()">Hủy</button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">Lưu hồ sơ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="app_v2.js"></script>
+    <script>
+        let curPage = 0;
+        let curSearch = '';
+        let curSpecialty = '';
+
+        (async () => {
+            const me = await requireAuth('ADMIN');
+            if (!me) return;
+            document.getElementById('userName').textContent = me.fullName || 'Admin';
+            document.getElementById('userAvatar').textContent = (me.fullName || 'A').charAt(0);
+
+            await Promise.all([
+                loadSpecialties(),
+                loadDoctors()
+            ]);
+        })();
+
+        async function loadSpecialties() {
+            try {
+                const r = await API('/api/specialties');
+                if (r.ok) {
+                    const list = await r.json();
+                    const filter = document.getElementById('specialtyFilter');
+                    const modalSelect = document.getElementById('modalSpecialty');
+                    
+                    list.forEach(s => {
+                        const opt = `<option value="${s.id}">${s.name}</option>`;
+                        filter.insertAdjacentHTML('beforeend', opt);
+                        modalSelect.insertAdjacentHTML('beforeend', opt);
+                    });
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadDoctors(page = 0) {
+            curPage = page;
+            const container = document.getElementById('doctorTableContainer');
+            showSkeleton(container, 'table');
+            
+            try {
+                let url = `/api/doctors?page=${page}&size=10`;
+                if(curSearch) url += `&q=${encodeURIComponent(curSearch)}`;
+                if(curSpecialty) url += `&specialtyId=${curSpecialty}`;
+
+                const r = await API(url);
+                if (r.ok) {
+                    const data = await r.json();
+                    document.getElementById('doctorCount').textContent = `Tổng cộng ${data.totalElements} bác sĩ`;
+                    
+                    if (data.content && data.content.length > 0) {
+                        container.innerHTML = `
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Bác sĩ</th>
+                                        <th>Chuyên khoa</th>
+                                        <th>Kinh nghiệm</th>
+                                        <th>Phòng khám</th>
+                                        <th class="text-right">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.content.map(d => `
+                                        <tr>
+                                            <td>
+                                                <div class="row items-center gap-3">
+                                                    <img src="${d.avatarUrl || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(d.fullName)}" class="avatar avatar-sm">
+                                                    <div>
+                                                        <div class="font-bold">${d.fullName}</div>
+                                                        <div class="text-xs text-secondary">${d.title || ''}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td><span class="badge badge-primary">${d.specialtyName}</span></td>
+                                            <td>${d.yearsExperience || 0} năm</td>
+                                            <td class="text-secondary">${d.clinicName || '-'}</td>
+                                            <td class="text-right">
+                                                <button class="btn btn-ghost btn-sm icon-only" onclick="location.href='doctor-schedule-config.html?id=${d.id}'" title="Cấu hình lịch làm việc">
+                                                    <span class="material-icons-round">calendar_month</span>
+                                                </button>
+                                                <button class="btn btn-ghost btn-sm icon-only" title="Chỉnh sửa">
+                                                    <span class="material-icons-round">edit</span>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        `;
+                        renderPagination(document.getElementById('pagination'), data, loadDoctors);
+                    } else {
+                        showEmptyState(container, 'people_outline', 'Không tìm thấy bác sĩ', 'Hãy thử thay đổi điều kiện tìm kiếm hoặc thêm bác sĩ mới.');
+                        document.getElementById('pagination').innerHTML = '';
+                    }
+                }
+            } catch(e) {
+                showErrorState(container, 'Lỗi kết nối', 'Không thể tải danh sách bác sĩ. Vui lòng thử lại.', () => loadDoctors(page));
+            }
+        }
+
+        function handleSearch() {
+            curSearch = document.getElementById('searchInput').value;
+            loadDoctors(0);
+        }
+
+        function handleFilter() {
+            curSpecialty = document.getElementById('specialtyFilter').value;
+            loadDoctors(0);
+        }
+
+        function showAddDoctorModal() {
+            document.getElementById('addDoctorModal').classList.add('show');
+        }
+
+        function hideAddDoctorModal() {
+            document.getElementById('addDoctorModal').classList.remove('show');
+        }
+
+        async function handleAddDoctor(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.textContent = 'Đang lưu...';
+
+            const fd = new FormData(e.target);
+            const data = Object.fromEntries(fd.entries());
+            // Convert types
+            data.yearsExperience = parseInt(data.yearsExperience) || 0;
+            data.consultFeeVnd = 200000; // Default if not provided
+
+            try {
+                const r = await API('/api/admin/doctors', {
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+                if (r.ok) {
+                    toast('Thành công', 'Đã thêm hồ sơ bác sĩ mới.', 'success');
+                    hideAddDoctorModal();
+                    loadDoctors(0);
+                    e.target.reset();
+                } else {
+                    const err = await r.json();
+                    toast('Lỗi', err.message || 'Không thể tạo hồ sơ bác sĩ.', 'danger');
+                }
+            } catch(ex) {
+                toast('Lỗi', 'Lỗi kết nối máy chủ.', 'danger');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Lưu hồ sơ';
+            }
+        }
+    </script>
+</body>
+</html>

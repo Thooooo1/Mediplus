@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Khám Tổng Quát — MediBook Master</title>
+    <link rel="stylesheet" href="app_v2.css"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <style>
+        :root{--primary:#2563eb;--primary-light:#eff6ff;--neutral-900:#0f172a;--neutral-600:#475569;--neutral-500:#64748b;--neutral-200:#e2e8f0;--radius-lg:24px}
+        *{font-family:'Inter',sans-serif}
+        
+        .service-hero{background:linear-gradient(135deg,#1e40af 0%,#2563eb 100%);color:#fff;padding:80px 0 60px;text-align:center}
+        .hero-badge{display:inline-block;padding:6px 16px;background:rgba(255,255,255,0.1);border-radius:100px;font-weight:700;font-size:13px;margin-bottom:16px;text-transform:uppercase;letter-spacing:1px}
+        .service-hero h1{font-size:42px;font-weight:800;margin-bottom:16px;letter-spacing:-1px}
+        .service-hero p{font-size:18px;max-width:640px;margin:0 auto;opacity:0.9;line-height:1.6}
+
+        .master-section{padding:80px 0}
+        .container{max-width:1100px;margin:0 auto;padding:0 24px}
+        
+        /* ── Info Grid ── */
+        .info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px}
+        .info-card{background:#fff;border:1px solid var(--neutral-200);border-radius:var(--radius-lg);padding:32px;text-align:center;transition:all .3s}
+        .info-card:hover{border-color:var(--primary);transform:translateY(-8px);box-shadow:0 20px 40px rgba(0,0,0,0.05)}
+        .info-card .ic-icon{width:64px;height:64px;border-radius:18px;background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+        .info-card .ic-icon .material-icons-round{font-size:32px}
+        .info-card h3{font-size:19px;font-weight:800;margin-bottom:12px;color:var(--neutral-900)}
+        .info-card p{color:var(--neutral-500);font-size:15px;line-height:1.7}
+
+        /* ── Modern Pricing ── */
+        .pkg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px}
+        .pkg-card{background:#fff;border:1px solid var(--neutral-200);border-radius:28px;padding:40px;display:flex;flex-direction:column;transition:all .3s}
+        .pkg-card:hover{border-color:var(--primary);transform:translateY(-5px)}
+        .pkg-card.popular{border:2px solid var(--primary);position:relative}
+        .pkg-card.popular::before{content:'PHỔ BIẾN';position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--primary);color:#fff;padding:4px 14px;border-radius:100px;font-size:11px;font-weight:800}
+        
+        .pkg-name{font-size:14px;font-weight:800;color:var(--neutral-500);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px}
+        .pkg-price{font-size:36px;font-weight:800;color:var(--neutral-900);margin-bottom:32px}
+        .pkg-price span{font-size:16px;font-weight:500;color:var(--neutral-500)}
+        
+        .pkg-features{list-style:none;margin-bottom:40px;flex-grow:1}
+        .pkg-features li{font-size:14px;color:var(--neutral-600);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+        .pkg-features li .material-icons-round{font-size:20px;color:#22c55e}
+        
+        .pkg-btn{display:block;text-align:center;padding:14px;border-radius:12px;font-weight:700;text-decoration:none;transition:all .2s;border:1.5px solid var(--primary)}
+        .pkg-card.popular .pkg-btn{background:var(--primary);color:#fff}
+        .pkg-card:not(.popular) .pkg-btn{color:var(--primary);background:transparent}
+        .pkg-btn:hover{background:#1e40af;border-color:#1e40af;color:#fff}
+
+        /* ── Doctor Grid ── */
+        .doctor-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:24px;margin-top:40px}
+        .doc-card{background:#fff;border:1px solid var(--neutral-200);border-radius:20px;padding:20px;display:flex;gap:16px;text-decoration:none;color:inherit;transition:all .3s}
+        .doc-card:hover{border-color:var(--primary);box-shadow:0 12px 30px rgba(0,0,0,0.05)}
+        .doc-avatar{width:80px;height:80px;border-radius:16px;object-fit:cover;background:var(--primary-light)}
+        .doc-info h4{font-size:17px;font-weight:800;color:var(--neutral-900);margin-bottom:4px}
+        .doc-info .spec{font-size:13px;color:var(--primary);font-weight:700;margin-bottom:4px}
+        .doc-info .clinic{font-size:13px;color:var(--neutral-500)}
+
+        /* ── Master Master CTA ── */
+        .master-cta{background:linear-gradient(145deg,#0f172a 0%,#1e3a8a 100%);border-radius:40px;padding:80px 48px;text-align:center;color:#fff;margin-top:80px;position:relative;overflow:hidden;box-shadow:0 30px 60px -15px rgba(15,23,42,0.3)}
+        .master-cta::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at top right,rgba(37,99,235,0.15),transparent);pointer-events:none}
+        .cta-content{position:relative;z-index:1}
+        .cta-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:rgba(255,255,255,0.1);border-radius:100px;font-size:12px;font-weight:700;margin-bottom:24px;color:rgba(255,255,255,0.9);letter-spacing:1px}
+        .master-cta h2{font-size:36px;font-weight:900;margin-bottom:20px;letter-spacing:-1px;line-height:1.2}
+        .master-cta p{opacity:0.75;margin-bottom:40px;max-width:600px;margin-left:auto;margin-right:auto;font-size:17px;line-height:1.6}
+        .cta-actions{display:flex;align-items:center;justify-content:center;gap:16px}
+        .master-btn-primary{display:inline-flex;align-items:center;gap:10px;background:#f59e0b;color:#fff;padding:18px 40px;border-radius:16px;font-weight:800;text-decoration:none;transition:all .3s ease;font-size:17px;box-shadow:0 10px 25px rgba(245,158,11,0.3)}
+        .master-btn-primary:hover{transform:translateY(-4px);box-shadow:0 20px 35px rgba(245,158,11,0.4);background:#fbbf24}
+        .master-btn-outline{display:inline-flex;align-items:center;gap:10px;background:transparent;color:#fff;padding:18px 32px;border-radius:16px;font-weight:700;text-decoration:none;transition:all .3s ease;font-size:16px;border:1.5px solid rgba(255,255,255,0.2)}
+        .master-btn-outline:hover{background:rgba(255,255,255,0.05);border-color:#fff}
+        .cta-trust{margin-top:48px;display:flex;align-items:center;justify-content:center;gap:32px;opacity:0.6;font-size:13px}
+        .cta-trust-item{display:flex;align-items:center;gap:8px}
+
+        @media(max-width:768px){.info-grid,.pkg-grid,.doctor-grid{grid-template-columns:1fr}.service-hero h1{font-size:32px}}
+    </style>
+</head>
+<body>
+    <nav id="nav" style="display:flex;align-items:center;padding:12px 32px;background:white;border-bottom:1px solid var(--neutral-200);position:sticky;top:0;z-index:100"></nav>
+
+    <div class="service-hero">
+        <div class="container">
+            <div class="hero-badge">Preventive Care</div>
+            <h1>Khám Tổng Quát</h1>
+            <p>Kiểm tra sức khỏe toàn diện với công nghệ y khoa hiện đại. Chủ động nắm bắt tình trạng khỏe của bản thân để sống vui mỗi ngày.</p>
+        </div>
+    </div>
+
+    <section class="master-section">
+        <div class="container">
+            <div style="text-align:center;margin-bottom:56px">
+                <h2 style="font-size:32px;font-weight:800;color:var(--neutral-900)">Ưu điểm tại MediBook Master</h2>
+                <p style="color:var(--neutral-500);margin-top:12px">Quy trình chuyên nghiệp, tiết kiệm thời gian, kết quả chính xác</p>
+            </div>
+            
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="ic-icon"><span class="material-icons-round">biotech</span></div>
+                    <h3>Thiết bị hiện đại</h3>
+                    <p>Hệ thống máy xét nghiệm, siêu âm, X-quang thế hệ mới nhất cho kết quả chuẩn xác.</p>
+                </div>
+                <div class="info-card">
+                    <div class="ic-icon"><span class="material-icons-round">groups</span></div>
+                    <h3>Thăm khám kỹ lưỡng</h3>
+                    <p>Bác sĩ dành nhiều thời gian lắng nghe và tư vấn chuyên sâu về lối sống, dinh dưỡng.</p>
+                </div>
+                <div class="info-card">
+                    <div class="ic-icon"><span class="material-icons-round">description</span></div>
+                    <h3>Hồ sơ điện tử</h3>
+                    <p>Toàn bộ kết quả được lưu trữ số hóa, bảo mật và dễ dàng tra cứu qua Mobile App.</p>
+                </div>
+            </div>
+
+            <div style="text-align:center;margin:80px 0 56px">
+                <h2 style="font-size:32px;font-weight:800;color:var(--neutral-900)">Các Gói Khám Master</h2>
+                <p style="color:var(--neutral-500);margin-top:12px">Được thiết kế khoa học phù hợp với từng độ tuổi và nhu cầu</p>
+            </div>
+
+            <div class="pkg-grid">
+                <div class="pkg-card">
+                    <div class="pkg-name">CƠ BẢN</div>
+                    <div class="pkg-price">1.2tr <span>/gói</span></div>
+                    <ul class="pkg-features">
+                        <li><span class="material-icons-round">check</span> Khám nội tổng quát</li>
+                        <li><span class="material-icons-round">check</span> Công thức máu 22 chỉ số</li>
+                        <li><span class="material-icons-round">check</span> Siêu âm bụng tổng quát</li>
+                        <li><span class="material-icons-round">check</span> X-quang phổi kỹ thuật số</li>
+                        <li><span class="material-icons-round">check</span> Tổng phân tích nước tiểu</li>
+                    </ul>
+                    <a href="register.html" class="pkg-btn">Đăng ký khám</a>
+                </div>
+                <div class="pkg-card popular">
+                    <div class="pkg-name">NÂNG CAO</div>
+                    <div class="pkg-price">3.5tr <span>/gói</span></div>
+                    <ul class="pkg-features">
+                        <li><span class="material-icons-round">check</span> Bao gồm gói Cơ Bản</li>
+                        <li><span class="material-icons-round">check</span> Tầm soát tim mạch toàn diện</li>
+                        <li><span class="material-icons-round">check</span> Xét nghiệm mỡ máu, chức năng gan</li>
+                        <li><span class="material-icons-round">check</span> Siêu âm tuyến giáp, doppler tim</li>
+                        <li><span class="material-icons-round">check</span> Chụp nhũ ảnh/Siêu âm vú (nữ)</li>
+                    </ul>
+                    <a href="register.html" class="pkg-btn">Gói được chọn nhiều nhất</a>
+                </div>
+                <div class="pkg-card">
+                    <div class="pkg-name">VIP MASTER</div>
+                    <div class="pkg-price">8.5tr <span>/gói</span></div>
+                    <ul class="pkg-features">
+                        <li><span class="material-icons-round">check</span> Bao gồm gói Nâng Cao</li>
+                        <li><span class="material-icons-round">check</span> Tầm soát 12 loại ung thư phổ biến</li>
+                        <li><span class="material-icons-round">check</span> Chụp CT phổi liều thấp</li>
+                        <li><span class="material-icons-round">check</span> Nội soi tiêu hóa không đau</li>
+                        <li><span class="material-icons-round">check</span> Phục vụ tại khu VIP riêng biệt</li>
+                    </ul>
+                    <a href="register.html" class="pkg-btn">Đăng ký VIP</a>
+                </div>
+            </div>
+
+            <div style="text-align:center;margin:80px 0 40px">
+                <h2 style="font-size:24px;font-weight:800;color:var(--neutral-900)">Bác sĩ Đa khoa nổi bật</h2>
+            </div>
+            <div id="doctorGrid" class="doctor-grid"></div>
+
+            <div class="master-cta">
+                <div class="cta-content">
+                    <div class="cta-badge">
+                        <span class="material-icons-round" style="font-size:16px">health_and_safety</span>
+                        PHÒNG BỆNH HƠN CHỮA BỆNH
+                    </div>
+                    <h2>Đầu tư cho sức khỏe là khoản đầu tư tốt nhất</h2>
+                    <p>Khám tổng quát định kỳ là chìa khóa để bạn luôn thấu hiểu cơ thể mình. Đừng chờ đến khi có triệu chứng, hãy chủ động bảo vệ hạnh phúc của bạn ngay hôm nay cùng MediBook Master.</p>
+                    <div class="cta-actions">
+                        <a href="doctors.html" class="master-btn-primary">
+                            Đặt lịch khám tổng quát
+                            <span class="material-icons-round">calendar_month</span>
+                        </a>
+                        <a href="service-specialist.html" class="master-btn-outline">Khám chuyên khoa</a>
+                    </div>
+                    <div class="cta-trust">
+                        <div class="cta-trust-item"><span class="material-icons-round">check_circle</span> Kết quả trong ngày</div>
+                        <div class="cta-trust-item"><span class="material-icons-round">medical_information</span> Tư vấn 1:1 cùng Bác sĩ</div>
+                        <div class="cta-trust-item"><span class="material-icons-round">bolt</span> Thủ tục siêu tốc</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="app_v2.js"></script>
+    <script>
+        (async () => {
+            const me = await API('/api/auth/me').then(r => r.ok ? r.json() : null).catch(() => null);
+            setNav(me);
+            try {
+                const r = await API('/api/doctors?page=0&size=6');
+                if (r.ok) {
+                    const data = await r.json();
+                    const docs = data.content || data;
+                    document.getElementById('doctorGrid').innerHTML = docs.map(d => `
+                        <a href="doctor-details.html?id=${d.id}" class="doc-card">
+                            <img src="${d.avatarUrl || 'img/default-avatar.png'}" class="doc-avatar" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(d.fullName)}&background=eff6ff&color=2563eb'"/>
+                            <div class="doc-info">
+                                <div class="spec">${d.specialty || 'Đa khoa'}</div>
+                                <h4>${d.title || 'Bác sĩ'} ${d.fullName}</h4>
+                                <div class="clinic">${d.clinicName || 'MediBook Master'}</div>
+                            </div>
+                        </a>
+                    `).join('');
+                }
+            } catch(e) {}
+        })();
+    </script>
+</body>
+</html>

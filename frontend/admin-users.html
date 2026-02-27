@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Quản lý người dùng — MediBook</title>
+    <link rel="stylesheet" href="app_v2.css"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="material-icons-round">medical_services</span>
+                    <span>MediBook</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="admin-dashboard.html" class="nav-item">
+                    <span class="material-icons-round">dashboard</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="admin-appointments.html" class="nav-item">
+                    <span class="material-icons-round">event</span>
+                    <span>Lịch hẹn</span>
+                </a>
+                <a href="admin-doctors.html" class="nav-item">
+                    <span class="material-icons-round">medical_information</span>
+                    <span>Bác sĩ</span>
+                </a>
+                <a href="admin-users.html" class="nav-item active">
+                    <span class="material-icons-round">people</span>
+                    <span>Người dùng</span>
+                </a>
+                <a href="admin-settings.html" class="nav-item">
+                    <span class="material-icons-round">settings</span>
+                    <span>Cài đặt</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">A</div>
+                    <div class="user-details">
+                        <div class="user-name" id="userName">Admin</div>
+                        <div class="user-role">Quản trị viên</div>
+                    </div>
+                </div>
+                <button class="btn-logout" onclick="logout()">
+                    <span class="material-icons-round">logout</span>
+                    <span>Đăng xuất</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <h1>Danh sách người dùng</h1>
+                    <p class="text-secondary" id="userCount">Đang tải...</p>
+                </div>
+            </header>
+
+            <div class="content-body">
+                <!-- Search & Filters -->
+                <div class="card mb-6 p-4">
+                    <div class="row items-center gap-4">
+                        <div class="col flex-grow">
+                            <div class="input-group">
+                                <span class="material-icons-round text-secondary">search</span>
+                                <input type="text" id="searchInput" class="input" placeholder="Tìm kiếm theo tên hoặc email..." oninput="handleSearch()">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <select id="roleFilter" class="input" onchange="handleFilter()">
+                                <option value="">Tất cả vai trò</option>
+                                <option value="USER">Bệnh nhân</option>
+                                <option value="DOCTOR">Bác sĩ</option>
+                                <option value="ADMIN">Quản trị viên</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Users Table -->
+                <div class="card">
+                    <div id="usersTableContainer">
+                        <div class="skeleton-table"></div>
+                    </div>
+                    <!-- Pagination -->
+                    <div class="pagination-container" id="pagination"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="app_v2.js"></script>
+    <script>
+        let curPage = 0;
+        let curSearch = '';
+        let curRole = '';
+
+        (async () => {
+            const me = await requireAuth('ADMIN');
+            if (!me) return;
+            document.getElementById('userName').textContent = me.fullName || 'Admin';
+            document.getElementById('userAvatar').textContent = (me.fullName || 'A').charAt(0);
+
+            loadUsers();
+        })();
+
+        async function loadUsers(page = 0) {
+            curPage = page;
+            const container = document.getElementById('usersTableContainer');
+            showSkeleton(container, 'table');
+            
+            try {
+                let url = `/api/admin/users?page=${page}&size=10`;
+                if (curSearch) url += `&q=${encodeURIComponent(curSearch)}`;
+                if (curRole) url += `&role=${curRole}`;
+                
+                const r = await API(url);
+                if (r.ok) {
+                    const data = await r.json();
+                    document.getElementById('userCount').textContent = `Tổng cộng ${data.totalElements} người dùng`;
+                    
+                    if (data.content && data.content.length > 0) {
+                        container.innerHTML = `
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Tên người dùng</th>
+                                        <th>Email</th>
+                                        <th>Vai trò</th>
+                                        <th>Trạng thái</th>
+                                        <th class="text-right">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.content.map(u => `
+                                        <tr>
+                                            <td><div class="font-bold">${u.fullName}</div></td>
+                                            <td class="text-secondary">${u.email}</td>
+                                            <td><span class="badge ${u.role === 'ADMIN' ? 'badge-danger' : (u.role === 'DOCTOR' ? 'badge-primary' : 'badge-ghost')}">${u.role}</span></td>
+                                            <td>
+                                                <button class="badge ${u.enabled ? 'badge-success' : 'badge-ghost'}" 
+                                                        style="cursor: pointer; border: none; padding: 4px 12px;"
+                                                        onclick="toggleUser('${u.id}', ${u.enabled})">
+                                                    ${u.enabled ? 'Đang hoạt động' : 'Đã khóa'}
+                                                </button>
+                                            </td>
+                                            <td class="text-right">
+                                                <button class="btn btn-ghost btn-sm icon-only" onclick="toggleUser('${u.id}', ${u.enabled})" title="${u.enabled ? 'Khóa tài khoản' : 'Mở khóa'}">
+                                                    <span class="material-icons-round">${u.enabled ? 'block' : 'check_circle'}</span>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        `;
+                        renderPagination(document.getElementById('pagination'), data, loadUsers);
+                    } else {
+                        showEmptyState(container, 'people_outline', 'Không tìm thấy người dùng', 'Hãy thử thay đổi điều kiện tìm kiếm hoặc bộ lọc.');
+                        document.getElementById('pagination').innerHTML = '';
+                    }
+                }
+            } catch(e) {
+                showErrorState(container, 'Lỗi kết nối', 'Không thể tải danh sách người dùng.', () => loadUsers(page));
+            }
+        }
+
+        function handleSearch() {
+            curSearch = document.getElementById('searchInput').value;
+            loadUsers(0);
+        }
+
+        function handleFilter() {
+            curRole = document.getElementById('roleFilter').value;
+            loadUsers(0);
+        }
+
+        async function toggleUser(id, currentEnabled) {
+            const action = currentEnabled ? 'khóa' : 'mở khóa';
+            if (!confirm(`Bạn có chắc chắn muốn ${action} người dùng này?`)) return;
+
+            try {
+                const r = await API(`/api/admin/users/${id}/toggle-enabled`, { method: 'PUT' });
+                if (r.ok) {
+                    toast('Thành công', `Đã ${action} tài khoản thành công.`, 'success');
+                    loadUsers(curPage);
+                } else {
+                    toast('Lỗi', 'Thao tác thất bại.', 'danger');
+                }
+            } catch(e) {
+                toast('Lỗi', 'Lỗi kết nối máy chủ.', 'danger');
+            }
+        }
+    </script>
+</body>
+</html>

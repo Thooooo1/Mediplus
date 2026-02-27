@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Đang chuyển hướng...</title>
+    <script>
+        // Mẹo gửi header ngầm định để bỏ qua trang cảnh báo của Localtunnel
+        fetch('https://medibook-app.loca.lt', {
+            headers: {
+                'Bypass-Tunnel-Reminder': 'true'
+            }
+        }).then(() => {
+            window.location.href = 'https://medibook-app.loca.lt';
+        }).catch(() => {
+            window.location.href = 'https://medibook-app.loca.lt';
+        });
+    </script>
+</head>
+<body>
+    <h2>Đang kết nối đến MediBook, vui lòng đợi vài giây...</h2>
+</body>
+</html>

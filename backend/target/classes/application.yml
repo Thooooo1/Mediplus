@@ -1,0 +1,45 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/medibook
+    username: ${DB_USER:medibook}
+    password: medibook
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: false
+    repair-on-migrate: true
+    clean-disabled: false
+    clean-on-validation-error: true
+
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
+app:
+  timezone: ${APP_TIMEZONE:Asia/Ho_Chi_Minh}
+  security:
+    jwtSecret: ${JWT_SECRET:change-me-super-secret-please-change-32chars-min}
+    jwtExpireMinutes: ${JWT_EXPIRE_MINUTES:4320}
+  mail:
+    enabled: ${MAIL_ENABLED:false}
+    from: ${MAIL_FROM:no-reply@medibook.local}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html

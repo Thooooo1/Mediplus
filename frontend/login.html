@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Đăng nhập — MediBook</title>
+    <meta name="description" content="Đăng nhập vào MediBook để đặt lịch khám bệnh trực tuyến"/>
+    <link rel="stylesheet" href="app_v2.css"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+    <style>
+        .auth-page { min-height: 100vh; display: flex; }
+        .auth-left {
+            flex: 1; background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
+            display: flex; align-items: center; justify-content: center; padding: 48px;
+            position: relative; overflow: hidden;
+        }
+        .auth-left::before {
+            content: ''; position: absolute; inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .auth-hero { position: relative; z-index: 1; color: white; max-width: 480px; }
+        .auth-hero h1 { font-size: 42px; font-weight: 800; margin-bottom: 16px; line-height: 1.2; }
+        .auth-hero p { font-size: 18px; opacity: 0.9; line-height: 1.7; }
+        .auth-features { margin-top: 40px; display: flex; flex-direction: column; gap: 16px; }
+        .auth-feature { display: flex; align-items: center; gap: 12px; }
+        .auth-feature .material-icons-round { font-size: 28px; background: rgba(255,255,255,0.15); padding: 8px; border-radius: var(--radius-lg); }
+        .auth-feature span:last-child { font-size: 15px; opacity: 0.95; }
+        .auth-right {
+            flex: 1; display: flex; align-items: center; justify-content: center; padding: 48px;
+            background: var(--neutral-50);
+        }
+        .auth-form-container { width: 100%; max-width: 420px; }
+        .auth-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 32px; }
+        .auth-logo .material-icons-round { font-size: 36px; color: var(--primary); }
+        .auth-logo span { font-size: 24px; font-weight: 800; color: var(--neutral-900); }
+        .auth-form-container h2 { font-size: 28px; margin-bottom: 8px; }
+        .auth-form-container .subtitle { color: var(--neutral-500); margin-bottom: 32px; font-size: 15px; }
+        .auth-links { text-align: center; margin-top: 24px; font-size: 14px; color: var(--neutral-500); }
+        .auth-links a { color: var(--primary); font-weight: 600; }
+        .divider { display: flex; align-items: center; gap: 16px; margin: 24px 0; color: var(--neutral-400); font-size: 13px; }
+        .divider::before, .divider::after { content: ''; flex: 1; border-top: 1px solid var(--neutral-200); }
+        @media (max-width: 900px) {
+            .auth-left { display: none; }
+            .auth-right { padding: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-page">
+        <div class="auth-left">
+            <div class="auth-hero">
+                <h1>Đặt lịch khám bệnh thông minh</h1>
+                <p>MediBook giúp bạn dễ dàng tìm bác sĩ phù hợp và đặt lịch khám chỉ trong vài bước đơn giản.</p>
+                <div class="auth-features">
+                    <div class="auth-feature">
+                        <span class="material-icons-round">schedule</span>
+                        <span>Đặt lịch 24/7, không cần chờ đợi</span>
+                    </div>
+                    <div class="auth-feature">
+                        <span class="material-icons-round">verified_user</span>
+                        <span>Đội ngũ bác sĩ chuyên khoa uy tín</span>
+                    </div>
+                    <div class="auth-feature">
+                        <span class="material-icons-round">notifications_active</span>
+                        <span>Nhắc lịch tự động qua email</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="auth-right">
+            <div class="auth-form-container">
+                <div class="auth-logo">
+                    <span class="material-icons-round">medical_services</span>
+                    <span>MediBook</span>
+                </div>
+                <h2>Đăng nhập</h2>
+                <p class="subtitle">Chào mừng bạn trở lại! Vui lòng đăng nhập để tiếp tục.</p>
+
+                <div id="error-msg" style="display:none;background:var(--danger-light);color:var(--danger);padding:12px 16px;border-radius:var(--radius-lg);font-size:14px;margin-bottom:16px;"></div>
+
+                <form id="loginForm" autocomplete="on">
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" id="email" class="form-input" placeholder="you@example.com" required autocomplete="email"/>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" style="display:flex;justify-content:space-between">
+                            Mật khẩu
+                            <a href="forgot-password.html" style="font-size:13px;font-weight:400">Quên mật khẩu?</a>
+                        </label>
+                        <input type="password" id="password" class="form-input" placeholder="••••••••" required autocomplete="current-password"/>
+                    </div>
+                    <button type="submit" class="btn-primary btn-lg" style="width:100%;margin-top:8px" id="loginBtn">
+                        <span class="material-icons-round" style="font-size:20px">login</span>
+                        Đăng nhập
+                    </button>
+                </form>
+
+                <p class="auth-links">
+                    Chưa có tài khoản? <a href="register.html">Đăng ký ngay</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="app_v2.js"></script>
+    <script>
+        // If already logged in, redirect
+        (async () => {
+            const token = localStorage.getItem('token');
+            if (token) {
+                const r = await API('/api/auth/me');
+                if (r.ok) {
+                    const me = await r.json();
+                    if (me.role === 'ADMIN') location.href = 'admin-dashboard.html';
+                    else if (me.role === 'DOCTOR') location.href = 'doctor-overview.html';
+                    else location.href = 'index.html';
+                    return;
+                }
+            }
+        })();
+
+        document.getElementById('loginForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('loginBtn');
+            const errDiv = document.getElementById('error-msg');
+            errDiv.style.display = 'none';
+
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!email || !password) {
+                errDiv.textContent = 'Vui lòng nhập email và mật khẩu.';
+                errDiv.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loader-spinner" style="width:20px;height:20px;border-width:2px"></span> Đang xử lý...';
+
+            try {
+                const r = await API('/api/auth/login', {
+                    method: 'POST',
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (!r.ok) {
+                    const data = await r.json().catch(() => ({}));
+                    throw new Error(data.error || 'Email hoặc mật khẩu không đúng.');
+                }
+
+                const data = await r.json();
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('role', data.role);
+
+                showToast('Đăng nhập thành công!', 'success');
+
+                setTimeout(() => {
+                    if (data.role === 'ADMIN') location.href = 'admin-dashboard.html';
+                    else if (data.role === 'DOCTOR') location.href = 'doctor-overview.html';
+                    else location.href = 'index.html';
+                }, 500);
+            } catch (err) {
+                errDiv.textContent = err.message;
+                errDiv.style.display = 'block';
+                btn.disabled = false;
+                btn.innerHTML = '<span class="material-icons-round" style="font-size:20px">login</span> Đăng nhập';
+            }
+        };
+    </script>
+</body>
+</html>

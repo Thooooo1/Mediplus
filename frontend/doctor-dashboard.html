@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Quản lý lịch hẹn — MediBook</title>
+    <link rel="stylesheet" href="app_v2.css"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="material-icons-round">medical_services</span>
+                    <span>MediBook</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="doctor-overview.html" class="nav-item">
+                    <span class="material-icons-round">dashboard</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="doctor-dashboard.html" class="nav-item active">
+                    <span class="material-icons-round">calendar_today</span>
+                    <span>Lịch hẹn</span>
+                </a>
+                <a href="doctor-patients.html" class="nav-item">
+                    <span class="material-icons-round">people</span>
+                    <span>Bệnh nhân</span>
+                </a>
+                <a href="doctor-records.html" class="nav-item">
+                    <span class="material-icons-round">description</span>
+                    <span>Hồ sơ bệnh án</span>
+                </a>
+                <a href="doctor-settings.html" class="nav-item">
+                    <span class="material-icons-round">settings</span>
+                    <span>Cài đặt</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">D</div>
+                    <div class="user-details">
+                        <div class="user-name" id="userName">Bác sĩ</div>
+                        <div class="user-role">Bác sĩ</div>
+                    </div>
+                </div>
+                <button class="btn-logout" onclick="logout()">
+                    <span class="material-icons-round">logout</span>
+                    <span>Đăng xuất</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <h1>Danh sách lịch hẹn</h1>
+                    <p class="text-secondary" id="appointmentCount">Đang tải...</p>
+                </div>
+            </header>
+
+            <div class="content-body">
+                <!-- Filters -->
+                <div class="card mb-6 p-4">
+                    <div class="row items-center gap-4">
+                        <div class="col" style="min-width: 200px;">
+                            <label class="label mb-1 text-secondary font-medium">Lọc theo Trạng thái</label>
+                            <div class="input-group">
+                                <span class="material-icons-round">filter_list</span>
+                                <select id="statusFilter" class="form-input" onchange="handleFilter()">
+                                    <option value="">Tất cả trạng thái</option>
+                                    <option value="BOOKED">Đã đặt (Chờ xác nhận)</option>
+                                    <option value="CONFIRMED">Đã xác nhận</option>
+                                    <option value="COMPLETED">Hoàn thành</option>
+                                    <option value="CANCELLED">Đã hủy</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="card">
+                    <div id="appointmentsTableContainer">
+                        <div class="skeleton-table"></div>
+                    </div>
+                    <!-- Pagination -->
+                    <div class="pagination-container" id="pagination"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="app_v2.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const filterParam = urlParams.get('filter') || '';
+
+        let curPage = 0;
+        let curStatus = '';
+        let allData = [];
+
+        (async () => {
+            const me = await requireAuth('DOCTOR');
+            if (!me) return;
+            document.getElementById('userName').textContent = me.fullName || 'Bác sĩ';
+            document.getElementById('userAvatar').textContent = (me.fullName || 'D').charAt(0);
+
+            if (filterParam === 'pending') {
+                curStatus = 'BOOKED';
+                document.getElementById('statusFilter').value = 'BOOKED';
+            }
+
+            // Gọi API phát đầu lấy toàn bộ danh sách Lịch khám
+            await fetchAllAppointments();
+            loadAppointments(0);
+        })();
+
+        async function fetchAllAppointments() {
+            const container = document.getElementById('appointmentsTableContainer');
+            showSkeleton(container, 'table');
+            
+            try {
+                // Mặc định lấy dải thời gian rộng
+                let from = '2000-01-01';
+                let to = '2099-12-31';
+
+                // Lọc theo khoảng thời gian nếu có
+                if (filterParam === 'today') {
+                    const today = new Date();
+                    // Bù trừ Local timezone để tránh lệch ngày
+                    const offset = today.getTimezoneOffset() * 60000;
+                    const localISOTime = (new Date(today - offset)).toISOString().split('T')[0];
+                    from = localISOTime;
+                    to = localISOTime;
+                } else if (filterParam === 'week') {
+                    const curr = new Date();
+                    const day = curr.getDay() || 7; 
+                    const first = curr.getDate() - day + 1;
+                    const last = first + 6;
+                    const offset = curr.getTimezoneOffset() * 60000;
+                    from = new Date(new Date(curr.setDate(first)) - offset).toISOString().split('T')[0];
+                    to = new Date(new Date(curr.setDate(last)) - offset).toISOString().split('T')[0];
+                }
+
+                let url = `/api/doctor/appointments?from=${from}&to=${to}`;
+                const r = await API(url);
+                if (r.ok) {
+                    allData = await r.json();
+                } else {
+                    showErrorState(container, 'Lỗi kết nối', 'Không thể tải danh sách lịch hẹn.', fetchAllAppointments);
+                }
+            } catch(e) {
+                showErrorState(container, 'Lỗi kết nối', 'Không thể tải danh sách lịch hẹn.', fetchAllAppointments);
+            }
+        }
+
+        function loadAppointments(page = 0) {
+            curPage = page;
+            const container = document.getElementById('appointmentsTableContainer');
+            
+            // Xử lý Lọc Trạng Thái
+            let filtered = allData;
+            if (curStatus) {
+                filtered = filtered.filter(a => a.status === curStatus);
+            }
+
+            document.getElementById('appointmentCount').textContent = `Tổng cộng ${filtered.length} lịch hẹn`;
+            
+            // Logic Phân trang mảng Client-Side
+            const size = 10;
+            const totalElements = filtered.length;
+            const totalPages = Math.ceil(totalElements / size) || 1;
+            const content = filtered.slice(page * size, (page + 1) * size);
+
+            if (content.length > 0) {
+                container.innerHTML = `
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Bệnh nhân</th>
+                                    <th>Thời gian hẹn</th>
+                                    <th>Ghi chú</th>
+                                    <th>Trạng thái</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${content.map(a => `
+                                    <tr onclick="location.href='appointment-detail.html?id=${a.id}'" style="cursor: pointer;">
+                                        <td>
+                                            <div class="font-bold text-neutral-900" style="font-size: 15px;">${a.patientName}</div>
+                                            <div class="text-secondary" style="font-size: 13px; font-family: monospace;">#${a.id.substring(0,8).toUpperCase()}</div>
+                                        </td>
+                                        <td>
+                                            <div class="font-medium text-primary" style="white-space:nowrap">${fmt(a.startAt)}</div>
+                                        </td>
+                                        <td><div class="text-xs text-secondary ellipsis" style="max-width: 150px;">${a.note || '—'}</div></td>
+                                        <td>${statusBadge(a.status)}</td>
+                                        <td class="text-right">
+                                            <button class="btn btn-ghost btn-sm icon-only">
+                                                <span class="material-icons-round">chevron_right</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                
+                // Cấu trúc Data giả lập Page Spring Boot cho Widget Phân trang Render
+                const pageData = {
+                    number: page,
+                    totalPages: totalPages,
+                    first: page === 0,
+                    last: page === totalPages - 1
+                };
+                renderPagination(document.getElementById('pagination'), pageData, loadAppointments);
+            } else {
+                showEmptyState(container, 'event_busy', 'Không có lịch hẹn', 'Chưa có lịch hẹn nào phù hợp với bộ lọc của bạn.');
+                document.getElementById('pagination').innerHTML = '';
+            }
+        }
+
+        function handleFilter() {
+            curStatus = document.getElementById('statusFilter').value;
+            loadAppointments(0);
+        }
+    </script>
+</body>
+</html>

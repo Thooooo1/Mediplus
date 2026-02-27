@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Xét Nghiệm Y Học — MediBook Master</title>
+    <link rel="stylesheet" href="app_v2.css"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <style>
+        :root{--primary:#2563eb;--primary-light:#eff6ff;--neutral-900:#0f172a;--neutral-600:#475569;--neutral-500:#64748b;--neutral-200:#e2e8f0}
+        *{font-family:'Inter',sans-serif}
+        
+        .service-hero{background:linear-gradient(135deg,#1e40af 0%,#2563eb 100%);color:#fff;padding:80px 0 60px;text-align:center}
+        .hero-badge{display:inline-block;padding:6px 16px;background:rgba(255,255,255,0.1);border-radius:100px;font-weight:700;font-size:13px;margin-bottom:16px;text-transform:uppercase;letter-spacing:1px}
+        .service-hero h1{font-size:42px;font-weight:800;margin-bottom:16px;letter-spacing:-1px}
+        .service-hero p{font-size:18px;max-width:640px;margin:0 auto;opacity:0.9}
+
+        .master-section{padding:80px 0}
+        .container{max-width:1100px;margin:0 auto;padding:0 24px}
+        
+        /* ── Modern Lab Cards ── */
+        .lab-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:24px;margin-top:40px}
+        .lab-card{background:#fff;border:1px solid var(--neutral-200);border-radius:20px;padding:32px;text-align:center;transition:all .3s}
+        .lab-card:hover{border-color:var(--primary);box-shadow:0 12px 30px rgba(0,0,0,0.05);transform:translateY(-8px)}
+        .lab-icon{width:64px;height:64px;border-radius:18px;background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+        .lab-icon .material-icons-round{font-size:32px}
+        .lab-card h3{font-size:18px;font-weight:800;color:var(--neutral-900);margin-bottom:12px}
+        .lab-card p{color:var(--neutral-500);font-size:14px;line-height:1.6}
+
+        /* ── Master List ── */
+        .master-list{background:#fff;border:1px solid var(--neutral-200);border-radius:24px;overflow:hidden;margin-top:48px}
+        .list-header{background:var(--neutral-900);color:#fff;padding:20px 32px;font-weight:800;font-size:17px;display:flex;justify-content:space-between}
+        .list-item{padding:20px 32px;border-bottom:1px solid var(--neutral-200);display:flex;align-items:center;justify-content:space-between;transition:background .2s}
+        .list-item:hover{background:var(--primary-light)}
+        .list-item:last-child{border-bottom:none}
+        .item-info{display:flex;align-items:center;gap:12px}
+        .item-info .material-icons-round{color:var(--primary);font-size:20px}
+        .item-name{font-weight:700;color:var(--neutral-900)}
+        .item-price{font-weight:800;color:var(--primary)}
+
+        /* ── Master Master CTA ── */
+        .master-cta{background:linear-gradient(145deg,#0f172a 0%,#1e3a8a 100%);border-radius:40px;padding:80px 48px;text-align:center;color:#fff;margin-top:80px;position:relative;overflow:hidden;box-shadow:0 30px 60px -15px rgba(15,23,42,0.3)}
+        .master-cta::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at top right,rgba(37,99,235,0.15),transparent);pointer-events:none}
+        .cta-content{position:relative;z-index:1}
+        .cta-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:rgba(255,255,255,0.1);border-radius:100px;font-size:12px;font-weight:700;margin-bottom:24px;color:rgba(255,255,255,0.9);letter-spacing:1px}
+        .master-cta h2{font-size:36px;font-weight:900;margin-bottom:20px;letter-spacing:-1px;line-height:1.2}
+        .master-cta p{opacity:0.75;margin-bottom:40px;max-width:600px;margin-left:auto;margin-right:auto;font-size:17px;line-height:1.6}
+        .cta-actions{display:flex;align-items:center;justify-content:center;gap:16px}
+        .master-btn-primary{display:inline-flex;align-items:center;gap:10px;background:var(--primary);color:#fff;padding:18px 40px;border-radius:16px;font-weight:800;text-decoration:none;transition:all .3s ease;font-size:17px;box-shadow:0 10px 25px rgba(37,99,235,0.3)}
+        .master-btn-primary:hover{transform:translateY(-4px);box-shadow:0 20px 35px rgba(37,99,235,0.4);background:#1e40af}
+        .master-btn-outline{display:inline-flex;align-items:center;gap:10px;background:transparent;color:#fff;padding:18px 32px;border-radius:16px;font-weight:700;text-decoration:none;transition:all .3s ease;font-size:16px;border:1.5px solid rgba(255,255,255,0.2)}
+        .master-btn-outline:hover{background:rgba(255,255,255,0.05);border-color:#fff}
+        .cta-trust{margin-top:48px;display:flex;align-items:center;justify-content:center;gap:32px;opacity:0.6;font-size:13px}
+        .cta-trust-item{display:flex;align-items:center;gap:8px}
+
+        @media(max-width:768px){.lab-grid{grid-template-columns:1fr}.service-hero h1{font-size:32px}}
+    </style>
+</head>
+<body>
+    <nav id="nav" style="display:flex;align-items:center;padding:12px 32px;background:white;border-bottom:1px solid var(--neutral-200);position:sticky;top:0;z-index:100"></nav>
+
+    <div class="service-hero">
+        <div class="container">
+            <div class="hero-badge">Diagnostic Excellence</div>
+            <h1>Xét Nghiệm Y Học</h1>
+            <p>Hệ thống phòng Lab đạt chuẩn quốc tế. Kết quả trả nhanh, chính xác, tư vấn bởi chuyên mục đầu ngành.</p>
+        </div>
+    </div>
+
+    <section class="master-section">
+        <div class="container">
+            <div style="text-align:center;margin-bottom:56px">
+                <h2 style="font-size:32px;font-weight:800;color:var(--neutral-900)">Danh mục Xét nghiệm nổi bật</h2>
+                <p style="color:var(--neutral-500);margin-top:12px">Chuyên nghiệp - Chính xác - Bảo mật</p>
+            </div>
+
+            <div class="lab-grid">
+                <div class="lab-card">
+                    <div class="lab-icon"><span class="material-icons-round">science</span></div>
+                    <h3>Xét nghiệm Máu</h3>
+                    <p>Tầm soát các chỉ số sinh hóa, huyết học, phát hiện sớm nguy cơ thiếu máu, nhiễm trùng.</p>
+                </div>
+                <div class="lab-card">
+                    <div class="lab-icon"><span class="material-icons-round">biotech</span></div>
+                    <h3>Tầm soát Ung thư</h3>
+                    <p>Xét nghiệm các chỉ số dấu ấn (Tumor Markers) hỗ trợ phát hiện sớm mầm mống ung thư.</p>
+                </div>
+                <div class="lab-card">
+                    <div class="lab-icon"><span class="material-icons-round">coronavirus</span></div>
+                    <h3>Bệnh truyền nhiễm</h3>
+                    <p>Xét nghiệm HIV, Viêm gan, STDs và các bệnh lý lây nhiễm qua đường máu.</p>
+                </div>
+                <div class="lab-card">
+                    <div class="lab-icon"><span class="material-icons-round">bloodtype</span></div>
+                    <h3>Xét nghiệm Gen</h3>
+                    <p>Sàng lọc dị tật thai nhi (NIPT), tầm soát nguy cơ di truyền cho gia đình.</p>
+                </div>
+            </div>
+
+            <div style="margin-top:80px">
+                <div class="list-header">
+                    <span>DANH MỤC XÉT NGHIỆM LẺ</span>
+                    <span>GIÁ NIÊM YẾT</span>
+                </div>
+                <div class="master-list">
+                    <div class="list-item">
+                        <div class="item-info"><span class="material-icons-round">check_circle</span> <span class="item-name">Công thức máu toàn bộ (CBC)</span></div>
+                        <span class="item-price">150.000đ</span>
+                    </div>
+                    <div class="list-item">
+                        <div class="item-info"><span class="material-icons-round">check_circle</span> <span class="item-name">Nhóm máu Hệ ABO - Rh</span></div>
+                        <span class="item-price">120.000đ</span>
+                    </div>
+                    <div class="list-item">
+                        <div class="item-info"><span class="material-icons-round">check_circle</span> <span class="item-name">Đường huyết lúc đói (Glucose)</span></div>
+                        <span class="item-price">80.000đ</span>
+                    </div>
+                    <div class="list-item">
+                        <div class="item-info"><span class="material-icons-round">check_circle</span> <span class="item-name">Xét nghiệm Chức năng Gan (AST/ALT)</span></div>
+                        <span class="item-price">160.000đ</span>
+                    </div>
+                    <div class="list-item">
+                        <div class="item-info"><span class="material-icons-round">check_circle</span> <span class="item-name">Xét nghiệm Chức năng Thận (Urea/Creatinine)</span></div>
+                        <span class="item-price">160.000đ</span>
+                    </div>
+                    <div class="list-item">
+                        <div class="item-info"><span class="material-icons-round">check_circle</span> <span class="item-name">Tầm soát Ung thư Gan (AFP)</span></div>
+                        <span class="item-price">350.000đ</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="master-cta">
+                <div class="cta-content">
+                    <div class="cta-badge">
+                        <span class="material-icons-round" style="font-size:16px">biotech</span>
+                        TIÊU CHUẨN PHÒNG LAB QUỐC TẾ
+                    </div>
+                    <h2>Chính xác tuyệt đối. Bảo mật tối đa.</h2>
+                    <p>MediBook Master cam kết cung cấp kết quả xét nghiệm chính xác nhất với quy trình kiểm soát nghiêm ngặt. Nhận kết quả nhanh chóng qua ứng dụng và được tư vấn bởi các chuyên gia đầu ngành.</p>
+                    <div class="cta-actions">
+                        <a href="doctors.html" class="master-btn-primary">
+                            Đặt lịch xét nghiệm
+                            <span class="material-icons-round">science</span>
+                        </a>
+                        <a href="service-general.html" class="master-btn-outline">Khám tổng quát</a>
+                    </div>
+                    <div class="cta-trust">
+                        <div class="cta-trust-item"><span class="material-icons-round">lock</span> Mã hóa dữ liệu 256-bit</div>
+                        <div class="cta-trust-item"><span class="material-icons-round">verified</span> ISO 15189:2022</div>
+                        <div class="cta-trust-item"><span class="material-icons-round">history</span> Lưu trữ hồ sơ 10 năm</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="app_v2.js"></script>
+    <script>
+        (async () => {
+            const me = await API('/api/auth/me').then(r => r.ok ? r.json() : null).catch(() => null);
+            setNav(me);
+        })();
+    </script>
+</body>
+</html>
