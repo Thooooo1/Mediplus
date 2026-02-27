@@ -102,6 +102,33 @@ public class NotificationListener {
                 );
                 mailService.sendHtml(admin.getEmail(), "[Admin Alert] Lịch khám mới được đặt", adminHtml);
             }
+            }
+        }
+
+        // 3. Send Email to Patient
+        if (mailEnabled) {
+            String patientEmail = appt.getPatient().getEmail();
+            String patientHtml = String.format("""
+                <div style="font-family:Arial,sans-serif; max-width:600px; margin:0 auto; border:1px solid #10b981; border-radius:12px; padding:24px;">
+                    <h2 style="color:#10b981;">Xác nhận đặt lịch thành công — MediBook</h2>
+                    <p>Chào bạn <strong>%s</strong>,</p>
+                    <p>Cảm ơn bạn đã tin tưởng sử dụng dịch vụ của MediBook. Lịch hẹn của bạn đã được ghi nhận:</p>
+                    <div style="background:#f0fdf4; padding:16px; border-radius:8px;">
+                        <p><strong>Bác sĩ:</strong> %s</p>
+                        <li><strong>Chuyên khoa:</strong> %s</li>
+                        <p><strong>Thời gian:</strong> %s</p>
+                        <p><strong>Địa điểm:</strong> %s</p>
+                    </div>
+                    <p style="margin-top:16px;">Vui lòng đến đúng giờ để được phục vụ tốt nhất.</p>
+                </div>
+                """, 
+                appt.getPatient().getFullName(),
+                appt.getDoctor().getUser().getFullName(),
+                appt.getDoctor().getSpecialty() != null ? appt.getDoctor().getSpecialty().getName() : "Đang cập nhật",
+                appt.getTimeSlot().getStartAt().toString(),
+                appt.getDoctor().getClinicName()
+            );
+            mailService.sendHtml(patientEmail, "MediBook — Xác nhận lịch hẹn thành công", patientHtml);
         }
 
         log.info("Notifications created and emails sent (if enabled) for appointment {}", appt.getId());
