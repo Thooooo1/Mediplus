@@ -102,7 +102,6 @@ public class NotificationListener {
                 );
                 mailService.sendHtml(admin.getEmail(), "[Admin Alert] Lịch khám mới được đặt", adminHtml);
             }
-            }
         }
 
         // 3. Send Email to Patient
