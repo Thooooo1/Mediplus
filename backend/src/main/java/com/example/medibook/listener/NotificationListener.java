@@ -29,6 +29,7 @@ public class NotificationListener {
     @org.springframework.beans.factory.annotation.Value("${app.mail.enabled:false}")
     private boolean mailEnabled;
 
+    @org.springframework.scheduling.annotation.Async
     @EventListener
     @Transactional
     public void handleAppointmentBooked(AppointmentBookedEvent event) {
