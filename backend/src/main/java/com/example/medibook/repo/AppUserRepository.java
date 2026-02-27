@@ -15,7 +15,9 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface AppUserRepository extends JpaRepository<AppUser, UUID> {
-    Optional<AppUser> findByEmail(String email);
+    @Query("SELECT u FROM AppUser u WHERE u.email = :email")
+    Optional<AppUser> findByEmail(@Param("email") String email);
+
     Page<AppUser> findByFullNameContainingIgnoreCaseOrEmailContainingIgnoreCase(String name, String email, Pageable pageable);
     Page<AppUser> findByRole(Role role, Pageable pageable);
 
