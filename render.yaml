@@ -5,7 +5,6 @@ services:
     env: docker
     rootDir: backend
     plan: free
-    dockerCommand: "java -jar target/medibook-1.0.0.jar"
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
