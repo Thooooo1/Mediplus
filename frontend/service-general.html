@@ -192,6 +192,7 @@
             // Logic for Packages
             if (me) {
                 const pkgBtns = document.querySelectorAll('.pkg-btn');
+                pkgBtns.forEach((btn, idx) => {
                     if (idx === 0) { btn.href = 'doctors.html?minPrice=0&maxPrice=500000'; btn.innerText = 'Đặt Khám Cơ Bản'; }
                     else if (idx === 1) { btn.href = 'doctors.html?minPrice=1000000&maxPrice=1500000'; btn.innerText = 'Đặt Khám Nâng Cao'; }
                     else if (idx === 2) { btn.href = 'doctors.html?minPrice=1500000'; btn.innerText = 'Đặt Khám VIP Master'; }
