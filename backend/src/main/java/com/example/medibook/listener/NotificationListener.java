@@ -24,6 +24,10 @@ public class NotificationListener {
     private final NotificationRepository notificationRepo;
     private final AppointmentRepository appointmentRepo;
     private final AppUserRepository userRepo;
+    private final com.example.medibook.service.MailService mailService;
+
+    @org.springframework.beans.factory.annotation.Value("${app.mail.enabled:false}")
+    private boolean mailEnabled;
 
     @EventListener
     @Transactional
@@ -46,6 +50,30 @@ public class NotificationListener {
             .build();
         notificationRepo.save(docNotif);
 
+        // Send Email to Doctor
+        if (mailEnabled) {
+            String docEmail = appt.getDoctor().getUser().getEmail();
+            String html = String.format("""
+                <div style="font-family:Arial,sans-serif; max-width:600px; margin:0 auto; border:1px solid #e5e7eb; border-radius:12px; padding:24px;">
+                    <h2 style="color:#2563eb;">Lịch khám mới — MediBook</h2>
+                    <p>Chào Bác sĩ <strong>%s</strong>,</p>
+                    <p>Bạn vừa có một lịch hẹn mới được đặt qua hệ thống:</p>
+                    <ul style="list-style:none; padding:0;">
+                        <li><strong>Bệnh nhân:</strong> %s</li>
+                        <li><strong>Thời gian:</strong> %s</li>
+                        <li><strong>Ghi chú:</strong> %s</li>
+                    </ul>
+                    <a href="https://medibook-v2.vercel.app/doctor/appointments.html" style="display:inline-block; padding:12px 24px; background:#2563eb; color:white; text-decoration:none; border-radius:8px; margin-top:16px;">Xem chi tiết lịch hẹn</a>
+                </div>
+                """, 
+                appt.getDoctor().getUser().getFullName(),
+                appt.getPatient().getFullName(),
+                appt.getTimeSlot().getStartAt().toString(),
+                appt.getPatientNote() != null ? appt.getPatientNote() : "Không có"
+            );
+            mailService.sendHtml(docEmail, "MediBook — Thông báo lịch khám mới", html);
+        }
+
         // 2. Notify all Admins
         List<AppUser> admins = userRepo.findByRole(Role.ADMIN);
         for (AppUser admin : admins) {
@@ -57,8 +85,25 @@ public class NotificationListener {
                 .relatedId(appt.getId())
                 .build();
             notificationRepo.save(adminNotif);
+
+            // Send Email to Admin
+            if (mailEnabled) {
+                String adminHtml = String.format("""
+                    <div style="font-family:Arial,sans-serif; padding:20px; border:1px solid #eee;">
+                        <h3 style="color:#ef4444;">[Hệ thống] Có lịch hẹn mới vừa đặt</h3>
+                        <p><strong>Bệnh nhân:</strong> %s</p>
+                        <p><strong>Bác sĩ:</strong> %s</p>
+                        <p><strong>Thời gian:</strong> %s</p>
+                    </div>
+                    """, 
+                    appt.getPatient().getFullName(),
+                    appt.getDoctor().getUser().getFullName(),
+                    appt.getTimeSlot().getStartAt().toString()
+                );
+                mailService.sendHtml(admin.getEmail(), "[Admin Alert] Lịch khám mới được đặt", adminHtml);
+            }
         }
 
-        log.info("Notifications created for appointment {}", appt.getId());
+        log.info("Notifications created and emails sent (if enabled) for appointment {}", appt.getId());
     }
 }
