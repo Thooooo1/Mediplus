@@ -94,12 +94,22 @@
             const qParam = params.get('q');
             const specParam = params.get('specialty');
             const typeParam = params.get('type');
+            const minPrice = params.get('minPrice');
+            const maxPrice = params.get('maxPrice');
             
             if (qParam) document.getElementById('searchInput').value = qParam;
 
             if (typeParam === 'telemedicine') {
                 document.querySelector('.page-header h1').textContent = 'Tư vấn trực tuyến với Bác sĩ';
                 document.querySelector('.page-header p').textContent = 'Chọn bác sĩ và đặt khung giờ tư vấn Video Call ngay tại nhà.';
+            } else if (minPrice || maxPrice) {
+                let pkgName = "Gói Khám";
+                if (maxPrice === '500000') pkgName = "Gói Cơ Bản";
+                else if (maxPrice === '1500000' && minPrice === '1000000') pkgName = "Gói Nâng Cao";
+                else if (minPrice === '1500000') pkgName = "Gói VIP Master";
+                
+                document.querySelector('.page-header h1').textContent = `Bác sĩ cho ${pkgName}`;
+                document.querySelector('.page-header p').textContent = 'Danh sách bác sĩ có chuyên môn và mức phí phù hợp với gói khám bạn đã chọn.';
             }
 
             // Load specialties
@@ -127,10 +137,15 @@
 
             const specId = document.getElementById('specialtyFilter').value;
             const q = document.getElementById('searchInput').value.trim();
+            const params = new URLSearchParams(window.location.search);
+            const minPrice = params.get('minPrice');
+            const maxPrice = params.get('maxPrice');
 
             let url = `/api/doctors?page=${currentPage}&size=${PAGE_SIZE}`;
             if (specId) url += `&specialtyId=${specId}`;
             if (q) url += `&q=${encodeURIComponent(q)}`;
+            if (minPrice) url += `&minPrice=${minPrice}`;
+            if (maxPrice) url += `&maxPrice=${maxPrice}`;
 
             try {
                 const r = await API(url);

@@ -32,10 +32,12 @@ public class CatalogController {
   public org.springframework.data.domain.Page<CatalogDtos.DoctorRes> doctors(
     @RequestParam(value = "specialtyId", required = false) UUID specialtyId,
     @RequestParam(value = "q", required = false) String q,
+    @RequestParam(value = "minPrice", required = false) Long minPrice,
+    @RequestParam(value = "maxPrice", required = false) Long maxPrice,
     @RequestParam(value = "page", defaultValue = "0") int page,
     @RequestParam(value = "size", defaultValue = "9") int size
   ) {
-    return catalogService.doctors(specialtyId, q, org.springframework.data.domain.PageRequest.of(page, size));
+    return catalogService.doctors(specialtyId, q, minPrice, maxPrice, org.springframework.data.domain.PageRequest.of(page, size));
   }
 
   @GetMapping("/api/doctors/{id}")

@@ -14,4 +14,7 @@ public interface DoctorProfileRepository extends JpaRepository<DoctorProfile, UU
   org.springframework.data.domain.Page<DoctorProfile> searchDoctors(@org.springframework.data.repository.query.Param("q") String q, org.springframework.data.domain.Pageable pageable);
 
   Optional<DoctorProfile> findByUserId(UUID userId);
+
+  @org.springframework.data.jpa.repository.Query("SELECT d FROM DoctorProfile d WHERE d.consultFeeVnd >= :min AND d.consultFeeVnd <= :max")
+  org.springframework.data.domain.Page<DoctorProfile> findByPriceRange(@org.springframework.data.repository.query.Param("min") Long min, @org.springframework.data.repository.query.Param("max") Long max, org.springframework.data.domain.Pageable pageable);
 }

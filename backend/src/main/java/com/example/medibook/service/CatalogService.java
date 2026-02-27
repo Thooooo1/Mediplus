@@ -23,11 +23,20 @@ public class CatalogService {
       .toList();
   }
 
-  public org.springframework.data.domain.Page<CatalogDtos.DoctorRes> doctors(UUID specialtyId, String q, org.springframework.data.domain.Pageable pageable) {
+  public org.springframework.data.domain.Page<CatalogDtos.DoctorRes> doctors(UUID specialtyId, String q, Long minPrice, Long maxPrice, org.springframework.data.domain.Pageable pageable) {
     org.springframework.data.domain.Page<DoctorProfile> page;
-    if (specialtyId != null) page = doctorRepo.findBySpecialtyId(specialtyId, pageable);
-    else if (q != null && !q.isBlank()) page = doctorRepo.searchDoctors(q.trim(), pageable);
-    else page = doctorRepo.findAll(pageable);
+    
+    if (minPrice != null || maxPrice != null) {
+        long min = minPrice != null ? minPrice : 0L;
+        long max = maxPrice != null ? maxPrice : Long.MAX_VALUE;
+        page = doctorRepo.findByPriceRange(min, max, pageable);
+    } else if (specialtyId != null) {
+        page = doctorRepo.findBySpecialtyId(specialtyId, pageable);
+    } else if (q != null && !q.isBlank()) {
+        page = doctorRepo.searchDoctors(q.trim(), pageable);
+    } else {
+        page = doctorRepo.findAll(pageable);
+    }
 
     return page.map(this::mapDoctor);
   }

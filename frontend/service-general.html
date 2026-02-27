@@ -194,11 +194,22 @@
             
             // Logic for Packages
             if (me) {
-                document.querySelectorAll('.pkg-btn').forEach(btn => {
-                    btn.href = 'doctors.html';
+                const pkgBtns = document.querySelectorAll('.pkg-btn');
+                pkgBtns.forEach((btn, idx) => {
+                    if (idx === 0) btn.href = 'doctors.html?minPrice=0&maxPrice=500000';
+                    else if (idx === 1) btn.href = 'doctors.html?minPrice=1000000&maxPrice=1500000';
+                    else if (idx === 2) btn.href = 'doctors.html?minPrice=1500000';
+                    
                     if (btn.innerText.includes('Đăng ký')) {
                         btn.innerText = btn.innerText.replace('Đăng ký', 'Đặt khám');
                     }
+                });
+            } else {
+                const pkgBtns = document.querySelectorAll('.pkg-btn');
+                pkgBtns.forEach((btn, idx) => {
+                    if (idx === 0) btn.href = 'register.html?minPrice=0&maxPrice=500000';
+                    else if (idx === 1) btn.href = 'register.html?minPrice=1000000&maxPrice=1500000';
+                    else if (idx === 2) btn.href = 'register.html?minPrice=1500000';
                 });
             }
 
