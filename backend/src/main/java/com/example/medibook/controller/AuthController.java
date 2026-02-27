@@ -41,10 +41,8 @@ public class AuthController {
     return authService.resetPassword(req);
   }
 
-  @GetMapping("/hotfix-passwords")
-  public org.springframework.http.ResponseEntity<?> hotfix() {
-    String p = "$2a$10$dXJ3SW6G7P50lGmMQkesxOC1v8yO3IVCFVHGMEHx7WySCVGJ1aI.W";
-    int u = appUserRepository.fixSeedPasswords(p);
-    return org.springframework.http.ResponseEntity.ok("Hotfix applied via JPA. Updated " + u + " users.");
+  @GetMapping("/list-users")
+  public org.springframework.http.ResponseEntity<?> listUsers(com.example.medibook.repo.AppUserRepository repo) {
+    return org.springframework.http.ResponseEntity.ok(repo.findAll().stream().map(u -> u.getEmail()).toList());
   }
 }
