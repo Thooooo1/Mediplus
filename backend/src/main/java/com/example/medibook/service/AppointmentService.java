@@ -95,6 +95,7 @@ public class AppointmentService {
     a.setUpdatedAt(Instant.now());
     slot.setStatus(TimeSlotStatus.AVAILABLE);
 
+    publisher.publishEvent(new AppointmentCancelledEvent(appointmentId, userRole));
     log.info("Appointment {} cancelled by {} (role={})", appointmentId, userId, userRole);
   }
 
@@ -112,6 +113,7 @@ public class AppointmentService {
 
     a.setStatus(AppointmentStatus.CONFIRMED);
     a.setUpdatedAt(Instant.now());
+    publisher.publishEvent(new AppointmentConfirmedEvent(appointmentId));
     log.info("Appointment {} confirmed by doctor {}", appointmentId, doctorUserId);
   }
 

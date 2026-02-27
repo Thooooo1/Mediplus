@@ -63,15 +63,18 @@
     </div>
 
     <div class="main-content">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:32px">
-            <div>
+        <header class="main-header">
+            <div class="header-left">
                 <h1 style="font-size:28px; font-weight:800; color:var(--neutral-900)">Cấu hình lịch làm việc</h1>
                 <p style="color:var(--neutral-500); font-size:14px; margin-top:4px">Thiết lập giờ làm việc và tạo slot khám tự động.</p>
             </div>
-            <div id="admin-actions" style="display:none">
-                <button class="btn-secondary btn-sm" onclick="copyLastWeek()"><span class="material-icons-round" style="font-size:18px">content_copy</span> Sao chép tuần trước</button>
+            <div class="header-right" style="display:flex;align-items:center;gap:16px">
+                <div id="admin-actions" style="display:none">
+                    <button class="btn-secondary btn-sm" onclick="copyLastWeek()"><span class="material-icons-round" style="font-size:18px">content_copy</span> Sao chép tuần trước</button>
+                </div>
+                <div id="headerNotif"></div>
             </div>
-        </div>
+        </header>
 
         <div class="schedule-grid">
             <!-- Sidebar: Doctor List (Admin only) -->
@@ -160,6 +163,7 @@
         if (!user) return;
         document.getElementById("userName").textContent = user.fullName || "Bác sĩ";
         document.getElementById("userEmail").textContent = user.email;
+        renderNotifBell('headerNotif');
 
         if (user.role === "ADMIN") {
             document.getElementById("admin-actions").style.display = "flex";

@@ -61,6 +61,7 @@
                     <h1>Danh sách lịch hẹn</h1>
                     <p class="text-secondary" id="appointmentCount">Đang tải...</p>
                 </div>
+                <div class="header-right" id="headerRight"></div>
             </header>
 
             <div class="content-body">
@@ -114,6 +115,8 @@
                 curStatus = 'BOOKED';
                 document.getElementById('statusFilter').value = 'BOOKED';
             }
+
+            renderNotifBell('headerRight');
 
             // Gọi API phát đầu lấy toàn bộ danh sách Lịch khám
             await fetchAllAppointments();

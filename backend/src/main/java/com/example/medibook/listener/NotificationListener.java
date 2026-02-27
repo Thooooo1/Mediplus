@@ -1,6 +1,8 @@
 package com.example.medibook.listener;
 
 import com.example.medibook.events.AppointmentBookedEvent;
+import com.example.medibook.events.AppointmentCancelledEvent;
+import com.example.medibook.events.AppointmentConfirmedEvent;
 import com.example.medibook.model.AppUser;
 import com.example.medibook.model.Appointment;
 import com.example.medibook.model.Notification;
@@ -161,5 +163,62 @@ public class NotificationListener {
         log.info("[NotifDebug] Saved in-app notification for patient: {}", appt.getPatient().getEmail());
 
         log.info("Notifications created and emails sent (if enabled) for appointment {}", appt.getId());
+    }
+
+    @org.springframework.scheduling.annotation.Async
+    @EventListener
+    @Transactional
+    public void handleAppointmentCancelled(AppointmentCancelledEvent event) {
+        Appointment appt = appointmentRepo.findById(event.appointmentId()).orElse(null);
+        if (appt == null) return;
+
+        String title = "Lịch hẹn đã bị hủy";
+        String message = String.format("Lịch hẹn lúc %s của bệnh nhân %s đã bị hủy bởi %s",
+            appt.getTimeSlot().getStartAt().toString(),
+            appt.getPatient().getFullName(),
+            event.cancelledBy().equals("DOCTOR") ? "Bác sĩ" : "Bệnh nhân");
+
+        // 1. Notify the OTHER party
+        AppUser targetUser = event.cancelledBy().equals("DOCTOR") ? appt.getPatient() : appt.getDoctor().getUser();
+        Notification cancelNotif = Notification.builder()
+            .user(targetUser)
+            .title(title)
+            .message(message)
+            .type("APPOINTMENT_CANCELLED")
+            .relatedId(appt.getId())
+            .build();
+        notificationRepo.save(cancelNotif);
+
+        // 2. Notify Admins
+        List<AppUser> admins = userRepo.findByRole(Role.ADMIN);
+        for (AppUser admin : admins) {
+            notificationRepo.save(Notification.builder()
+                .user(admin)
+                .title("Admin: " + title)
+                .message(message)
+                .type("APPOINTMENT_CANCELLED")
+                .relatedId(appt.getId())
+                .build());
+        }
+    }
+
+    @org.springframework.scheduling.annotation.Async
+    @EventListener
+    @Transactional
+    public void handleAppointmentConfirmed(AppointmentConfirmedEvent event) {
+        Appointment appt = appointmentRepo.findById(event.appointmentId()).orElse(null);
+        if (appt == null) return;
+
+        // Notify Patient
+        Notification confNotif = Notification.builder()
+            .user(appt.getPatient())
+            .title("Lịch hẹn đã được xác nhận")
+            .message(String.format("Bác sĩ %s đã xác nhận lịch hẹn của bạn vào lúc %s",
+                appt.getDoctor().getUser().getFullName(),
+                appt.getTimeSlot().getStartAt().toString()))
+            .type("APPOINTMENT_CONFIRMED")
+            .relatedId(appt.getId())
+            .build();
+        notificationRepo.save(confNotif);
     }
 }

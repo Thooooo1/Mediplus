@@ -52,18 +52,23 @@
     </div>
 
     <div class="main-content">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
-            <h1 style="font-size:28px">Hồ sơ bệnh án</h1>
-            <div style="display:flex;gap:12px">
-                <div style="position:relative">
-                    <span class="material-icons-round" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--neutral-400)">search</span>
-                    <input type="text" id="search-records" placeholder="Tìm hồ sơ..." class="form-input" style="padding-left:40px;width:260px" oninput="filterRecords()"/>
-                </div>
-                <button onclick="showNewRecord()" class="btn-primary">
-                    <span class="material-icons-round" style="font-size:18px">add</span> Tạo hồ sơ
-                </button>
+        <header class="main-header">
+            <div class="header-left">
+                <h1>Hồ sơ bệnh án</h1>
             </div>
-        </div>
+            <div class="header-right" style="display:flex;align-items:center;gap:16px">
+                <div style="display:flex;gap:12px">
+                    <div style="position:relative">
+                        <span class="material-icons-round" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--neutral-400)">search</span>
+                        <input type="text" id="search-records" placeholder="Tìm hồ sơ..." class="form-input" style="padding-left:40px;width:260px" oninput="filterRecords()"/>
+                    </div>
+                    <button onclick="showNewRecord()" class="btn-primary">
+                        <span class="material-icons-round" style="font-size:18px">add</span> Tạo hồ sơ
+                    </button>
+                </div>
+                <div id="headerNotif"></div>
+            </div>
+        </header>
 
         <div id="records-grid" class="records-grid">
             <div class="skeleton-card" style="width:100%"><div class="skeleton-line w-60"></div><div class="skeleton-line w-40"></div></div>
@@ -120,6 +125,7 @@ const typeColors = { 'Khám tổng quát': '#2563eb', 'Tái khám': '#16a34a', '
         if (!user) return;
         document.getElementById("userName").textContent = user.fullName || "Bác sĩ";
         document.getElementById("userEmail").textContent = user.email;
+        renderNotifBell('headerNotif');
         document.getElementById("rec-date").value = new Date().toISOString().substring(0, 10);
 
         const r = await API("/api/doctor/records");

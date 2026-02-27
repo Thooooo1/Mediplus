@@ -504,6 +504,17 @@ hr { border: none; border-top: 1px solid var(--neutral-200); margin: 20px 0; }
 }
 .notif-bell-btn:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); }
 
+/* Dashboard Header adjustments */
+.main-header .notif-bell-btn {
+    background: var(--neutral-100);
+    border-color: var(--neutral-200);
+    color: var(--neutral-600);
+}
+.main-header .notif-bell-btn:hover {
+    background: var(--neutral-200);
+    color: var(--primary);
+}
+
 /* Badge Pulse Animation */
 .notif-badge { 
     position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; 

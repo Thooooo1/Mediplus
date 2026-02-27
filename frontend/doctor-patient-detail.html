@@ -57,10 +57,13 @@
     </div>
 
     <div class="main-content">
-        <div style="display:flex; align-items:center; gap:12px; margin-bottom:32px">
-            <button onclick="history.back()" class="btn-ghost btn-sm" style="padding:8px; border-radius:50%"><span class="material-icons-round">arrow_back</span></button>
-            <h1 style="font-size:24px" id="page-title">Chi tiết bệnh nhân</h1>
-        </div>
+        <header class="main-header">
+            <div class="header-left" style="display:flex; align-items:center; gap:12px">
+                <button onclick="history.back()" class="btn-ghost btn-sm" style="padding:8px; border-radius:50%"><span class="material-icons-round">arrow_back</span></button>
+                <h1 style="font-size:24px" id="page-title">Chi tiết bệnh nhân</h1>
+            </div>
+            <div class="header-right" id="headerNotif"></div>
+        </header>
 
         <div class="grid" style="grid-template-columns: 320px 1fr; gap:32px; align-items:start">
             <!-- Left Profile -->
@@ -120,6 +123,7 @@
             if (!user) return;
             document.getElementById("userName").textContent = user.fullName || "Bác sĩ";
             document.getElementById("userEmail").textContent = user.email;
+            renderNotifBell('headerNotif');
 
             if(!patientId) {
                 location.href = 'doctor-patients.html';

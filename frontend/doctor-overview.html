@@ -62,7 +62,10 @@
     </div>
 
     <div class="main-content">
-        <h1 class="page-title">Dashboard</h1>
+        <header class="main-header">
+            <h1 class="page-title" style="margin-bottom:0">Dashboard</h1>
+            <div id="headerRight"></div>
+        </header>
 
         <div class="stats-row" id="statsRow">
             <div class="stat-card skeleton-card"><div class="skeleton-line w-40"></div><div class="skeleton-line w-60"></div></div>
@@ -89,6 +92,7 @@
             if (!me) return;
             document.getElementById('userName').textContent = me.fullName || 'Bác sĩ';
             document.getElementById('userEmail').textContent = me.email;
+            renderNotifBell('headerRight');
 
             // Load stats
             try {

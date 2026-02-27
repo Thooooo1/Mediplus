@@ -63,25 +63,35 @@ const logout = () => {
 };
 
 /* ─── Navbar ──────────────────────────────────── */
+const getNotifHtml = () => `
+  <div class="nav-notif-container">
+    <button class="notif-bell-btn" onclick="toggleNotifDropdown(event)">
+      <span class="material-icons-round">notifications</span>
+      <span id="notifBadge" class="notif-badge">0</span>
+    </button>
+    <div id="notifDropdown" class="notif-dropdown">
+      <div class="notif-header">
+        <h4>Thông báo</h4>
+        <span class="material-icons-round" style="font-size:18px;color:var(--neutral-400)">notifications_active</span>
+      </div>
+      <div id="notifList" class="notif-list"></div>
+    </div>
+  </div>
+`;
+
+const renderNotifBell = (containerId) => {
+    const container = document.getElementById(containerId);
+    if (container) {
+        container.innerHTML = getNotifHtml();
+        initNotifications();
+    }
+};
+
 const setNav = (me) => {
   const nav = document.getElementById("nav") || document.getElementById("topNav");
   if (!nav) return;
 
-  const notifHtml = me ? `
-    <div class="nav-notif-container">
-      <button class="notif-bell-btn" onclick="toggleNotifDropdown(event)">
-        <span class="material-icons-round">notifications</span>
-        <span id="notifBadge" class="notif-badge">0</span>
-      </button>
-      <div id="notifDropdown" class="notif-dropdown">
-        <div class="notif-header">
-          <h4>Thông báo</h4>
-          <span class="material-icons-round" style="font-size:18px;color:var(--neutral-400)">notifications_active</span>
-        </div>
-        <div id="notifList" class="notif-list"></div>
-      </div>
-    </div>
-  ` : '';
+  const notifHtml = me ? getNotifHtml() : '';
 
   // Nếu là trang index.html có style khác, ta sẽ giữ nguyên CSS nhưng thay đổi link
   const navLinks = document.getElementById("navLinks");
@@ -193,10 +203,11 @@ const markNotifAsRead = async (id, type, relatedId) => {
         await API(`/api/notifications/${id}/read`, { method: 'POST' });
         updateNotificationBadge();
         // Redirect based on type if needed
-        if (type === 'APPOINTMENT_BOOKED') {
+        if (type === 'APPOINTMENT_BOOKED' || type === 'APPOINTMENT_CANCELLED' || type === 'APPOINTMENT_CONFIRMED') {
             const role = localStorage.getItem("role");
             if (role === 'DOCTOR') location.href = 'doctor-appointments.html';
             else if (role === 'ADMIN') location.href = 'admin-appointments.html';
+            else if (role === 'USER') location.href = 'my-appointments.html';
             else renderNotifications();
         } else {
             renderNotifications();

@@ -27,6 +27,25 @@
             .detail-grid { grid-template-columns: 1fr; }
             .side-panel { order: -1; }
         }
+
+        /* PRINT STYLES */
+        @media print {
+            body { background: white !important; font-size: 12pt; }
+            .nav, footer, .page-header nav, #actionButtons, .btn-ghost, .material-icons-round.spinner, #statusBadge { display: none !important; }
+            .page-header { background: white !important; border: none !important; padding: 0 0 20px 0 !important; margin-bottom: 20px !important; }
+            .page-header h1 { font-size: 24pt !important; text-align: center; }
+            .detail-grid { grid-template-columns: 1fr !important; gap: 0 !important; }
+            .info-section { border: 1px solid #eee !important; box-shadow: none !important; margin-bottom: 15px !important; padding: 20px !important; }
+            .appt-meta-box { background: #f8f9fa !important; color: black !important; border: 1px solid #eee !important; }
+            .appt-meta-icon { border: 1px solid #ddd !important; }
+            .container { max-width: 100% !important; width: 100% !important; padding: 0 !important; }
+            .main-content { margin: 0 !important; padding: 0 !important; }
+            .profile-card { background: white !important; border: 1px solid #eee !important; margin-top: 20px; }
+            
+            .print-only { display: block !important; }
+            .no-print { display: none !important; }
+        }
+        .print-only { display: none; }
     </style>
 </head>
 <body>
@@ -62,9 +81,13 @@
                         <div class="appt-meta-icon">
                             <span class="material-icons-round" style="font-size:32px">event_available</span>
                         </div>
-                        <div>
+                        <div style="flex:1">
                             <div class="text-primary font-bold uppercase" style="font-size:11px; letter-spacing:0.1em">Thời gian khám bệnh</div>
                             <div class="h3 mb-0 text-primary" id="apptTimeFull">—</div>
+                        </div>
+                        <div class="text-end">
+                            <div class="text-neutral-400 font-bold uppercase" style="font-size:11px; letter-spacing:0.1em">Mã lịch hẹn</div>
+                            <div class="font-bold text-neutral-800" id="apptIdDisplay">#—</div>
                         </div>
                     </div>
 
@@ -90,6 +113,18 @@
                                     <div class="value" id="apptClinic">—</div>
                                 </div>
                             </div>
+                            <div class="col-md-12 print-only">
+                                <div style="margin-top:40px; display:flex; justify-content:space-between; text-align:center">
+                                    <div style="width:200px">
+                                        <div style="font-size:12px; margin-bottom:60px">Xác nhận của Bệnh viện</div>
+                                        <div style="border-top:1px dashed #ccc; padding-top:8px; font-size:11px; color:#666">(Ký và đóng dấu)</div>
+                                    </div>
+                                    <div style="width:200px">
+                                        <div style="font-size:12px; margin-bottom:60px">Người in phiếu</div>
+                                        <div style="border-top:1px dashed #ccc; padding-top:8px; font-size:11px; color:#666" id="printedByName">—</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -105,8 +140,10 @@
                     </div>
 
                     <!-- Actions -->
-                    <div class="d-flex gap-3 mt-4" id="actionButtons">
-                        <button class="btn-text" onclick="window.print()"><span class="material-icons-round">print</span> In thông tin</button>
+                    <div class="d-flex gap-3 mt-4 no-print" id="actionButtons">
+                        <button class="btn-primary" onclick="window.print()" style="padding: 10px 24px">
+                            <span class="material-icons-round">print</span> In phiếu khám bệnh
+                        </button>
                     </div>
                 </div>
 
@@ -190,6 +227,8 @@
             document.getElementById('mainContent').style.display = 'block';
 
             document.getElementById('pageTitle').innerText = `Chi tiết lịch hẹn #${appt.id.substring(0,8).toUpperCase()}`;
+            document.getElementById('apptIdDisplay').innerText = `#${appt.id.substring(0,8).toUpperCase()}`;
+            document.getElementById('printedByName').innerText = me.fullName;
             document.getElementById('statusBadgeContainer').innerHTML = statusBadge(appt.status);
             
             const start = new Date(appt.startAt);

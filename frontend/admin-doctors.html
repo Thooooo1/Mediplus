@@ -78,7 +78,8 @@
                     <h1>Danh sách bác sĩ</h1>
                     <p class="text-secondary" id="doctorCount">Đang tải...</p>
                 </div>
-                <div class="header-right">
+                <div class="header-right" style="display:flex;align-items:center;gap:16px">
+                    <div id="headerNotif"></div>
                     <button class="btn btn-primary" onclick="showAddDoctorModal()">
                         <span class="material-icons-round">add</span>
                         Thêm bác sĩ mới
@@ -181,6 +182,7 @@
             if (!me) return;
             document.getElementById('userName').textContent = me.fullName || 'Admin';
             document.getElementById('userAvatar').textContent = (me.fullName || 'A').charAt(0);
+            renderNotifBell('headerNotif');
 
             await Promise.all([
                 loadSpecialties(),

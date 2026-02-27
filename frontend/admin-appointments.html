@@ -61,6 +61,7 @@
                     <h1>Danh sách lịch hẹn</h1>
                     <p class="text-secondary" id="appointmentCount">Đang tải...</p>
                 </div>
+                <div class="header-right" id="headerNotif"></div>
             </header>
 
             <div class="content-body">
@@ -105,6 +106,7 @@
             if (!me) return;
             document.getElementById('userName').textContent = me.fullName || 'Admin';
             document.getElementById('userAvatar').textContent = (me.fullName || 'A').charAt(0);
+            renderNotifBell('headerNotif');
 
             loadAppointments();
         })();
