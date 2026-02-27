@@ -118,8 +118,29 @@ const setNav = (me) => {
 
 const initNav = async () => {
     const token = localStorage.getItem("token");
+    
+    const updateCta = (me) => {
+        const ctaTitle = document.getElementById('ctaTitle');
+        const ctaDesc = document.getElementById('ctaDesc');
+        const ctaBtn = document.getElementById('ctaBtn');
+        if (ctaTitle && ctaDesc && ctaBtn) {
+            if (me) {
+                ctaTitle.textContent = 'Đặt lịch khám chuyên khoa ngay';
+                ctaDesc.innerHTML = 'Tìm bác sĩ và đặt lịch khám nhanh chóng.<br>Hệ thống xác nhận lịch tự động.';
+                ctaBtn.innerHTML = '<span class="material-icons-round" style="font-size:20px">event_available</span> Đặt lịch ngay';
+                ctaBtn.href = 'doctors.html';
+            } else {
+                ctaTitle.textContent = 'Sẵn sàng chăm sóc sức khỏe?';
+                ctaDesc.innerHTML = 'Đăng ký miễn phí và đặt lịch với bác sĩ chuyên khoa<br>ngay hôm nay. Chỉ mất 30 giây.';
+                ctaBtn.innerHTML = '<span class="material-icons-round" style="font-size:20px">rocket_launch</span> Bắt đầu ngay — Miễn phí';
+                ctaBtn.href = 'register.html';
+            }
+        }
+    };
+
     if (!token) {
         setNav(null);
+        updateCta(null);
         return;
     }
     try {
@@ -127,11 +148,14 @@ const initNav = async () => {
         if (r.ok) {
             const me = await r.json();
             setNav(me);
+            updateCta(me);
         } else {
             setNav(null);
+            updateCta(null);
         }
     } catch(e) {
         setNav(null);
+        updateCta(null);
     }
 };
 

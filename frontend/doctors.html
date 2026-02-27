@@ -81,6 +81,13 @@
         let currentPage = 0;
         const PAGE_SIZE = 9;
 
+        function getAvatarHtml(d) {
+            if (d.avatarUrl) {
+                return `<img src="${d.avatarUrl}" alt="${d.fullName}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(d.fullName)}&background=eff6ff&color=2563eb'">`;
+            }
+            return '<span class="material-icons-round">person</span>';
+        }
+
         (async () => {
             // Handle query params from index.html
             const params = new URLSearchParams(window.location.search);
@@ -134,7 +141,7 @@
                         <div class="doctor-card-body">
                             <div class="doctor-card-top">
                                 <div class="doctor-avatar">
-                                    ${d.avatarUrl ? `<img src="${d.avatarUrl}" alt="${d.fullName}">` : `<span class="material-icons-round">person</span>`}
+                                    ${getAvatarHtml(d)}
                                 </div>
                                 <div class="doctor-info">
                                     <h3>${d.title ? d.title + ' ' : ''}${d.fullName}</h3>
