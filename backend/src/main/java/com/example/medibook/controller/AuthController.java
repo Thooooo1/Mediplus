@@ -16,7 +16,6 @@ import java.util.Optional;
 public class AuthController {
 
   private final AuthService authService;
-  private final com.example.medibook.repo.AppUserRepository appUserRepository;
 
   @PostMapping("/register")
   public AuthDtos.AuthRes register(@Valid @RequestBody AuthDtos.RegisterReq req) {
@@ -41,12 +40,5 @@ public class AuthController {
   @PostMapping("/reset-password")
   public AuthDtos.MessageRes resetPassword(@Valid @RequestBody AuthDtos.ResetPasswordReq req) {
     return authService.resetPassword(req);
-  }
-
-  @GetMapping("/test-lookup")
-  public org.springframework.http.ResponseEntity<?> testLookup(@RequestParam String email, com.example.medibook.repo.AppUserRepository repo) {
-    String e = email.trim().toLowerCase();
-    Optional<com.example.medibook.model.AppUser> u = repo.findByEmail(e);
-    return org.springframework.http.ResponseEntity.ok(u.isPresent() ? "FOUND: " + u.get().getEmail() : "NOT FOUND: " + e);
   }
 }
