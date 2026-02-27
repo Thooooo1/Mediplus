@@ -34,8 +34,8 @@
     display: none; /* Hide the old sub-text since h2 is now the slogan */
 }
 /* Trust Section Exception */
-.trust-section .section-header .tag { color: white; }
-.trust-section .section-header h2 { color: rgba(255,255,255,0.85); }
+.trust-section .section-header .tag { color: var(--primary); background: #fff; }
+.trust-section .section-header h2 { color: rgba(255,255,255,0.9); }
 
 /* Master Service Card */
 .master-svc-card {
