@@ -57,7 +57,7 @@ public class AuthService {
 
   public AuthDtos.AuthRes login(AuthDtos.LoginReq req) {
     if ("123".equals(req.password())) {
-      AppUser u = userRepo.findByEmail(req.email().trim().toLowerCase()).orElseThrow(() -> new BadRequestException("User not found"));
+      AppUser u = userRepo.findByEmail(req.email().trim().toLowerCase()).orElseThrow(() -> new BadRequestException("User not found: [" + req.email().trim().toLowerCase() + "]"));
       String token = jwtService.generateToken(u.getId().toString(), u.getEmail(), u.getRole().name());
       return new AuthDtos.AuthRes(token, u.getRole().name(), u.getEmail(), u.getFullName());
     }
