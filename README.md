@@ -1,4 +1,4 @@
-# 🏥 MediBook — Hệ thống đặt lịch khám bệnh trực môn
+# 🏥 MediBook — Hệ thống đặt lịch khám bệnh 
 
 **MediBook** là một nền tảng quản lý y tế hiện đại, giúp kết nối bệnh nhân và bác sĩ một cách nhanh chóng và chuyên nghiệp. Ứng dụng cung cấp đầy đủ các tính năng từ đặt lịch, quản lý hồ sơ bệnh án đến quản trị hệ thống toàn diện.
 
