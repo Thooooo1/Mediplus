@@ -40,6 +40,8 @@ public class NotificationListener {
         String message = String.format("Bệnh nhân %s đã đặt lịch vào lúc %s", 
             appt.getPatient().getFullName(), 
             appt.getTimeSlot().getStartAt().toString());
+        
+        log.info("[NotifDebug] Start handling appointment {}. Patient: {}", appt.getId(), appt.getPatient().getFullName());
 
         // 1. Notify the Doctor
         Notification docNotif = Notification.builder()
@@ -50,6 +52,7 @@ public class NotificationListener {
             .relatedId(appt.getId())
             .build();
         notificationRepo.save(docNotif);
+        log.info("[NotifDebug] Saved notification for doctor: {}", appt.getDoctor().getUser().getEmail());
 
         // Send Email to Doctor
         if (mailEnabled) {
@@ -72,7 +75,11 @@ public class NotificationListener {
                 appt.getTimeSlot().getStartAt().toString(),
                 appt.getPatientNote() != null ? appt.getPatientNote() : "Không có"
             );
-            mailService.sendHtml(docEmail, "MediBook — Thông báo lịch khám mới", html);
+            try {
+                mailService.sendHtml(docEmail, "MediBook — Thông báo lịch khám mới", html);
+            } catch (Exception e) {
+                log.error("[NotifDebug] Failed to send email to doctor: {}", e.getMessage());
+            }
         }
 
         // 2. Notify all Admins
@@ -86,6 +93,7 @@ public class NotificationListener {
                 .relatedId(appt.getId())
                 .build();
             notificationRepo.save(adminNotif);
+            log.info("[NotifDebug] Saved notification for admin: {}", admin.getEmail());
 
             // Send Email to Admin
             if (mailEnabled) {
@@ -101,7 +109,11 @@ public class NotificationListener {
                     appt.getDoctor().getUser().getFullName(),
                     appt.getTimeSlot().getStartAt().toString()
                 );
-                mailService.sendHtml(admin.getEmail(), "[Admin Alert] Lịch khám mới được đặt", adminHtml);
+                try {
+                    mailService.sendHtml(admin.getEmail(), "[Admin Alert] Lịch khám mới được đặt", adminHtml);
+                } catch (Exception e) {
+                    log.error("[NotifDebug] Failed to send email to admin {}: {}", admin.getEmail(), e.getMessage());
+                }
             }
         }
 

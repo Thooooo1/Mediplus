@@ -67,7 +67,7 @@ const setNav = (me) => {
   const nav = document.getElementById("nav") || document.getElementById("topNav");
   if (!nav) return;
 
-  const notifHtml = (me && (me.role === 'ADMIN' || me.role === 'DOCTOR')) ? `
+  const notifHtml = me ? `
     <div class="nav-notif-container">
       <button class="notif-bell-btn" onclick="toggleNotifDropdown(event)">
         <span class="material-icons-round">notifications</span>
@@ -102,7 +102,7 @@ const setNav = (me) => {
         <a href="register.html" class="nav-link-solid">Đăng ký miễn phí</a>
       `;
     }
-    if (me && (me.role === 'ADMIN' || me.role === 'DOCTOR')) initNotifications();
+    if (me) initNotifications();
     return;
   }
 
@@ -132,7 +132,7 @@ const setNav = (me) => {
       `}
     </div>
   `;
-  if (me && (me.role === 'ADMIN' || me.role === 'DOCTOR')) initNotifications();
+  if (me) initNotifications();
 };
 
 /* --- Notifications --- */
@@ -214,8 +214,8 @@ const toggleNotifDropdown = (e) => {
 };
 
 const initNotifications = () => {
-    const role = localStorage.getItem("role");
-    if (role !== 'ADMIN' && role !== 'DOCTOR') return;
+    const token = localStorage.getItem("token");
+    if (!token) return;
 
     // Close on outside click
     if (!window.notifInitialized) {
