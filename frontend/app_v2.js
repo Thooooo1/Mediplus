@@ -5,7 +5,7 @@
 /* ─── Config ──────────────────────────────────── */
 const API_BASE = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" 
     ? "http://localhost:8080" 
-    : "https://medibook-api.onrender.com"; // URL chính thức của Backend API trên Render
+    : "https://medibook-api-yd85.onrender.com"; // URL chính thức của Backend API trên Render
 const APP_TIMEZONE = "Asia/Ho_Chi_Minh";
 const APP_TIMEZONE_LABEL = "Giờ Việt Nam (GMT+7)";
 
