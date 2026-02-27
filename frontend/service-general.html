@@ -120,34 +120,34 @@
             <div class="pkg-grid">
                 <div class="pkg-card">
                     <div class="pkg-name">CƠ BẢN</div>
-                    <div class="pkg-price">1.2tr <span>/gói</span></div>
+                    <div class="pkg-price">400K <span>/gói</span></div>
                     <ul class="pkg-features">
                         <li><span class="material-icons-round">check</span> Khám nội tổng quát</li>
                         <li><span class="material-icons-round">check</span> Công thức máu 22 chỉ số</li>
                         <li><span class="material-icons-round">check</span> Siêu âm bụng tổng quát</li>
-                        <li><span class="material-icons-round">check</span> Bác sĩ (Phí < 500k)</li>
+                        <li><span class="material-icons-round">check</span> Bác sĩ (Phí < 200k)</li>
                     </ul>
                     <a href="register.html" class="pkg-btn">Đăng ký khám</a>
                 </div>
                 <div class="pkg-card popular">
                     <div class="pkg-name">NÂNG CAO</div>
-                    <div class="pkg-price">3.5tr <span>/gói</span></div>
+                    <div class="pkg-price">1.2tr <span>/gói</span></div>
                     <ul class="pkg-features">
                         <li><span class="material-icons-round">check</span> Tầm soát tim mạch toàn diện</li>
                         <li><span class="material-icons-round">check</span> Xét nghiệm chức năng gan</li>
                         <li><span class="material-icons-round">check</span> Siêu âm tuyến giáp</li>
-                        <li><span class="material-icons-round">check</span> Bác sĩ (Phí 1tr - 1.5tr)</li>
+                        <li><span class="material-icons-round">check</span> Bác sĩ (Phí > 500K)</li>
                     </ul>
                     <a href="register.html" class="pkg-btn">Gói được chọn nhiều nhất</a>
                 </div>
                 <div class="pkg-card">
                     <div class="pkg-name">VIP MASTER</div>
-                    <div class="pkg-price">8.5tr <span>/gói</span></div>
+                    <div class="pkg-price">1.8tr <span>/gói</span></div>
                     <ul class="pkg-features">
                         <li><span class="material-icons-round">check</span> Tầm soát 12 loại ung thư</li>
                         <li><span class="material-icons-round">check</span> Chụp CT phổi liều thấp</li>
                         <li><span class="material-icons-round">check</span> Nội soi tiêu hóa không đau</li>
-                        <li><span class="material-icons-round">check</span> Bác sĩ VIP Master (> 1.5tr)</li>
+                        <li><span class="material-icons-round">check</span> Bác sĩ VIP Master (> 1tr)</li>
                     </ul>
                     <a href="register.html" class="pkg-btn">Đăng ký VIP</a>
                 </div>
@@ -193,16 +193,16 @@
             if (me) {
                 const pkgBtns = document.querySelectorAll('.pkg-btn');
                 pkgBtns.forEach((btn, idx) => {
-                    if (idx === 0) { btn.href = 'doctors.html?minPrice=0&maxPrice=500000'; btn.innerText = 'Đặt Khám Cơ Bản'; }
-                    else if (idx === 1) { btn.href = 'doctors.html?minPrice=1000000&maxPrice=1500000'; btn.innerText = 'Đặt Khám Nâng Cao'; }
-                    else if (idx === 2) { btn.href = 'doctors.html?minPrice=1500000'; btn.innerText = 'Đặt Khám VIP Master'; }
+                    if (idx === 0) { btn.href = 'doctors.html?minPrice=0&maxPrice=200000'; btn.innerText = 'Đặt Khám Cơ Bản'; }
+                    else if (idx === 1) { btn.href = 'doctors.html?minPrice=500000'; btn.innerText = 'Đặt Khám Nâng Cao'; }
+                    else if (idx === 2) { btn.href = 'doctors.html?minPrice=1000000'; btn.innerText = 'Đặt Khám VIP Master'; }
                 });
             } else {
                 const pkgBtns = document.querySelectorAll('.pkg-btn');
                 pkgBtns.forEach((btn, idx) => {
-                    if (idx === 0) btn.href = 'register.html?minPrice=0&maxPrice=500000';
-                    else if (idx === 1) btn.href = 'register.html?minPrice=1000000&maxPrice=1500000';
-                    else if (idx === 2) btn.href = 'register.html?minPrice=1500000';
+                    if (idx === 0) btn.href = 'register.html?minPrice=0&maxPrice=200000';
+                    else if (idx === 1) btn.href = 'register.html?minPrice=500000';
+                    else if (idx === 2) btn.href = 'register.html?minPrice=1000000';
                 });
             }
 
