@@ -1,6 +1,8 @@
 package com.example.medibook.service;
 
 import com.example.medibook.events.AppointmentBookedEvent;
+import com.example.medibook.events.AppointmentCancelledEvent;
+import com.example.medibook.events.AppointmentConfirmedEvent;
 import com.example.medibook.exception.ConflictException;
 import com.example.medibook.exception.NotFoundException;
 import com.example.medibook.model.*;

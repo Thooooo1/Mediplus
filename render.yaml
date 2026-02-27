@@ -44,10 +44,6 @@ services:
         value: smtp.gmail.com
       - key: MAIL_PORT
         value: 587
-      - key: MAIL_USERNAME
-        value: tnguyenanh189@gmail.com
-      - key: MAIL_PASSWORD
-        value: xbqqbxmdftwrguvr
       - key: MAIL_FROM
-        value: Medibook Support <tnguyenanh189@gmail.com>
+        value: Medibook Support <no-reply@medibook.local>
 
