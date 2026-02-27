@@ -200,6 +200,39 @@ public class NotificationListener {
                 .relatedId(appt.getId())
                 .build());
         }
+
+        // 3. Send Email to Both
+        if (mailEnabled) {
+            String patientEmail = appt.getPatient().getEmail();
+            String docEmail = appt.getDoctor().getUser().getEmail();
+            
+            String html = String.format("""
+                <div style="font-family:Arial,sans-serif; max-width:600px; margin:0 auto; border:1px solid #ef4444; border-radius:12px; padding:24px;">
+                    <h2 style="color:#ef4444;">Thông báo hủy lịch hẹn — MediBook</h2>
+                    <p>Chào bạn,</p>
+                    <p>Chúng tôi rất tiếc phải thông báo rằng lịch hẹn sau đã bị hủy:</p>
+                    <div style="background:#fef2f2; padding:16px; border-radius:8px; border-left:4px solid #ef4444;">
+                        <p><strong>Bệnh nhân:</strong> %s</p>
+                        <p><strong>Bác sĩ:</strong> %s</p>
+                        <p><strong>Thời gian:</strong> %s</p>
+                        <p><strong>Người thực hiện hủy:</strong> %s</p>
+                    </div>
+                    <p style="margin-top:16px;">Vui lòng truy cập hệ thống nếu bạn muốn đặt lại lịch mới.</p>
+                </div>
+                """, 
+                appt.getPatient().getFullName(),
+                appt.getDoctor().getUser().getFullName(),
+                appt.getTimeSlot().getStartAt().toString(),
+                event.cancelledBy().equals("DOCTOR") ? "Bác sĩ" : "Bệnh nhân"
+            );
+
+            try {
+                mailService.sendHtml(patientEmail, "MediBook — Thông báo hủy lịch hẹn", html);
+                mailService.sendHtml(docEmail, "MediBook — Thông báo hủy lịch hẹn", html);
+            } catch (Exception e) {
+                log.error("[NotifDebug] Failed to send cancellation email: {}", e.getMessage());
+            }
+        }
     }
 
     @org.springframework.scheduling.annotation.Async
@@ -220,5 +253,33 @@ public class NotificationListener {
             .relatedId(appt.getId())
             .build();
         notificationRepo.save(confNotif);
+
+        // Send Email to Patient
+        if (mailEnabled) {
+            String patientEmail = appt.getPatient().getEmail();
+            String html = String.format("""
+                <div style="font-family:Arial,sans-serif; max-width:600px; margin:0 auto; border:1px solid #2563eb; border-radius:12px; padding:24px;">
+                    <h2 style="color:#2563eb;">Lịch hẹn đã được xác nhận — MediBook</h2>
+                    <p>Chào bạn <strong>%s</strong>,</p>
+                    <p>Bác sĩ đã xác nhận lịch hẹn của bạn. Thông tin chi tiết:</p>
+                    <div style="background:#eff6ff; padding:16px; border-radius:8px;">
+                        <p><strong>Bác sĩ:</strong> %s</p>
+                        <p><strong>Thời gian:</strong> %s</p>
+                        <p><strong>Địa điểm:</strong> %s</p>
+                    </div>
+                    <p style="margin-top:16px;">Hẹn gặp lại bạn tại phòng khám!</p>
+                </div>
+                """, 
+                appt.getPatient().getFullName(),
+                appt.getDoctor().getUser().getFullName(),
+                appt.getTimeSlot().getStartAt().toString(),
+                appt.getDoctor().getClinicName()
+            );
+            try {
+                mailService.sendHtml(patientEmail, "MediBook — Lịch hẹn đã được xác nhận", html);
+            } catch (Exception e) {
+                log.error("[NotifDebug] Failed to send confirmation email to patient: {}", e.getMessage());
+            }
+        }
     }
 }
