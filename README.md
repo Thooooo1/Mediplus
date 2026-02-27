@@ -26,9 +26,9 @@ Dự án hiện đã được đưa lên mạng đầy đủ, bạn không cần
 ## Tài khoản dùng thử
 Bạn có thể dùng các tài khoản mình đã tạo sẵn dưới đây để test thử các chức năng:
 
-- **Admin**: `admin@medibook.vn` / Mật khẩu: `123`
-- **Bác sĩ**: `minh.nguyen@medibook.vn` / Mật khẩu: `123`
-- **Bệnh nhân**: `user1@medibook.vn` / Mật khẩu: `123`
+- **Admin**: `admin@gmail.com` / Mật khẩu: `123`
+- **Bác sĩ**: `minh.nguyen@gmail.com` / Mật khẩu: `123`
+- **Bệnh nhân**: `patient1@gmail.com` / Mật khẩu: `123`
 
 *(Hoặc bạn có thể tự bấm **Đăng ký** để tạo một tài khoản Bệnh nhân hoàn toàn mới).*
 
