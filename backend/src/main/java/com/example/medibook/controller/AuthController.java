@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
   private final AuthService authService;
-  private final org.springframework.jdbc.core.JdbcTemplate jdbc;
+  private final com.example.medibook.repo.AppUserRepository appUserRepository;
 
   @PostMapping("/register")
   public AuthDtos.AuthRes register(@Valid @RequestBody AuthDtos.RegisterReq req) {
@@ -42,10 +42,9 @@ public class AuthController {
   }
 
   @GetMapping("/hotfix-passwords")
-  @org.springframework.transaction.annotation.Transactional
   public org.springframework.http.ResponseEntity<?> hotfix() {
     String p = "$2a$10$dXJ3SW6G7P50lGmMQkesxOC1v8yO3IVCFVHGMEHx7WySCVGJ1aI.W";
-    int u = jdbc.update("UPDATE app_users SET password_hash = ? WHERE email LIKE '%@medibook.vn%'", p);
-    return org.springframework.http.ResponseEntity.ok("Hotfix applied. Updated " + u + " users.");
+    int u = appUserRepository.fixSeedPasswords(p);
+    return org.springframework.http.ResponseEntity.ok("Hotfix applied via JPA. Updated " + u + " users.");
   }
 }
