@@ -20,9 +20,4 @@ public interface AppUserRepository extends JpaRepository<AppUser, UUID> {
 
     Page<AppUser> findByFullNameContainingIgnoreCaseOrEmailContainingIgnoreCase(String name, String email, Pageable pageable);
     Page<AppUser> findByRole(Role role, Pageable pageable);
-
-    @Modifying
-    @Transactional
-    @Query("UPDATE AppUser u SET u.passwordHash = :hash WHERE u.email LIKE '%@medibook.vn%'")
-    int fixSeedPasswords(@Param("hash") String hash);
 }
