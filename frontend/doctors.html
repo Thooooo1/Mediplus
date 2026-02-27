@@ -93,7 +93,14 @@
             const params = new URLSearchParams(window.location.search);
             const qParam = params.get('q');
             const specParam = params.get('specialty');
+            const typeParam = params.get('type');
+            
             if (qParam) document.getElementById('searchInput').value = qParam;
+
+            if (typeParam === 'telemedicine') {
+                document.querySelector('.page-header h1').textContent = 'Tư vấn trực tuyến với Bác sĩ';
+                document.querySelector('.page-header p').textContent = 'Chọn bác sĩ và đặt khung giờ tư vấn Video Call ngay tại nhà.';
+            }
 
             // Load specialties
             try {
