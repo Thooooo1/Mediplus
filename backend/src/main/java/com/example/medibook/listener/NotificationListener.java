@@ -140,8 +140,25 @@ public class NotificationListener {
                 appt.getTimeSlot().getStartAt().toString(),
                 appt.getDoctor().getClinicName()
             );
-            mailService.sendHtml(patientEmail, "MediBook — Xác nhận lịch hẹn thành công", patientHtml);
+            try {
+                mailService.sendHtml(patientEmail, "MediBook — Xác nhận lịch hẹn thành công", patientHtml);
+            } catch (Exception e) {
+                log.error("[NotifDebug] Failed to send email to patient: {}", e.getMessage());
+            }
         }
+
+        // 4. Notify the Patient in-app
+        Notification patientNotif = Notification.builder()
+            .user(appt.getPatient())
+            .title("Đặt lịch thành công")
+            .message(String.format("Lịch hẹn với Bác sĩ %s vào lúc %s đã được ghi nhận.", 
+                appt.getDoctor().getUser().getFullName(),
+                appt.getTimeSlot().getStartAt().toString()))
+            .type("APPOINTMENT_CONFIRMED")
+            .relatedId(appt.getId())
+            .build();
+        notificationRepo.save(patientNotif);
+        log.info("[NotifDebug] Saved in-app notification for patient: {}", appt.getPatient().getEmail());
 
         log.info("Notifications created and emails sent (if enabled) for appointment {}", appt.getId());
     }
