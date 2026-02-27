@@ -61,7 +61,7 @@ public class DataSeeder implements ApplicationRunner {
 
     /* ---------- 2) Admin ---------- */
     userRepo.save(AppUser.builder()
-      .email("admin@medibook.local")
+      .email("admin@gmail.com")
       .fullName("Admin")
       .passwordHash(encoder.encode("Password@123"))
       .role(Role.ADMIN)
@@ -155,7 +155,7 @@ public class DataSeeder implements ApplicationRunner {
       if (spec == null) continue;
 
       AppUser du = userRepo.save(AppUser.builder()
-        .email("doctor" + idx + "@medibook.local")
+        .email(com.example.medibook.utils.StringNormalizationUtils.toEmailFormat(d.name()))
         .fullName(d.name())
         .passwordHash(encoder.encode("Password@123"))
         .role(Role.DOCTOR)
@@ -201,7 +201,7 @@ public class DataSeeder implements ApplicationRunner {
     /* ---------- 4) Patient Users ---------- */
     for (int i = 1; i <= 10; i++) {
       userRepo.save(AppUser.builder()
-        .email("user" + i + "@medibook.local")
+        .email("patient" + i + "@gmail.com")
         .fullName("Bệnh nhân " + i)
         .passwordHash(encoder.encode("Password@123"))
         .role(Role.USER)
