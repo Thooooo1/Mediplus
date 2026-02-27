@@ -503,8 +503,21 @@ hr { border: none; border-top: 1px solid var(--neutral-200); margin: 20px 0; }
     position: absolute; top: 4px; right: 4px; background: var(--danger); color: white; 
     font-size: 10px; font-weight: 800; min-width: 18px; height: 18px; border-radius: 9px; 
     display: none; align-items: center; justify-content: center; border: 2px solid white; padding: 0 4px;
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.4);
 }
-.notif-badge.show { display: flex; }
+.notif-badge.show { display: flex; animation: pulse-red 2s infinite; }
+
+@keyframes pulse-red {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* Home Nav Bell Color Logic */
+#topNav .notif-bell-btn { color: rgba(255,255,255,0.85); }
+#topNav .notif-bell-btn:hover { color: #fff; background: rgba(255,255,255,0.1); }
+#topNav.scrolled .notif-bell-btn { color: var(--neutral-600); }
+#topNav.scrolled .notif-bell-btn:hover { color: var(--primary); background: var(--neutral-100); }
 
 .notif-dropdown { 
     position: absolute; top: 100%; right: 0; width: 320px; background: white; 

@@ -147,8 +147,16 @@ const updateNotificationBadge = async () => {
             const count = await r.json();
             const badge = document.getElementById("notifBadge");
             if (badge) {
+                const prevCount = parseInt(badge.getAttribute("data-count") || "0");
+                badge.setAttribute("data-count", count);
                 badge.textContent = count > 99 ? "99+" : count;
-                badge.classList.toggle("show", count > 0);
+                const isShowing = count > 0;
+                badge.classList.toggle("show", isShowing);
+                
+                // Alert if count increased
+                if (count > prevCount && prevCount >= 0) {
+                    showToast("Bạn có thông báo mới!", "info");
+                }
             }
         }
     } catch(e) {}
@@ -222,7 +230,7 @@ const initNotifications = () => {
 
     updateNotificationBadge();
     if (notifInterval) clearInterval(notifInterval);
-    notifInterval = setInterval(updateNotificationBadge, 30000); // 30s
+    notifInterval = setInterval(updateNotificationBadge, 10000); // 10s (Faster response)
 };
 
 const initNav = async () => {
