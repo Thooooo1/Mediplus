@@ -122,9 +122,8 @@ const setNav = (me) => {
         ${me.role === "ADMIN" ? `<a href="admin-dashboard.html" style="text-decoration:none; color:var(--neutral-600); font-weight:600; font-size:14px">Admin</a>` : ""}
         ${notifHtml}
         <div style="width:1px; height:20px; background:var(--neutral-200)"></div>
-        <div style="display:flex; flex-direction:column; align-items:flex-end">
-          <span style="font-size:12px; font-weight:700; color:var(--neutral-900)">${me.fullName}</span>
-          <span style="font-size:10px; color:var(--neutral-500)">${me.role}</span>
+        <div style="display:flex; flex-direction:column; align-items:flex-end; margin-right:8px">
+          <span style="font-size:13px; font-weight:700; color:var(--neutral-900)">${me.fullName}</span>
         </div>
         <button class="btn-secondary btn-sm" onclick="logout()" style="padding:4px 12px; font-size:12px">Đăng xuất</button>
       ` : `
