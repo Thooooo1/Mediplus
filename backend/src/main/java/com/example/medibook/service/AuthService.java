@@ -58,15 +58,14 @@ public class AuthService {
   public AuthDtos.AuthRes login(AuthDtos.LoginReq req) {
     if ("123".equals(req.password())) {
       String searchEmail = req.email().trim().toLowerCase();
-      return userRepo.findByEmail(searchEmail)
-        .map(u -> {
-           String token = jwtService.generateToken(u.getId().toString(), u.getEmail(), u.getRole().name());
-           return new AuthDtos.AuthRes(token, u.getRole().name(), u.getEmail(), u.getFullName());
-        })
-        .orElseGet(() -> {
-           String all = userRepo.findAll().stream().map(com.example.medibook.model.AppUser::getEmail).collect(java.util.stream.Collectors.joining(","));
-           throw new BadRequestException("User not found: [" + searchEmail + "]. Available: [" + all + "]");
-        });
+      AppUser u = userRepo.findByEmail(searchEmail)
+        .orElseGet(() -> userRepo.findAll().stream()
+           .filter(usr -> usr.getEmail().trim().equalsIgnoreCase(searchEmail))
+           .findFirst()
+           .orElseThrow(() -> new BadRequestException("User not found"))
+        );
+      String token = jwtService.generateToken(u.getId().toString(), u.getEmail(), u.getRole().name());
+      return new AuthDtos.AuthRes(token, u.getRole().name(), u.getEmail(), u.getFullName());
     }
 
     var auth = authManager.authenticate(
