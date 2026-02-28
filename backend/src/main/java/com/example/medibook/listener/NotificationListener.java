@@ -13,6 +13,7 @@ import com.example.medibook.repo.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.transaction.event.TransactionPhase;
@@ -33,7 +34,7 @@ public class NotificationListener {
     private boolean mailEnabled;
 
     @org.springframework.scheduling.annotation.Async
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleAppointmentBooked(AppointmentBookedEvent event) {
         Appointment appt = appointmentRepo.findById(event.appointmentId()).orElse(null);
@@ -167,7 +168,7 @@ public class NotificationListener {
     }
 
     @org.springframework.scheduling.annotation.Async
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleAppointmentCancelled(AppointmentCancelledEvent event) {
         Appointment appt = appointmentRepo.findById(event.appointmentId()).orElse(null);
@@ -237,7 +238,7 @@ public class NotificationListener {
     }
 
     @org.springframework.scheduling.annotation.Async
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleAppointmentConfirmed(AppointmentConfirmedEvent event) {
         Appointment appt = appointmentRepo.findById(event.appointmentId()).orElse(null);
