@@ -1,41 +1,61 @@
-# MediBook - Hệ thống Đặt lịch Khám bệnh
+# MediBook - Nen tang Dat lich Kham benh truc tuyen
 
-Đây là hệ thống quản lý và đặt lịch khám bệnh trực tuyến. Trang web giúp bệnh nhân dễ dàng tìm kiếm bác sĩ theo chuyên khoa, chọn ngày giờ và đặt lịch khám. Bác sĩ và admin có trang quản trị riêng để theo dõi lịch hẹn và quản lý toàn bộ nền tảng.
+Du an nay la mot he thong quan ly lich hen y te (Clinic Management System) hoan chinh, duoc xay dung de giai quyet bai toan dat lich giua Benh nhan va Bac si mot cach nhanh chong nhat. Du an tap trung vao tinh thuc te, giao dien hien dai va quy trinh thong bao tu dong (Email).
 
-## Cấu trúc dự án
-Dự án được thiết kế theo mô hình tách biệt (Frontend và Backend riêng), tiện cho việc quản lý mã nguồn và triển khai:
-- **Frontend**: Nằm trong thư mục `frontend`. Chạy hoàn toàn bằng HTML, CSS và JavaScript thuần.
-- **Backend**: Nằm trong thư mục `backend`. Xây dựng bằng Java Spring Boot 3, chịu trách nhiệm xử lý API và quản lý cơ sở dữ liệu.
+## Tai sao du an nay ton tai?
+He thong giup loai bo quy trinh dat lich thu cong qua dien thoai. Benh nhan co the thay chinh xac khung gio trong cua bac si va nhan email xac nhan ngay lap tuc, trong khi bac si co bang dieu khien rieng de quan ly ca kham trong ngay.
 
-## Công nghệ sử dụng
-- **Backend API**: Java 21, Spring Boot (Web, Security, Data JPA, Mail)
-- **Database**: PostgreSQL
-- **Bảo mật**: Cấp quyền và xác thực qua JWT (JSON Web Token), mã hóa mật khẩu bằng BCrypt.
-- **Triển khai (Deployment)**: 
-  - Backend & Database chạy trên hệ thống của Render.
-  - Frontend được host trên nền tảng Vercel.
+## Tech Stack
+He thong duoc thiet ke theo kien truc Micro-monolith (tach biet Front-End va Back-End):
 
-## Hướng dẫn xem Demo trực tiếp
-Dự án hiện đã được đưa lên mạng đầy đủ, bạn không cần phải cài đặt phức tạp ở dưới máy tính cá nhân.
+### Back-End
+- Java 21 + Spring Boot 3.x: Framework cot loi.
+- Spring Security + JWT: Bao mat da tang, khong dung Session, xac thuc qua Token.
+- PostgreSQL: Co so du lieu quan trong, luu tru lich hen va ho su bac si.
+- Resend API: He thong gui Email thong bao (xac nhan lich, bao lich moi cho admin).
+- Lombok & MapStruct: Code gon gang, giam thieu boilerplate.
 
-- **Cổng Giao Diện Web Dành Cho Người Dùng (Frontend)**: [https://mediplus.vercel.app](https://mediplus.vercel.app) *(Link chính thức để đặt lịch và quản trị)*
-- **Máy Chủ Xử Lý Dữ Liệu (Backend API)**: [https://medibook-api-yd85.onrender.com](https://medibook-api-yd85.onrender.com) *(Trang này chạy ngầm, không có giao diện trừ tài liệu API)*
-- **Tài liệu API Backend (Swagger UI)**: [https://medibook-api-yd85.onrender.com/swagger-ui/index.html](https://medibook-api-yd85.onrender.com/swagger-ui/index.html)
-- **Mã Nguồn (Source Code)**: [https://github.com/Thooooo1/Mediplus](https://github.com/Thooooo1/Mediplus)
+### Front-End
+- HTML5, CSS3, Vanilla JS: Khong dung React/Vue de toi uu toc do tai va giu su don gian.
+- Vite (Build tool): Dong goi tai nguyen nhanh chong.
+- Tailwind-style CSS: Su dung cac class tien ich de giao dien trong premium va hien dai.
 
-## Tài khoản dùng thử
-Bạn có thể dùng các tài khoản mình đã tạo sẵn dưới đây để test thử các chức năng:
+## Tinh nang noi bat
+- Tim kiem thong minh: Loc bac si theo chuyen khoa, kinh nghiem.
+- Dat lich Real-time: Khoa khung gio ngay khi co nguoi dat de tranh trung lich.
+- Thong bao Email: Gui mail xac nhan cho benh nhan va thong bao cho bac si/admin.
+- Bang dieu khien Bac si: Quan ly ca kham, cap nhat trang thai "Hoan thanh" hoac "Huy".
+- Quan tri vien (Admin): Quan ly danh sach bac si, chuyen khoa va theo doi toan bo he thong.
 
-- **Admin**: `admin@gmail.com` / Mật khẩu: `123`
-- **Bác sĩ**: `minh.nguyen@gmail.com` / Mật khẩu: `123`
-- **Bệnh nhân**: `patient1@gmail.com` / Mật khẩu: `123`
+## Cai dat va Chay duoi may (Local)
+Neu ban muon voc vach ma nguon duoi local, hay lam theo cac buoc:
 
-*(Hoặc bạn có thể tự bấm **Đăng ký** để tạo một tài khoản Bệnh nhân hoàn toàn mới).*
+1. Clone project:
+   git clone https://github.com/Thooooo1/Mediplus.git
 
-## Các chức năng chính
-- **Bệnh nhân**: Tìm bác sĩ, xem chi tiết giờ trống, đặt lịch. Hệ thống tự động gửi email thông báo xác nhận.
-- **Bác sĩ**: Xem được danh sách bệnh nhân đã đặt lịch với mình hôm nay, bấm hoàn thành ca khám và nhập ghi chú bệnh án.
-- **Quản trị viên (Admin)**: Xem thống kê tổng số user/lịch hẹn, thêm bác sĩ mới vào hệ thống, khóa tài khoản người dùng vi phạm.
+2. Cau hinh bien moi truong: Tao file .env o root hoac cau hinh trong IDE:
+   - DB_URL: Link Postgres cua ban.
+   - JWT_SECRET: Chuoi bao mat tuy y (it nhat 32 ky tu).
+   - RESEND_API_KEY: Lay tu Resend.com.
+   - MAIL_ENABLED: Cai thanh true de bat gui mail.
+
+3. Chay Back-End:
+   cd backend
+   ./mvnw spring-boot:run
+
+4. Chay Front-End: Mo file index.html trong thu muc frontend bang Live Server hoac deploy len Vercel/Netlify.
+
+## Demo va API Documentation
+- Giao dien Web: https://mediplus.vercel.app
+- Swagger UI (Danh cho Dev): https://medibook-api-yd85.onrender.com/swagger-ui.html
+
+## Tai khoan Test
+Vai tro | Email | Mat khau
+--- | --- | ---
+Admin chinh | tnguyenanh189@gmail.com | 123
+Admin he thong | admin@gmail.com | 123
+Bac si | minh.nguyen@gmail.com | 123
+Benh nhan | patient1@gmail.com | 123
 
 ---
-*Phát triển năm 2026. Mọi thắc mắc vui lòng liên hệ tác giả.*
+Du an duoc bao tri boi @Thooooo1. Neu thay hay hay cho 5 sao nhe!
