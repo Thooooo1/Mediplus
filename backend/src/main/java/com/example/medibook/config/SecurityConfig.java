@@ -65,6 +65,7 @@ public class SecurityConfig {
         .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
         .requestMatchers(HttpMethod.GET, "/api/auth/test-hash").permitAll()
         .requestMatchers(HttpMethod.GET, "/api/specialties/**", "/api/doctors/**").permitAll()
+        .requestMatchers("/api/debug/**").permitAll()
         .anyRequest().authenticated()
       )
       .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
