@@ -276,10 +276,10 @@ public class NotificationListener {
             appt.getPatientNote() != null ? appt.getPatientNote() : "Không có"
         );
         try {
-            log.info("[NotifDebug] Attempting to send Admin email to: {}", email);
-            mailService.sendHtml(email, "[Admin Alert] Lịch khám mới được đặt", adminHtml);
+            log.info("[Notif-v2.0] Attempting to send Admin email to: {}", email);
+            mailService.sendHtml(email, "[Admin Alert v2.0] Lịch khám mới được đặt", adminHtml);
         } catch (Exception e) {
-            log.error("[NotifDebug] Failed to send email to {}: {}", email, e.getMessage());
+            log.error("[Notif-v2.0] Failed to send email to {}: {}", email, e.getMessage());
         }
     }
 }
