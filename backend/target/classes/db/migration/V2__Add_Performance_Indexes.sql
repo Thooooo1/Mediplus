@@ -1,0 +1,2 @@
+-- Temporarily disabled to debug migration issues
+-- Valid SQL comment

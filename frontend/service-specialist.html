@@ -135,10 +135,10 @@
                 if (r.ok) {
                     const specs = await r.json();
                     document.getElementById('specialtiesList').innerHTML = specs.map(s => `
-                        <button onclick="filterBySpecialty('${s.id}', '${s.name}')" class="spec-btn" id="spec-${s.id}">
-                            <span class="material-icons-round">medical_services</span>
-                            ${s.name}
-                        </button>
+                        <div class="premium-spec-card" onclick="filterBySpecialty('${s.id}', '${s.name}')" id="spec-${s.id}">
+                            <div class="spec-name">${s.name}</div>
+                            <div class="spec-count">Chuyên gia hàng đầu</div>
+                        </div>
                     `).join('');
                 }
             } catch(e) {}

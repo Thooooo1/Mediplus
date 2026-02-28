@@ -216,11 +216,9 @@
             }
             grid.innerHTML = list.map(s => `
                 <div class="col-md-6 col-xl-4">
-                    <div class="card p-3 h-100 hover-shadow border-0 shadow-sm d-flex align-items-center gap-3 flex-row cursor-pointer" onclick="selectSpecialty('${s.id}', '${s.name}')">
-                        <div class="bg-primary-light rounded-lg p-2 text-primary">
-                            <span class="material-icons-round">health_and_safety</span>
-                        </div>
-                        <div class="font-bold text-neutral-800">${s.name}</div>
+                    <div class="premium-spec-card" onclick="selectSpecialty('${s.id}', '${s.name}')">
+                        <div class="spec-name">${s.name}</div>
+                        <div class="spec-count">Chuyên gia hàng đầu</div>
                     </div>
                 </div>
             `).join('');
