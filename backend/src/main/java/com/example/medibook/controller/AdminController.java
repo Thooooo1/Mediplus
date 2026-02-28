@@ -60,6 +60,7 @@ public class AdminController {
   }
 
   @GetMapping("/test-notif")
+  @org.springframework.transaction.annotation.Transactional
   public String testNotif(@RequestParam("id") UUID appointmentId, @RequestParam(value = "secret", required = false) String secret) {
     if (!"medi-check".equals(secret)) return "Forbidden";
     try {
