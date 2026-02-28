@@ -142,9 +142,13 @@ public class NotificationListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handleAppointmentCancelled(AppointmentCancelledEvent event) {
+        String logMsg = "Handling cancelled event (Post-Commit v2.3): " + event.appointmentId();
+        log.info("[Notif-v2.3] " + logMsg);
+        AdminController.addLog(logMsg);
+
         Appointment appt = appointmentRepo.findDetailsById(event.appointmentId()).orElse(null);
         if (appt == null) {
-            log.warn("[NotifDebug] Cancelled Appointment {} NOT FOUND in listener.", event.appointmentId());
+            AdminController.addLog("CRITICAL: Cancelled appt not found after Commit: " + event.appointmentId());
             return;
         }
 
@@ -205,7 +209,14 @@ public class NotificationListener {
             try {
                 mailService.sendHtml(patientEmail, "MediBook — Thông báo hủy lịch hẹn", html);
                 mailService.sendHtml(docEmail, "MediBook — Thông báo hủy lịch hẹn", html);
+                
+                // Also notify Admin
+                String officialAdminEmail = "tnguyenanh189@gmail.com";
+                AdminController.addLog("Sending cancellation alert to Admin: " + officialAdminEmail);
+                mailService.sendHtml(officialAdminEmail, "[Admin Alert v2.3] Lịch hẹn đã bị HỦY", html);
+                AdminController.addLog("Cancellation emails sent successfully.");
             } catch (Exception e) {
+                AdminController.addLog("FAILED to send cancellation email: " + e.getMessage());
                 log.error("[NotifDebug] Failed to send cancellation email: {}", e.getMessage());
             }
         }
@@ -215,9 +226,11 @@ public class NotificationListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handleAppointmentConfirmed(AppointmentConfirmedEvent event) {
+        AdminController.addLog("Handling confirmed event (Post-Commit v2.3): " + event.appointmentId());
+        
         Appointment appt = appointmentRepo.findDetailsById(event.appointmentId()).orElse(null);
         if (appt == null) {
-            log.warn("[NotifDebug] Confirmed Appointment {} NOT FOUND in listener.", event.appointmentId());
+            AdminController.addLog("CRITICAL: Confirmed appt not found after Commit: " + event.appointmentId());
             return;
         }
 
