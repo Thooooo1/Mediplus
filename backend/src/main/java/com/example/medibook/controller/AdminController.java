@@ -14,6 +14,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.transaction.annotation.Transactional;
+import com.example.medibook.events.AppointmentBookedEvent;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -35,7 +38,7 @@ public class AdminController {
   private final SlotService slotService;
   private final PasswordEncoder encoder;
   private final com.example.medibook.service.MailService mailService;
-  private final org.springframework.context.ApplicationEventPublisher publisher;
+  private final ApplicationEventPublisher publisher;
 
   @Value("${app.mail.enabled:false}")
   private boolean mailEnabled;
@@ -60,35 +63,38 @@ public class AdminController {
   }
 
   @GetMapping("/test-notif")
-  @org.springframework.transaction.annotation.Transactional
+  @Transactional
   public String testNotif(@RequestParam("id") String idStr, @RequestParam(value = "secret", required = false) String secret) {
     if (!"medi-check".equals(secret)) return "Forbidden";
     
     UUID appointmentId;
     try {
-      if (idStr.startsWith("[") && idStr.endsWith("]")) {
-          idStr = idStr.substring(1, idStr.length() - 1);
+      String processedId = idStr;
+      if (processedId.startsWith("[") && processedId.endsWith("]")) {
+          processedId = processedId.substring(1, processedId.length() - 1);
       }
-      if (idStr.startsWith("#")) {
-          idStr = idStr.substring(1);
+      if (processedId.startsWith("#")) {
+          processedId = processedId.substring(1);
       }
+      
+      final String finalId = processedId;
 
-      if (idStr.length() == 36) {
-        appointmentId = UUID.fromString(idStr);
+      if (finalId.length() == 36) {
+        appointmentId = UUID.fromString(finalId);
       } else {
         // Search by prefix (Short ID)
-        log.info("[DeepDebug] Searching for appointment with short ID prefix: {}", idStr);
+        log.info("[DeepDebug] Searching for appointment with short ID prefix: {}", finalId);
         List<Appointment> matches = appointmentRepo.findAll().stream()
-            .filter(a -> a.getId().toString().toUpperCase().startsWith(idStr.toUpperCase()))
+            .filter(a -> a.getId().toString().toUpperCase().startsWith(finalId.toUpperCase()))
             .toList();
         
-        if (matches.isEmpty()) return "Error: No appointment found starting with " + idStr;
-        if (matches.size() > 1) return "Error: Multiple appointments found starting with " + idStr + ". Please provide more characters.";
+        if (matches.isEmpty()) return "Error: No appointment found starting with " + finalId;
+        if (matches.size() > 1) return "Error: Multiple appointments found starting with " + finalId + ". Please provide more characters.";
         appointmentId = matches.get(0).getId();
       }
 
       log.info("[DeepDebug] Manually triggering notification for appt: {}", appointmentId);
-      com.example.medibook.events.AppointmentBookedEvent event = new com.example.medibook.events.AppointmentBookedEvent(appointmentId);
+      AppointmentBookedEvent event = new AppointmentBookedEvent(appointmentId);
       publisher.publishEvent(event);
       return "Successfully triggered notification event for ID: " + appointmentId + ". Current MAIL_ENABLED: " + mailEnabled;
     } catch (Exception e) {

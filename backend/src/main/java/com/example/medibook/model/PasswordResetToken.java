@@ -28,5 +28,6 @@ public class PasswordResetToken {
     @Column(nullable = false)
     private Instant expiresAt;
 
+    @Builder.Default
     private boolean used = false;
 }
