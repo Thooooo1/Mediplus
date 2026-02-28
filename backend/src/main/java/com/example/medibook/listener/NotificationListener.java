@@ -143,7 +143,6 @@ public class NotificationListener {
         report.append("\n--- Execution Finished ---");
         return report.toString();
     }
-    }
 
     private String sendAdminEmailDebug(String email, Appointment appt) {
         // reuse existing HTML generator but return status
