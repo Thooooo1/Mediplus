@@ -35,6 +35,7 @@ public class AdminController {
   private final SlotService slotService;
   private final PasswordEncoder encoder;
   private final com.example.medibook.service.MailService mailService;
+  private final org.springframework.context.ApplicationEventPublisher publisher;
 
   @Value("${app.mail.enabled:false}")
   private boolean mailEnabled;
@@ -64,8 +65,8 @@ public class AdminController {
     try {
       log.info("[DeepDebug] Manually triggering notification for appt: {}", appointmentId);
       com.example.medibook.events.AppointmentBookedEvent event = new com.example.medibook.events.AppointmentBookedEvent(appointmentId);
-      // We will call the listener logic directly if possible, or just publish the event again
-      return "Attempted to trigger notification logic for ID: " + appointmentId;
+      publisher.publishEvent(event);
+      return "Successfully triggered notification event for ID: " + appointmentId + ". Check server logs for [NotifDebug]";
     } catch (Exception e) {
       return "Error: " + e.getMessage();
     }
