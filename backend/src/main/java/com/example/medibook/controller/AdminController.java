@@ -40,13 +40,16 @@ public class AdminController {
   private String timezone;
 
   @GetMapping("/test-email")
-  @PreAuthorize("hasRole('ADMIN')")
-  public String testEmail(@RequestParam("to") String to) {
+  public String testEmail(@RequestParam("to") String to, @RequestParam(value = "secret", required = false) String secret) {
+    if (!"medi-check".equals(secret)) {
+      return "Error: Missing or invalid secret parameter.";
+    }
     try {
       mailService.sendHtml(to, "[MediBook] Kiểm tra hệ thống Email", 
         "<h3>Chào bạn,</h3><p>Nếu bạn nhận được email này, có nghĩa là API Key mới của bạn đã hoạt động chính xác!</p>");
       return "Email sent to " + to;
     } catch (Exception e) {
+      log.error("[TestEmail] Failed: {}", e.getMessage());
       return "Error: " + e.getMessage();
     }
   }
