@@ -36,7 +36,7 @@ public class NotificationListener {
     private boolean mailEnabled;
 
     @Async
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handleAppointmentBooked(AppointmentBookedEvent event) {
         log.info("[NotifDebug] Mail Enabled Status: {}", mailEnabled);
@@ -171,8 +171,8 @@ public class NotificationListener {
     }
 
     @Async
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handleAppointmentCancelled(AppointmentCancelledEvent event) {
         Appointment appt = appointmentRepo.findDetailsById(event.appointmentId()).orElse(null);
         if (appt == null) {
@@ -244,8 +244,8 @@ public class NotificationListener {
     }
 
     @Async
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handleAppointmentConfirmed(AppointmentConfirmedEvent event) {
         Appointment appt = appointmentRepo.findDetailsById(event.appointmentId()).orElse(null);
         if (appt == null) {
