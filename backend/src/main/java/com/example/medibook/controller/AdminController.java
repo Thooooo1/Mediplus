@@ -95,8 +95,7 @@ public class AdminController {
 
       log.info("[DeepDebug] Manually triggering notification for appt: {}", appointmentId);
       AppointmentBookedEvent event = new AppointmentBookedEvent(appointmentId);
-      publisher.publishEvent(event);
-      return "Successfully triggered notification event for ID: " + appointmentId + ". Current MAIL_ENABLED: " + mailEnabled;
+      return notificationListener.handleAppointmentBookedDebug(event);
     } catch (Exception e) {
       log.error("[DeepDebug] Error: {}", e.getMessage());
       return "Error: " + e.getMessage();
