@@ -36,14 +36,22 @@ public class NotificationListener {
     private boolean mailEnabled;
 
     @Async
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @EventListener
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handleAppointmentBooked(AppointmentBookedEvent event) {
-        log.info("[Notif] Handling booked event for appt: {}", event.appointmentId());
+        log.info("[Notif-v2.1] Handling booked event: {}", event.appointmentId());
         
-        Appointment appt = appointmentRepo.findDetailsById(event.appointmentId()).orElse(null);
+        Appointment appt = null;
+        // Retry logic: Wait up to 2 seconds for DB to persist
+        for (int i = 0; i < 3; i++) {
+            appt = appointmentRepo.findDetailsById(event.appointmentId()).orElse(null);
+            if (appt != null) break;
+            log.info("[Notif-v2.1] Appointment {} not found, retrying in 1s... (Attempt {})", event.appointmentId(), i+1);
+            try { Thread.sleep(1000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+        }
+
         if (appt == null) {
-            log.warn("[Notif] Appointment {} NOT FOUND.", event.appointmentId());
+            log.warn("[Notif-v2.1] Appointment {} DEFINITIVELY NOT FOUND after retries.", event.appointmentId());
             return;
         }
 

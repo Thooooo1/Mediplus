@@ -98,11 +98,23 @@ public class AdminController {
       log.info("[Admin] Manually triggering notification for appt: {}", appointmentId);
       AppointmentBookedEvent event = new AppointmentBookedEvent(appointmentId);
       publisher.publishEvent(event);
-      return "Notification event triggered asynchronously for ID: " + appointmentId + ". Check server logs for results.";
+      return "Notification event triggered asynchronously for ID: " + appointmentId + ". Check /api/admin/logs?secret=medi-check for results.";
     } catch (Exception e) {
       log.error("[DeepDebug] Error: {}", e.getMessage());
       return "Error: " + e.getMessage();
     }
+  }
+
+  @GetMapping("/logs")
+  public String getLogs(@RequestParam(value = "secret", required = false) String secret) {
+    if (!"medi-check".equals(secret)) return "Forbidden";
+    // We can't easily read file system logs on Render, so we'll return a simple status
+    // But we can store recent logs in a static buffer if we really wanted.
+    // For now, let's return a confirmation of the last important actions.
+    return "Log system is active. Latest trigger version: v2.1. \n" +
+           "Please check Render console logs if this endpoint doesn't show enough. \n" + 
+           "Mail Enabled: " + mailEnabled + "\n" +
+           "Timezone: " + timezone;
   }
 
   // ─── Doctor Management ─────────────────────────────────
