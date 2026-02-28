@@ -39,9 +39,10 @@ public class NotificationListener {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleAppointmentBooked(AppointmentBookedEvent event) {
-        Appointment appt = appointmentRepo.findById(event.appointmentId()).orElse(null);
+        log.info("[NotifDebug] Mail Enabled Status: {}", mailEnabled);
+        Appointment appt = appointmentRepo.findDetailsById(event.appointmentId()).orElse(null);
         if (appt == null) {
-            log.warn("[NotifDebug] Appointment {} NOT FOUND in listener. Transaction might still be in progress.", event.appointmentId());
+            log.warn("[NotifDebug] Appointment {} NOT FOUND in listener.", event.appointmentId());
             return;
         }
 
@@ -135,10 +136,10 @@ public class NotificationListener {
                     <p>Chào bạn <strong>%s</strong>,</p>
                     <p>Cảm ơn bạn đã tin tưởng sử dụng dịch vụ của MediBook. Lịch hẹn của bạn đã được ghi nhận:</p>
                     <div style="background:#f0fdf4; padding:16px; border-radius:8px;">
-                        <p><strong>Bác sĩ:</strong> %s</p>
-                        <li><strong>Chuyên khoa:</strong> %s</li>
-                        <p><strong>Thời gian:</strong> %s</p>
-                        <p><strong>Địa điểm:</strong> %s</p>
+                        <p style="margin:4px 0;"><strong>Bác sĩ:</strong> %s</p>
+                        <p style="margin:4px 0;"><strong>Chuyên khoa:</strong> %s</p>
+                        <p style="margin:4px 0;"><strong>Thời gian:</strong> %s</p>
+                        <p style="margin:4px 0;"><strong>Địa điểm:</strong> %s</p>
                     </div>
                     <p style="margin-top:16px;">Vui lòng đến đúng giờ để được phục vụ tốt nhất.</p>
                 </div>
@@ -176,7 +177,7 @@ public class NotificationListener {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleAppointmentCancelled(AppointmentCancelledEvent event) {
-        Appointment appt = appointmentRepo.findById(event.appointmentId()).orElse(null);
+        Appointment appt = appointmentRepo.findDetailsById(event.appointmentId()).orElse(null);
         if (appt == null) {
             log.warn("[NotifDebug] Cancelled Appointment {} NOT FOUND in listener.", event.appointmentId());
             return;
@@ -249,7 +250,7 @@ public class NotificationListener {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleAppointmentConfirmed(AppointmentConfirmedEvent event) {
-        Appointment appt = appointmentRepo.findById(event.appointmentId()).orElse(null);
+        Appointment appt = appointmentRepo.findDetailsById(event.appointmentId()).orElse(null);
         if (appt == null) {
             log.warn("[NotifDebug] Confirmed Appointment {} NOT FOUND in listener.", event.appointmentId());
             return;

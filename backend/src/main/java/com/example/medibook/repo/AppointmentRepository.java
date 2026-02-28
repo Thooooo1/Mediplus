@@ -17,7 +17,13 @@ import java.util.UUID;
 public interface AppointmentRepository extends JpaRepository<Appointment, UUID> {
 
     // For MailListener
-    @Query("SELECT a FROM Appointment a JOIN FETCH a.doctor d JOIN FETCH d.user u JOIN FETCH a.patient p WHERE a.id = :id")
+    @Query("SELECT a FROM Appointment a " +
+           "JOIN FETCH a.doctor d " +
+           "JOIN FETCH d.user u " +
+           "LEFT JOIN FETCH d.specialty s " +
+           "JOIN FETCH a.patient p " +
+           "JOIN FETCH a.timeSlot ts " +
+           "WHERE a.id = :id")
     Optional<Appointment> findDetailsById(UUID id);
 
     // For patient's appointments

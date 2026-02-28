@@ -19,7 +19,6 @@ D:\mediplus\backend\src\main\java\com\example\medibook\exception\ApiExceptionHan
 D:\mediplus\backend\src\main\java\com\example\medibook\exception\BadRequestException.java
 D:\mediplus\backend\src\main\java\com\example\medibook\exception\ConflictException.java
 D:\mediplus\backend\src\main\java\com\example\medibook\exception\NotFoundException.java
-D:\mediplus\backend\src\main\java\com\example\medibook\listener\MailListener.java
 D:\mediplus\backend\src\main\java\com\example\medibook\listener\NotificationListener.java
 D:\mediplus\backend\src\main\java\com\example\medibook\MediBookApplication.java
 D:\mediplus\backend\src\main\java\com\example\medibook\model\Appointment.java

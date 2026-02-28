@@ -1,5 +1,4 @@
 com\example\medibook\config\CorsConfig$1.class
-com\example\medibook\listener\MailListener.class
 com\example\medibook\utils\StringNormalizationUtils.class
 com\example\medibook\model\Appointment$AppointmentBuilder.class
 com\example\medibook\model\WorkingHour.class
