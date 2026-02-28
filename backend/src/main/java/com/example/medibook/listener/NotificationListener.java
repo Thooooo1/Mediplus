@@ -11,12 +11,8 @@ import com.example.medibook.repo.AppUserRepository;
 import com.example.medibook.repo.AppointmentRepository;
 import com.example.medibook.repo.NotificationRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.event.TransactionalEventListener;
-import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 
 import java.util.List;
 
@@ -33,9 +29,9 @@ public class NotificationListener {
     @org.springframework.beans.factory.annotation.Value("${app.mail.enabled:false}")
     private boolean mailEnabled;
 
-    @org.springframework.scheduling.annotation.Async
+    @Async
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @EventListener
     public void handleAppointmentBooked(AppointmentBookedEvent event) {
         Appointment appt = appointmentRepo.findById(event.appointmentId()).orElse(null);
         if (appt == null) return;
@@ -167,9 +163,9 @@ public class NotificationListener {
         log.info("Notifications created and emails sent (if enabled) for appointment {}", appt.getId());
     }
 
-    @org.springframework.scheduling.annotation.Async
+    @Async
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @EventListener
     public void handleAppointmentCancelled(AppointmentCancelledEvent event) {
         Appointment appt = appointmentRepo.findById(event.appointmentId()).orElse(null);
         if (appt == null) return;
@@ -237,9 +233,9 @@ public class NotificationListener {
         }
     }
 
-    @org.springframework.scheduling.annotation.Async
+    @Async
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @EventListener
     public void handleAppointmentConfirmed(AppointmentConfirmedEvent event) {
         Appointment appt = appointmentRepo.findById(event.appointmentId()).orElse(null);
         if (appt == null) return;
