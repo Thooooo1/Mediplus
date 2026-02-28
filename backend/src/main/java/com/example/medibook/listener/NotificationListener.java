@@ -43,16 +43,9 @@ public class NotificationListener {
         log.info("[Notif-v2.2] " + logMsg);
         AdminController.addLog(logMsg);
         
-        Appointment appt = null;
-        for (int i = 0; i < 3; i++) {
-            appt = appointmentRepo.findDetailsById(event.appointmentId()).orElse(null);
-            if (appt != null) break;
-            AdminController.addLog("Appointment not found, retrying... " + (i+1));
-            try { Thread.sleep(1000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
-        }
-
+        appt = appointmentRepo.findDetailsById(event.appointmentId()).orElse(null);
         if (appt == null) {
-            AdminController.addLog("Appointment DEFINITIVELY NOT FOUND: " + event.appointmentId());
+            AdminController.addLog("CRITICAL: Appointment still not found even after Commit: " + event.appointmentId());
             return;
         }
         AdminController.addLog("Found appointment for: " + appt.getPatient().getFullName());
