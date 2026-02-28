@@ -39,20 +39,13 @@ public class NotificationListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handleAppointmentBooked(AppointmentBookedEvent event) {
-        StringBuilder report = new StringBuilder();
-        report.append("--- Notification Debug Report ---\n");
-        report.append("Event ID: ").append(event.appointmentId()).append("\n");
-        report.append("Mail Enabled Status: ").append(mailEnabled).append("\n");
+        log.info("[Notif] Handling booked event for appt: {}", event.appointmentId());
         
         Appointment appt = appointmentRepo.findDetailsById(event.appointmentId()).orElse(null);
         if (appt == null) {
-            String msg = "Appointment " + event.appointmentId() + " NOT FOUND.";
-            return report.append("ERROR: ").append(msg).toString();
+            log.warn("[Notif] Appointment {} NOT FOUND.", event.appointmentId());
+            return;
         }
-
-        report.append("Appointment found: ").append(appt.getId()).append("\n");
-        report.append("Patient: ").append(appt.getPatient().getFullName()).append("\n");
-        report.append("Doctor: ").append(appt.getDoctor().getUser().getFullName()).append("\n");
 
         String title = "Lịch hẹn mới";
         String message = String.format("Bệnh nhân %s đã đặt lịch vào lúc %s", 
