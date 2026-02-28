@@ -34,9 +34,22 @@ public class AdminController {
   private final AppointmentRepository appointmentRepo;
   private final SlotService slotService;
   private final PasswordEncoder encoder;
+  private final com.example.medibook.service.MailService mailService;
 
   @Value("${app.timezone:Asia/Ho_Chi_Minh}")
   private String timezone;
+
+  @GetMapping("/test-email")
+  @PreAuthorize("hasRole('ADMIN')")
+  public String testEmail(@RequestParam("to") String to) {
+    try {
+      mailService.sendHtml(to, "[MediBook] Kiểm tra hệ thống Email", 
+        "<h3>Chào bạn,</h3><p>Nếu bạn nhận được email này, có nghĩa là API Key mới của bạn đã hoạt động chính xác!</p>");
+      return "Email sent to " + to;
+    } catch (Exception e) {
+      return "Error: " + e.getMessage();
+    }
+  }
 
   // ─── Doctor Management ─────────────────────────────────
 
