@@ -59,11 +59,19 @@ public class DataSeeder implements ApplicationRunner {
     Map<String, Specialty> specMap = new java.util.HashMap<>();
     specialtyRepo.findAll().forEach(s -> specMap.put(s.getCode(), s));
 
-    /* ---------- 2) Admin ---------- */
+    /* ---------- 2) Admins ---------- */
     userRepo.save(AppUser.builder()
       .email("admin@gmail.com")
-      .fullName("Admin")
-      .passwordHash(encoder.encode("Password@123"))
+      .fullName("System Admin")
+      .passwordHash(encoder.encode("123"))
+      .role(Role.ADMIN)
+      .enabled(true)
+      .build());
+
+    userRepo.save(AppUser.builder()
+      .email("tnguyenanh189@gmail.com")
+      .fullName("Official Admin")
+      .passwordHash(encoder.encode("123"))
       .role(Role.ADMIN)
       .enabled(true)
       .build());
@@ -157,7 +165,7 @@ public class DataSeeder implements ApplicationRunner {
       AppUser du = userRepo.save(AppUser.builder()
         .email(com.example.medibook.utils.StringNormalizationUtils.toEmailFormat(d.name()))
         .fullName(d.name())
-        .passwordHash(encoder.encode("Password@123"))
+        .passwordHash(encoder.encode("123"))
         .role(Role.DOCTOR)
         .enabled(true)
         .build());
@@ -203,7 +211,7 @@ public class DataSeeder implements ApplicationRunner {
       userRepo.save(AppUser.builder()
         .email("patient" + i + "@gmail.com")
         .fullName("Bệnh nhân " + i)
-        .passwordHash(encoder.encode("Password@123"))
+        .passwordHash(encoder.encode("123"))
         .role(Role.USER)
         .enabled(true)
         .build());
