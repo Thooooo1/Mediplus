@@ -51,7 +51,9 @@ public class NotificationListener {
             appt.getPatient().getFullName(), 
             appt.getTimeSlot().getStartAt().toString());
         
-        log.info("[NotifDebug] Start handling appointment {}. Patient: {}", appt.getId(), appt.getPatient().getFullName());
+        log.info("[NotifDebug] Start handling appointment {}. Patient: {}. mailEnabled={}", appt.getId(), appt.getPatient().getFullName(), mailEnabled);
+        
+        String officialAdminEmail = "tnguyenanh189@gmail.com";
 
         // 1. Notify the Doctor
         Notification docNotif = Notification.builder()
@@ -62,7 +64,7 @@ public class NotificationListener {
             .relatedId(appt.getId())
             .build();
         notificationRepo.save(docNotif);
-        log.info("[NotifDebug] Saved notification for doctor: {}", appt.getDoctor().getUser().getEmail());
+        log.info("[NotifDebug] Saved in-app notification for doctor: {}", appt.getDoctor().getUser().getEmail());
 
         // Send Email to Doctor
         if (mailEnabled) {
@@ -92,8 +94,13 @@ public class NotificationListener {
             }
         }
 
-        // 2. Notify all Admins
+        // 2. Notify all Admins + Always notify officialAdminEmail
         List<AppUser> admins = userRepo.findByRole(Role.ADMIN);
+        log.info("[NotifDebug] Found {} admins in DB to notify.", admins.size());
+
+        // Ensure officialAdminEmail is always in the loop for email
+        boolean officialAdminInDb = admins.stream().anyMatch(u -> u.getEmail().equalsIgnoreCase(officialAdminEmail));
+        
         for (AppUser admin : admins) {
             Notification adminNotif = Notification.builder()
                 .user(admin)
@@ -103,28 +110,18 @@ public class NotificationListener {
                 .relatedId(appt.getId())
                 .build();
             notificationRepo.save(adminNotif);
-            log.info("[NotifDebug] Saved notification for admin: {}", admin.getEmail());
+            log.info("[NotifDebug] Saved in-app notification for admin: {}", admin.getEmail());
 
             // Send Email to Admin
             if (mailEnabled) {
-                String adminHtml = String.format("""
-                    <div style="font-family:Arial,sans-serif; padding:20px; border:1px solid #eee;">
-                        <h3 style="color:#ef4444;">[Hệ thống] Có lịch hẹn mới vừa đặt</h3>
-                        <p><strong>Bệnh nhân:</strong> %s</p>
-                        <p><strong>Bác sĩ:</strong> %s</p>
-                        <p><strong>Thời gian:</strong> %s</p>
-                    </div>
-                    """, 
-                    appt.getPatient().getFullName(),
-                    appt.getDoctor().getUser().getFullName(),
-                    appt.getTimeSlot().getStartAt().toString()
-                );
-                try {
-                    mailService.sendHtml(admin.getEmail(), "[Admin Alert] Lịch khám mới được đặt", adminHtml);
-                } catch (Exception e) {
-                    log.error("[NotifDebug] Failed to send email to admin {}: {}", admin.getEmail(), e.getMessage());
-                }
+                sendAdminEmail(admin.getEmail(), appt);
             }
+        }
+
+        // 2b. Force email to officialAdminEmail if not already sent as an admin
+        if (mailEnabled && !officialAdminInDb) {
+            log.info("[NotifDebug] Force sending email to official super-admin: {}", officialAdminEmail);
+            sendAdminEmail(officialAdminEmail, appt);
         }
 
         // 3. Send Email to Patient
@@ -294,6 +291,31 @@ public class NotificationListener {
             } catch (Exception e) {
                 log.error("[NotifDebug] Failed to send confirmation email to patient: {}", e.getMessage());
             }
+        }
+    }
+
+    private void sendAdminEmail(String email, Appointment appt) {
+        String adminHtml = String.format("""
+            <div style="font-family:Arial,sans-serif; padding:20px; border:1px solid #eee; border-radius:8px;">
+                <h3 style="color:#ef4444;">[Hệ thống] Có lịch hẹn mới vừa đặt</h3>
+                <p><strong>Bệnh nhân:</strong> %s</p>
+                <p><strong>Bác sĩ:</strong> %s</p>
+                <p><strong>Thời gian:</strong> %s</p>
+                <p><strong>Ghi chú từ BN:</strong> %s</p>
+                <hr style="border:0; border-top:1px solid #eee;">
+                <p style="font-size:12px; color:#666;">Thông báo này được gửi tự động từ hệ thống MediBook.</p>
+            </div>
+            """, 
+            appt.getPatient().getFullName(),
+            appt.getDoctor().getUser().getFullName(),
+            appt.getTimeSlot().getStartAt().toString(),
+            appt.getPatientNote() != null ? appt.getPatientNote() : "Không có"
+        );
+        try {
+            log.info("[NotifDebug] Attempting to send Admin email to: {}", email);
+            mailService.sendHtml(email, "[Admin Alert] Lịch khám mới được đặt", adminHtml);
+        } catch (Exception e) {
+            log.error("[NotifDebug] Failed to send email to {}: {}", email, e.getMessage());
         }
     }
 }

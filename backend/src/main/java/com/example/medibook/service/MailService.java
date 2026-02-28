@@ -78,14 +78,14 @@ public class MailService {
 
     private void sendViaResend(String to, String subject, String html) {
         String cleanKey = resendApiKey != null ? resendApiKey.trim() : "";
-        log.info("[Mail] Attempting to send via Resend API to: {}", to);
+        log.info("[Mail] Attempting to send via Resend API to: {}. API Key Present: {}", to, !cleanKey.isEmpty());
         
         // Resilience: If using a personal email as sender for non-verified domains, Resend often fails.
         // We use a safe default if the current sender looks like a personal email or placeholder.
         String effectiveFrom = fromEmail;
-        if (fromEmail.contains("@gmail.com") || fromEmail.contains("local") || fromEmail.contains("example.com")) {
+        if (fromEmail == null || fromEmail.contains("@gmail.com") || fromEmail.contains("local") || fromEmail.contains("example.com")) {
             effectiveFrom = "MediBook <onboarding@resend.dev>";
-            log.warn("[Mail] Using safe-sender 'onboarding@resend.dev' instead of '{}' for reliability.", fromEmail);
+            log.warn("[Mail] Using safe-sender 'onboarding@resend.dev' because '{}' might be invalid for Resend.", fromEmail);
         }
 
         String jsonBody = String.format("""
