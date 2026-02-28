@@ -208,7 +208,7 @@ const markNotifAsRead = async (id, type, relatedId) => {
         // Redirect based on type if needed
         if (type === 'APPOINTMENT_BOOKED' || type === 'APPOINTMENT_CANCELLED' || type === 'APPOINTMENT_CONFIRMED') {
             const role = localStorage.getItem("role");
-            if (role === 'DOCTOR') location.href = 'doctor-appointments.html';
+            if (role === 'DOCTOR') location.href = 'doctor-dashboard.html';
             else if (role === 'ADMIN') location.href = 'admin-appointments.html';
             else if (role === 'USER') location.href = 'my-appointments.html';
             else renderNotifications();
