@@ -36,8 +36,8 @@ public class AdminController {
   private final PasswordEncoder encoder;
   private final com.example.medibook.service.MailService mailService;
 
-  @Value("${app.timezone:Asia/Ho_Chi_Minh}")
-  private String timezone;
+  @Value("${app.mail.enabled:false}")
+  private boolean mailEnabled;
 
   @GetMapping("/test-email")
   public String testEmail(@RequestParam("to") String to, @RequestParam(value = "secret", required = false) String secret) {
@@ -46,11 +46,12 @@ public class AdminController {
     }
     try {
       mailService.sendHtml(to, "[MediBook] Kiểm tra hệ thống Email", 
-        "<h3>Chào bạn,</h3><p>Nếu bạn nhận được email này, có nghĩa là API Key mới của bạn đã hoạt động chính xác!</p>");
-      return "Email sent to " + to;
+        "<h3>Chào bạn,</h3><p>Nếu bạn nhận được email này, có nghĩa là API Key mới của bạn đã hoạt động chính xác!</p>" +
+        "<p>Trạng thái MAIL_ENABLED hiện tại: <b>" + mailEnabled + "</b></p>");
+      return "Email sent to " + to + ". Current MAIL_ENABLED status: " + mailEnabled;
     } catch (Exception e) {
       log.error("[TestEmail] Failed: {}", e.getMessage());
-      return "Error: " + e.getMessage();
+      return "Error: " + e.getMessage() + ". MAIL_ENABLED: " + mailEnabled;
     }
   }
 
