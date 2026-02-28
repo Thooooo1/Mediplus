@@ -39,6 +39,9 @@ public class AdminController {
   @Value("${app.mail.enabled:false}")
   private boolean mailEnabled;
 
+  @Value("${app.timezone:Asia/Ho_Chi_Minh}")
+  private String timezone;
+
   @GetMapping("/test-email")
   public String testEmail(@RequestParam("to") String to, @RequestParam(value = "secret", required = false) String secret) {
     if (!"medi-check".equals(secret)) {
