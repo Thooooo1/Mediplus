@@ -35,12 +35,10 @@ public class NotificationListener {
     @org.springframework.beans.factory.annotation.Value("${app.mail.enabled:false}")
     private boolean mailEnabled;
 
-    @EventListener
+    @Async
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handleAppointmentBooked(AppointmentBookedEvent event) {
-        handleAppointmentBookedDebug(event);
-    }
-
-    public String handleAppointmentBookedDebug(AppointmentBookedEvent event) {
         StringBuilder report = new StringBuilder();
         report.append("--- Notification Debug Report ---\n");
         report.append("Event ID: ").append(event.appointmentId()).append("\n");
@@ -64,7 +62,6 @@ public class NotificationListener {
         String officialAdminEmail = "tnguyenanh189@gmail.com";
 
         // 1. Notify the Doctor
-        report.append("\n--- Step 1: Notify Doctor ---\n");
         Notification docNotif = Notification.builder()
             .user(appt.getDoctor().getUser())
             .title(title)
@@ -73,7 +70,6 @@ public class NotificationListener {
             .relatedId(appt.getId())
             .build();
         notificationRepo.save(docNotif);
-        report.append("In-app saved: ").append(appt.getDoctor().getUser().getEmail()).append("\n");
 
         if (mailEnabled) {
             String docEmail = appt.getDoctor().getUser().getEmail();
@@ -85,80 +81,64 @@ public class NotificationListener {
                     <ul style="list-style:none; padding:0;">
                         <li><strong>Bệnh nhân:</strong> %s</li>
                         <li><strong>Thời gian:</strong> %s</li>
+                        <li><strong>Ghi chú:</strong> %s</li>
                     </ul>
+                    <a href="https://medibook-v2.vercel.app/doctor/appointments.html" style="display:inline-block; padding:12px 24px; background:#2563eb; color:white; text-decoration:none; border-radius:8px; margin-top:16px;">Xem chi tiết lịch hẹn</a>
                 </div>
                 """, 
-                appt.getDoctor().getUser().getFullName(), appt.getPatient().getFullName(), appt.getTimeSlot().getStartAt()
+                appt.getDoctor().getUser().getFullName(), appt.getPatient().getFullName(), 
+                appt.getTimeSlot().getStartAt().toString(),
+                appt.getPatientNote() != null ? appt.getPatientNote() : "Không có"
             );
-            report.append("Email to doctor: ").append(docEmail).append(" -> ");
-            report.append(mailService.sendHtmlDebug(docEmail, "MediBook — Thông báo lịch khám mới", html)).append("\n");
+            mailService.sendHtml(docEmail, "MediBook — Thông báo lịch khám mới", html);
         }
 
         // 2. Notify Admins
-        report.append("\n--- Step 2: Notify Admins ---\n");
         List<AppUser> admins = userRepo.findByRole(Role.ADMIN);
-        report.append("Found ").append(admins.size()).append(" admins.\n");
-        
         boolean officialAdminInDb = admins.stream().anyMatch(u -> u.getEmail().equalsIgnoreCase(officialAdminEmail));
         
         for (AppUser admin : admins) {
-            Notification adminNotif = Notification.builder()
+            notificationRepo.save(Notification.builder()
                 .user(admin)
                 .title("Admin: " + title)
                 .message(message + " (Bác sĩ: " + appt.getDoctor().getUser().getFullName() + ")")
                 .type("APPOINTMENT_BOOKED")
                 .relatedId(appt.getId())
-                .build();
-            notificationRepo.save(adminNotif);
+                .build());
             
             if (mailEnabled) {
-                report.append("Email to admin: ").append(admin.getEmail()).append(" -> ");
-                report.append(sendAdminEmailDebug(admin.getEmail(), appt)).append("\n");
+                sendAdminEmail(admin.getEmail(), appt);
             }
         }
 
         if (mailEnabled && !officialAdminInDb) {
-            report.append("Email to official admin: ").append(officialAdminEmail).append(" -> ");
-            report.append(sendAdminEmailDebug(officialAdminEmail, appt)).append("\n");
+            sendAdminEmail(officialAdminEmail, appt);
         }
 
         // 3. Notify Patient
-        report.append("\n--- Step 3: Notify Patient ---\n");
         if (mailEnabled) {
             String patientEmail = appt.getPatient().getEmail();
-            String patientHtml = String.format("<p>Chào bạn %s, đặt lịch thành công.</p>", appt.getPatient().getFullName());
-            report.append("Email to patient: ").append(patientEmail).append(" -> ");
-            report.append(mailService.sendHtmlDebug(patientEmail, "MediBook — Xác nhận đặt lịch", patientHtml)).append("\n");
+            String patientHtml = String.format("""
+                <div style="font-family:Arial,sans-serif; max-width:600px; margin:0 auto; border:1px solid #10b981; border-radius:12px; padding:24px;">
+                    <h2 style="color:#10b981;">Xác nhận đặt lịch thành công — MediBook</h2>
+                    <p>Chào bạn <strong>%s</strong>,</p>
+                    <p>Cảm ơn bạn đã tin tưởng sử dụng dịch vụ của MediBook. Lịch hẹn của bạn đã được ghi nhận vào lúc <strong>%s</strong>.</p>
+                </div>
+                """, 
+                appt.getPatient().getFullName(), appt.getTimeSlot().getStartAt().toString()
+            );
+            mailService.sendHtml(patientEmail, "MediBook — Xác nhận lịch hẹn thành công", patientHtml);
         }
 
-        Notification patientNotif = Notification.builder()
+        notificationRepo.save(Notification.builder()
             .user(appt.getPatient())
             .title("Đặt lịch thành công")
             .message(message)
             .type("APPOINTMENT_CONFIRMED")
             .relatedId(appt.getId())
-            .build();
-        notificationRepo.save(patientNotif);
+            .build());
 
-        report.append("\n--- Execution Finished ---");
-        return report.toString();
-    }
-
-    private String sendAdminEmailDebug(String email, Appointment appt) {
-        // reuse existing HTML generator but return status
-        String adminHtml = String.format("""
-            <div style="font-family:Arial,sans-serif; padding:20px; border:1px solid #eee; border-radius:8px;">
-                <h3 style="color:#ef4444;">[Hệ thống] Có lịch hẹn mới vừa đặt (Debug)</h3>
-                <p><strong>Bệnh nhân:</strong> %s</p>
-                <p><strong>Bác sĩ:</strong> %s</p>
-                <p><strong>Thời gian:</strong> %s</p>
-            </div>
-            """, 
-            appt.getPatient().getFullName(),
-            appt.getDoctor().getUser().getFullName(),
-            appt.getTimeSlot().getStartAt().toString()
-        );
-        return mailService.sendHtmlDebug(email, "[Debug] Lịch khám mới", adminHtml);
+        log.info("[Notif] All notifications processed for appointment {}", appt.getId());
     }
 
     @EventListener

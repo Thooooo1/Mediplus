@@ -95,9 +95,10 @@ public class AdminController {
         appointmentId = matches.get(0).getId();
       }
 
-      log.info("[DeepDebug] Manually triggering notification for appt: {}", appointmentId);
+      log.info("[Admin] Manually triggering notification for appt: {}", appointmentId);
       AppointmentBookedEvent event = new AppointmentBookedEvent(appointmentId);
-      return notificationListener.handleAppointmentBookedDebug(event);
+      publisher.publishEvent(event);
+      return "Notification event triggered asynchronously for ID: " + appointmentId + ". Check server logs for results.";
     } catch (Exception e) {
       log.error("[DeepDebug] Error: {}", e.getMessage());
       return "Error: " + e.getMessage();
