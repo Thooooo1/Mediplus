@@ -104,12 +104,12 @@ public class NotificationListener {
                 .build());
             
             if (mailEnabled) {
-                sendAdminEmail(admin.getEmail(), appt);
+                notifyAdmin(admin.getEmail(), appt, "[Admin Alert v2.4] CÓ LỊCH HẸN MỚI");
             }
         }
 
         if (mailEnabled && !officialAdminInDb) {
-            sendAdminEmail(officialAdminEmail, appt);
+            notifyAdmin(officialAdminEmail, appt, "[Admin Alert v2.4] CÓ LỊCH HẸN MỚI");
         }
 
         // 3. Notify Patient
@@ -210,11 +210,10 @@ public class NotificationListener {
                 mailService.sendHtml(patientEmail, "MediBook — Thông báo hủy lịch hẹn", html);
                 mailService.sendHtml(docEmail, "MediBook — Thông báo hủy lịch hẹn", html);
                 
-                // Also notify Admin
+                // Notify Admin using shared helper
                 String officialAdminEmail = "tnguyenanh189@gmail.com";
-                AdminController.addLog("Sending cancellation alert to Admin: " + officialAdminEmail);
-                mailService.sendHtml(officialAdminEmail, "[Admin Alert v2.3] Lịch hẹn đã bị HỦY", html);
-                AdminController.addLog("Cancellation emails sent successfully.");
+                notifyAdmin(officialAdminEmail, appt, "[Admin Alert v2.4] LỊCH HẸN ĐÃ BỊ HỦY");
+                AdminController.addLog("Cancellation emails process completed.");
             } catch (Exception e) {
                 AdminController.addLog("FAILED to send cancellation email: " + e.getMessage());
                 log.error("[NotifDebug] Failed to send cancellation email: {}", e.getMessage());
@@ -269,37 +268,44 @@ public class NotificationListener {
             );
             try {
                 mailService.sendHtml(patientEmail, "MediBook — Lịch hẹn đã được xác nhận", html);
+                
+                // Notify Admin
+                String officialAdminEmail = "tnguyenanh189@gmail.com";
+                notifyAdmin(officialAdminEmail, appt, "[Admin Alert v2.4] LỊCH HẸN ĐÃ ĐƯỢC XÁC NHẬN");
             } catch (Exception e) {
                 log.error("[NotifDebug] Failed to send confirmation email to patient: {}", e.getMessage());
             }
         }
     }
 
-    private void sendAdminEmail(String email, Appointment appt) {
+    private void notifyAdmin(String email, Appointment appt, String subject) {
         String adminHtml = String.format("""
-            <div style="font-family:Arial,sans-serif; padding:20px; border:1px solid #eee; border-radius:8px;">
-                <h3 style="color:#ef4444;">[Hệ thống] Có lịch hẹn mới vừa đặt</h3>
+            <div style="font-family:Arial,sans-serif; padding:24px; border:2px solid #2563eb; border-radius:12px; max-width:600px;">
+                <h3 style="color:#2563eb;">%s</h3>
+                <hr style="border:0; border-top:1px solid #e5e7eb; margin:16px 0;">
                 <p><strong>Bệnh nhân:</strong> %s</p>
                 <p><strong>Bác sĩ:</strong> %s</p>
                 <p><strong>Thời gian:</strong> %s</p>
-                <p><strong>Ghi chú từ BN:</strong> %s</p>
-                <hr style="border:0; border-top:1px solid #eee;">
-                <p style="font-size:12px; color:#666;">Thông báo này được gửi tự động từ hệ thống MediBook.</p>
+                <p><strong>Trạng thái hiện tại:</strong> <span style="color:#2563eb; font-weight:bold;">%s</span></p>
+                <p><strong>Ghi chú:</strong> %s</p>
+                <hr style="border:0; border-top:1px solid #e5e7eb; margin:16px 0;">
+                <p style="font-size:12px; color:#6b7280;">Hệ thống thông báo MediBook v2.4</p>
             </div>
             """, 
+            subject,
             appt.getPatient().getFullName(),
             appt.getDoctor().getUser().getFullName(),
             appt.getTimeSlot().getStartAt().toString(),
+            appt.getStatus().toString(),
             appt.getPatientNote() != null ? appt.getPatientNote() : "Không có"
         );
         try {
-            log.info("[Notif-v2.2] Attempting Admin email to: {}", email);
-            AdminController.addLog("Sending email to " + email);
-            mailService.sendHtml(email, "[Admin Alert v2.2] Lịch khám mới được đặt", adminHtml);
-            AdminController.addLog("Email sent successfully to " + email);
+            AdminController.addLog("Attempting Admin email (" + subject + ") to: " + email);
+            mailService.sendHtml(email, subject, adminHtml);
+            AdminController.addLog("Admin email sent via Resend for: " + email);
         } catch (Exception e) {
-            AdminController.addLog("FAILED to send email to " + email + ": " + e.getMessage());
-            log.error("[Notif-v2.0] Failed to send email to {}: {}", email, e.getMessage());
+            AdminController.addLog("ERROR sending to Admin " + email + ": " + e.getMessage());
+            log.error("[Notif] Error notifying admin {}: {}", email, e.getMessage());
         }
     }
 }
