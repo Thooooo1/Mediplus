@@ -39,7 +39,7 @@ app:
     jwtExpireMinutes: ${JWT_EXPIRE_MINUTES:4320}
   mail:
     enabled: ${MAIL_ENABLED:false}
-    from: ${MAIL_FROM:no-reply@medibook.local}
+    from: ${MAIL_FROM:onboarding@resend.dev}
   resend:
     apiKey: ${RESEND_API_KEY:}
 

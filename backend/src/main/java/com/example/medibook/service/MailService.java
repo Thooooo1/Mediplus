@@ -65,7 +65,7 @@ public class MailService {
             log.info("[Mail] Resend Response: Status={}, Body={}", response.statusCode(), response.body());
             
             if (response.statusCode() >= 400) {
-                log.error("[Mail] Resend Error details: {}", response.body());
+                log.error("[Mail] Resend Error details: {}. Likely cause: 'From' address [{}] not verified in Resend Dashboard.", response.body(), fromEmail);
             }
         } catch (Exception e) {
             log.error("[Mail] Resend API failed: {}. Falling back to SMTP if possible...", e.getMessage());
