@@ -36,14 +36,15 @@ public class NotificationListener {
     @org.springframework.beans.factory.annotation.Value("${app.mail.enabled:false}")
     private boolean mailEnabled;
 
-    @EventListener
+    @Async
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handleAppointmentBooked(AppointmentBookedEvent event) {
-        String logMsg = "Handling booked event: " + event.appointmentId();
-        log.info("[Notif-v2.2] " + logMsg);
+        String logMsg = "Handling booked event (Post-Commit v2.3): " + event.appointmentId();
+        log.info("[Notif-v2.3] " + logMsg);
         AdminController.addLog(logMsg);
         
-        appt = appointmentRepo.findDetailsById(event.appointmentId()).orElse(null);
+        Appointment appt = appointmentRepo.findDetailsById(event.appointmentId()).orElse(null);
         if (appt == null) {
             AdminController.addLog("CRITICAL: Appointment still not found even after Commit: " + event.appointmentId());
             return;
