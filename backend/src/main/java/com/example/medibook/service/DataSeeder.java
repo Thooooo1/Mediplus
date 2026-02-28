@@ -27,10 +27,34 @@ public class DataSeeder implements ApplicationRunner {
   private final AppointmentRepository appointmentRepo;
   private final TimeSlotRepository timeSlotRepo;
 
+  // Force redeploy to ensure admin seeding
   @Override
   public void run(ApplicationArguments args) {
     if (userRepo.count() == 0) {
         seedAll();
+    } else {
+        // Đảm bảo tnguyenanh189@gmail.com luôn tồn tại
+        if (userRepo.findByEmail("tnguyenanh189@gmail.com").isEmpty()) {
+            userRepo.save(AppUser.builder()
+              .email("tnguyenanh189@gmail.com")
+              .fullName("Official Admin")
+              .passwordHash(encoder.encode("123"))
+              .role(Role.ADMIN)
+              .enabled(true)
+              .build());
+            System.out.println("==> Added missing admin: tnguyenanh189@gmail.com");
+        }
+        // Đảm bảo admin@gmail.com luôn tồn tại
+        if (userRepo.findByEmail("admin@gmail.com").isEmpty()) {
+            userRepo.save(AppUser.builder()
+              .email("admin@gmail.com")
+              .fullName("System Admin")
+              .passwordHash(encoder.encode("123"))
+              .role(Role.ADMIN)
+              .enabled(true)
+              .build());
+            System.out.println("==> Added missing admin: admin@gmail.com");
+        }
     }
   }
 
