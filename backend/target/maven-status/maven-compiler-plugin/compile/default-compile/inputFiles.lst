@@ -7,16 +7,20 @@ D:\mediplus\backend\src\main\java\com\example\medibook\controller\AppointmentCon
 D:\mediplus\backend\src\main\java\com\example\medibook\controller\AuthController.java
 D:\mediplus\backend\src\main\java\com\example\medibook\controller\CatalogController.java
 D:\mediplus\backend\src\main\java\com\example\medibook\controller\DoctorController.java
+D:\mediplus\backend\src\main\java\com\example\medibook\controller\NotificationController.java
 D:\mediplus\backend\src\main\java\com\example\medibook\dto\AppointmentDtos.java
 D:\mediplus\backend\src\main\java\com\example\medibook\dto\AuthDtos.java
 D:\mediplus\backend\src\main\java\com\example\medibook\dto\CatalogDtos.java
 D:\mediplus\backend\src\main\java\com\example\medibook\dto\DoctorDtos.java
 D:\mediplus\backend\src\main\java\com\example\medibook\events\AppointmentBookedEvent.java
+D:\mediplus\backend\src\main\java\com\example\medibook\events\AppointmentCancelledEvent.java
+D:\mediplus\backend\src\main\java\com\example\medibook\events\AppointmentConfirmedEvent.java
 D:\mediplus\backend\src\main\java\com\example\medibook\exception\ApiExceptionHandler.java
 D:\mediplus\backend\src\main\java\com\example\medibook\exception\BadRequestException.java
 D:\mediplus\backend\src\main\java\com\example\medibook\exception\ConflictException.java
 D:\mediplus\backend\src\main\java\com\example\medibook\exception\NotFoundException.java
 D:\mediplus\backend\src\main\java\com\example\medibook\listener\MailListener.java
+D:\mediplus\backend\src\main\java\com\example\medibook\listener\NotificationListener.java
 D:\mediplus\backend\src\main\java\com\example\medibook\MediBookApplication.java
 D:\mediplus\backend\src\main\java\com\example\medibook\model\Appointment.java
 D:\mediplus\backend\src\main\java\com\example\medibook\model\AppointmentStatus.java
@@ -25,6 +29,7 @@ D:\mediplus\backend\src\main\java\com\example\medibook\model\ChatMessage.java
 D:\mediplus\backend\src\main\java\com\example\medibook\model\DoctorProfile.java
 D:\mediplus\backend\src\main\java\com\example\medibook\model\MedicalRecord.java
 D:\mediplus\backend\src\main\java\com\example\medibook\model\MessageSender.java
+D:\mediplus\backend\src\main\java\com\example\medibook\model\Notification.java
 D:\mediplus\backend\src\main\java\com\example\medibook\model\PasswordResetToken.java
 D:\mediplus\backend\src\main\java\com\example\medibook\model\Role.java
 D:\mediplus\backend\src\main\java\com\example\medibook\model\Specialty.java
@@ -36,6 +41,7 @@ D:\mediplus\backend\src\main\java\com\example\medibook\repo\AppUserRepository.ja
 D:\mediplus\backend\src\main\java\com\example\medibook\repo\ChatMessageRepository.java
 D:\mediplus\backend\src\main\java\com\example\medibook\repo\DoctorProfileRepository.java
 D:\mediplus\backend\src\main\java\com\example\medibook\repo\MedicalRecordRepository.java
+D:\mediplus\backend\src\main\java\com\example\medibook\repo\NotificationRepository.java
 D:\mediplus\backend\src\main\java\com\example\medibook\repo\PasswordResetTokenRepository.java
 D:\mediplus\backend\src\main\java\com\example\medibook\repo\SpecialtyRepository.java
 D:\mediplus\backend\src\main\java\com\example\medibook\repo\TimeSlotRepository.java
@@ -50,3 +56,4 @@ D:\mediplus\backend\src\main\java\com\example\medibook\service\CatalogService.ja
 D:\mediplus\backend\src\main\java\com\example\medibook\service\DataSeeder.java
 D:\mediplus\backend\src\main\java\com\example\medibook\service\MailService.java
 D:\mediplus\backend\src\main\java\com\example\medibook\service\SlotService.java
+D:\mediplus\backend\src\main\java\com\example\medibook\utils\StringNormalizationUtils.java

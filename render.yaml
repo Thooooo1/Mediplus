@@ -45,5 +45,10 @@ services:
       - key: MAIL_PORT
         value: 587
       - key: MAIL_FROM
-        value: Medibook Support <no-reply@medibook.local>
-
+        value: Medibook Support <tnguyenanh189@gmail.com>
+      - key: RESEND_API_KEY
+        value: re_RH7JjXo9_5bAtio-uRuK6exruuErgxRmP
+      - key: MAIL_USER
+        value: tnguyenanh189@gmail.com
+      - key: MAIL_PASS
+        value: hlkwzfzqcseuwrrs

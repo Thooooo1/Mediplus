@@ -96,6 +96,8 @@
       <version>2.6.0</version>
     </dependency>
 
+    </dependency>
+
     <!-- Lombok -->
     <dependency>
       <groupId>org.projectlombok</groupId>
