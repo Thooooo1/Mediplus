@@ -36,8 +36,8 @@ public class NotificationListener {
     private boolean mailEnabled;
 
     @Async
+    @EventListener
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleAppointmentBooked(AppointmentBookedEvent event) {
         log.info("[NotifDebug] Mail Enabled Status: {}", mailEnabled);
         Appointment appt = appointmentRepo.findDetailsById(event.appointmentId()).orElse(null);

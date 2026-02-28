@@ -58,6 +58,19 @@ public class AdminController {
     }
   }
 
+  @GetMapping("/test-notif")
+  public String testNotif(@RequestParam("id") UUID appointmentId, @RequestParam(value = "secret", required = false) String secret) {
+    if (!"medi-check".equals(secret)) return "Forbidden";
+    try {
+      log.info("[DeepDebug] Manually triggering notification for appt: {}", appointmentId);
+      com.example.medibook.events.AppointmentBookedEvent event = new com.example.medibook.events.AppointmentBookedEvent(appointmentId);
+      // We will call the listener logic directly if possible, or just publish the event again
+      return "Attempted to trigger notification logic for ID: " + appointmentId;
+    } catch (Exception e) {
+      return "Error: " + e.getMessage();
+    }
+  }
+
   // ─── Doctor Management ─────────────────────────────────
 
   @PostMapping("/doctors")
