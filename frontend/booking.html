@@ -216,9 +216,8 @@
             }
             grid.innerHTML = list.map(s => `
                 <div class="col-md-6 col-xl-4">
-                    <div class="premium-spec-card" onclick="selectSpecialty('${s.id}', '${s.name}')">
+                    <div class="premium-spec-card" onclick="selectSpecialty(this, '${s.id}', '${s.name}')">
                         <div class="spec-name">${s.name}</div>
-                        <div class="spec-count">Chuyên gia hàng đầu</div>
                     </div>
                 </div>
             `).join('');
@@ -229,13 +228,22 @@
             renderSpecialties(specialties.filter(s => s.name.toLowerCase().includes(q)));
         };
 
-        function selectSpecialty(id, name) {
+        function selectSpecialty(el, id, name) {
+            // Remove active from all siblings
+            document.querySelectorAll('.premium-spec-card').forEach(c => c.classList.remove('active'));
+            // Add to current
+            if (el) el.classList.add('active');
+
             selectedSpecialty = { id, name };
             document.getElementById('summarySpec').innerText = name;
             document.getElementById('selectedSpecName').innerText = name;
-            goToStep(2);
-            renderDateStrip();
-            loadSlots();
+            
+            // Short delay to show selection before moving
+            setTimeout(() => {
+                goToStep(2);
+                renderDateStrip();
+                loadSlots();
+            }, 300);
         }
 
         function renderDateStrip() {

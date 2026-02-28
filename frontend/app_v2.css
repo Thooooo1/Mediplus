@@ -577,14 +577,26 @@ hr { border: none; border-top: 1px solid var(--neutral-200); margin: 20px 0; }
 .nav-notif-container { position: relative; margin-right: 12px; }
 /* Bell Button Style */
 .notif-bell-btn { 
-    background: rgba(255,255,255,0.1); 
-    border: 1px solid rgba(255,255,255,0.2); 
-    color: white; 
+    background: var(--neutral-100); 
+    border: 1px solid var(--neutral-200); 
+    color: var(--neutral-600); 
     padding: 8px; border-radius: 12px; cursor: pointer; position: relative;
     display: flex; align-items: center; justify-content: center;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.notif-bell-btn:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); }
+.notif-bell-btn:hover { background: var(--neutral-200); color: var(--primary); transform: translateY(-2px); }
+
+/* Transparent Nav State (Home Hero) */
+#topNav .notif-bell-btn {
+    background: rgba(255,255,255,0.15);
+    border-color: rgba(255,255,255,0.2);
+    color: white;
+}
+#topNav.scrolled .notif-bell-btn { 
+    background: var(--neutral-100); 
+    border-color: var(--neutral-200); 
+    color: var(--neutral-600); 
+}
 
 /* Dashboard Header adjustments */
 .main-header .notif-bell-btn {

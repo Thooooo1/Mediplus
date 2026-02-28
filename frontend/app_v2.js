@@ -162,6 +162,8 @@ const updateNotificationBadge = async () => {
                 badge.textContent = count > 99 ? "99+" : count;
                 const isShowing = count > 0;
                 badge.classList.toggle("show", isShowing);
+                if (!isShowing) badge.style.display = 'none';
+                else badge.style.display = 'flex';
                 
                 // Alert if count increased
                 if (count > prevCount && prevCount >= 0) {
@@ -181,11 +183,12 @@ const renderNotifications = async () => {
         const r = await API("/api/notifications?size=10");
         if (r.ok) {
             const data = await r.json();
-            if (data.content.length === 0) {
-                list.innerHTML = '<div class="notif-empty"><span class="material-icons-round">notifications_off</span><span>Không có thông báo nào</span></div>';
-            } else {
-                list.innerHTML = data.content.map(n => `
-                    <div class="notif-item ${n.read ? '' : 'unread'}" onclick="markNotifAsRead('${n.id}', '${n.type}', '${n.relatedId}')">
+                const unreadOnly = data.content.filter(n => !n.read);
+                if (unreadOnly.length === 0) {
+                    list.innerHTML = '<div class="notif-empty"><span class="material-icons-round">notifications_off</span><span>Không có thông báo mới</span></div>';
+                } else {
+                    list.innerHTML = unreadOnly.map(n => `
+                        <div class="notif-item unread" onclick="markNotifAsRead('${n.id}', '${n.type}', '${n.relatedId}')">
                         <div class="notif-title">${n.title}</div>
                         <div class="notif-msg">${n.message}</div>
                         <div class="notif-time">${fmt(n.createdAt)}</div>

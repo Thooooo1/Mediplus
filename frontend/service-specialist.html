@@ -135,9 +135,8 @@
                 if (r.ok) {
                     const specs = await r.json();
                     document.getElementById('specialtiesList').innerHTML = specs.map(s => `
-                        <div class="premium-spec-card" onclick="filterBySpecialty('${s.id}', '${s.name}')" id="spec-${s.id}">
+                        <div class="premium-spec-card" onclick="filterBySpecialty(this, '${s.id}', '${s.name}')" id="spec-${s.id}">
                             <div class="spec-name">${s.name}</div>
-                            <div class="spec-count">Chuyên gia hàng đầu</div>
                         </div>
                     `).join('');
                 }
@@ -198,17 +197,17 @@
             }
         }
 
-        function filterBySpecialty(id, name) {
-            currentSpecId = id;
-            document.getElementById('gridTitle').textContent = `Bác sĩ chuyên khoa: ${name}`;
+        function filterBySpecialty(el, id, name) {
+            // Remove active from all siblings
+            document.querySelectorAll('.premium-spec-card').forEach(c => c.classList.remove('active'));
+            // Add to current
+            if (el) el.classList.add('active');
             
-            // UI Active State
-            document.querySelectorAll('.spec-btn').forEach(btn => btn.classList.remove('active'));
-            if (id) {
-                document.getElementById('spec-' + id).classList.add('active');
-            }
-            
-            loadDoctors(id);
+            selectedSpecialty = id;
+            currentPage = 0;
+            const title = document.getElementById('gridTitle'); // Changed from sectionTitle to gridTitle
+            if (title) title.textContent = `Bác sĩ chuyên khoa ${name}`;
+            loadDoctors();
         }
     </script>
 </body>
