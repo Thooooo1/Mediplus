@@ -1,5 +1,6 @@
 package com.example.medibook.listener;
 
+import com.example.medibook.controller.AdminController;
 import com.example.medibook.events.AppointmentBookedEvent;
 import com.example.medibook.events.AppointmentCancelledEvent;
 import com.example.medibook.events.AppointmentConfirmedEvent;
@@ -40,7 +41,7 @@ public class NotificationListener {
     public void handleAppointmentBooked(AppointmentBookedEvent event) {
         String logMsg = "Handling booked event: " + event.appointmentId();
         log.info("[Notif-v2.2] " + logMsg);
-        com.example.medibook.controller.AdminController.addLog(logMsg);
+        AdminController.addLog(logMsg);
         
         Appointment appt = null;
         for (int i = 0; i < 3; i++) {
