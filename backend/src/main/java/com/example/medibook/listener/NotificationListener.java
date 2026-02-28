@@ -35,7 +35,8 @@ public class NotificationListener {
     @org.springframework.beans.factory.annotation.Value("${app.mail.enabled:false}")
     private boolean mailEnabled;
 
-    @EventListener
+    @Async
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handleAppointmentBooked(AppointmentBookedEvent event) {
         log.info("[Notif] Handling booked event for appt: {}", event.appointmentId());
@@ -133,7 +134,8 @@ public class NotificationListener {
         log.info("[Notif] All notifications processed for appointment {}", appt.getId());
     }
 
-    @EventListener
+    @Async
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handleAppointmentCancelled(AppointmentCancelledEvent event) {
         Appointment appt = appointmentRepo.findDetailsById(event.appointmentId()).orElse(null);
@@ -205,7 +207,8 @@ public class NotificationListener {
         }
     }
 
-    @EventListener
+    @Async
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handleAppointmentConfirmed(AppointmentConfirmedEvent event) {
         Appointment appt = appointmentRepo.findDetailsById(event.appointmentId()).orElse(null);
