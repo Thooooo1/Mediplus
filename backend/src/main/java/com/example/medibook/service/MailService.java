@@ -35,6 +35,39 @@ public class MailService {
         }
     }
 
+    /**
+     * For Debugging: Returns the actual response body from Resend for analysis.
+     */
+    public String sendHtmlDebug(String to, String subject, String htmlContent) {
+        if (resendApiKey != null && !resendApiKey.trim().isEmpty()) {
+            log.info("[MailDebug] Manual test attempt to: {}", to);
+            String jsonBody = String.format("""
+                {
+                    "from": "%s",
+                    "to": ["%s"],
+                    "subject": "%s",
+                    "html": %s
+                }
+                """, fromEmail, to, subject, escapeJson(htmlContent));
+
+            try {
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create("https://api.resend.com/emails"))
+                        .header("Authorization", "Bearer " + resendApiKey)
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                        .build();
+
+                HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+                return String.format("Status: %d | Body: %s", response.statusCode(), response.body());
+            } catch (Exception e) {
+                return "Debug Error: " + e.getMessage();
+            }
+        }
+        return "Resend API Key is missing. Check your environment variables.";
+    }
+
+
     private void sendViaResend(String to, String subject, String html) {
         log.info("[Mail] Attempting to send via Resend API to: {}", to);
         

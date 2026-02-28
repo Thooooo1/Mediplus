@@ -41,9 +41,11 @@ public class MailDebugController {
     public Map<String, Object> sendTest(@RequestParam String to) {
         Map<String, Object> result = new HashMap<>();
         try {
-            mailService.sendHtml(to, "MediBook Test Email", "<h1>Test</h1><p>This is a test email from MediBook Debugger.</p>");
+            String response = mailService.sendHtmlDebug(to, "MediBook Debug Test", 
+                "<h1>MediBook Connection Test</h1><p>If you see this, connectivity to Resend is working!</p>");
             result.put("success", true);
-            result.put("message", "Attempted to send email to " + to + ". Check server logs for API response.");
+            result.put("rawResponse", response);
+            result.put("advice", "If status is 403/422, ensure 'fromEmail' is exactly 'onboarding@resend.dev' OR verified in Resend Dashboard.");
         } catch (Exception e) {
             result.put("success", false);
             result.put("error", e.getMessage());
