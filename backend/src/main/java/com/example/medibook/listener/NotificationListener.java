@@ -35,25 +35,26 @@ public class NotificationListener {
     @org.springframework.beans.factory.annotation.Value("${app.mail.enabled:false}")
     private boolean mailEnabled;
 
-    @Async
     @EventListener
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handleAppointmentBooked(AppointmentBookedEvent event) {
-        log.info("[Notif-v2.1] Handling booked event: {}", event.appointmentId());
+        String logMsg = "Handling booked event: " + event.appointmentId();
+        log.info("[Notif-v2.2] " + logMsg);
+        com.example.medibook.controller.AdminController.addLog(logMsg);
         
         Appointment appt = null;
-        // Retry logic: Wait up to 2 seconds for DB to persist
         for (int i = 0; i < 3; i++) {
             appt = appointmentRepo.findDetailsById(event.appointmentId()).orElse(null);
             if (appt != null) break;
-            log.info("[Notif-v2.1] Appointment {} not found, retrying in 1s... (Attempt {})", event.appointmentId(), i+1);
+            AdminController.addLog("Appointment not found, retrying... " + (i+1));
             try { Thread.sleep(1000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
         }
 
         if (appt == null) {
-            log.warn("[Notif-v2.1] Appointment {} DEFINITIVELY NOT FOUND after retries.", event.appointmentId());
+            AdminController.addLog("Appointment DEFINITIVELY NOT FOUND: " + event.appointmentId());
             return;
         }
+        AdminController.addLog("Found appointment for: " + appt.getPatient().getFullName());
 
         String title = "Lịch hẹn mới";
         String message = String.format("Bệnh nhân %s đã đặt lịch vào lúc %s", 
@@ -284,9 +285,12 @@ public class NotificationListener {
             appt.getPatientNote() != null ? appt.getPatientNote() : "Không có"
         );
         try {
-            log.info("[Notif-v2.0] Attempting to send Admin email to: {}", email);
-            mailService.sendHtml(email, "[Admin Alert v2.0] Lịch khám mới được đặt", adminHtml);
+            log.info("[Notif-v2.2] Attempting Admin email to: {}", email);
+            AdminController.addLog("Sending email to " + email);
+            mailService.sendHtml(email, "[Admin Alert v2.2] Lịch khám mới được đặt", adminHtml);
+            AdminController.addLog("Email sent successfully to " + email);
         } catch (Exception e) {
+            AdminController.addLog("FAILED to send email to " + email + ": " + e.getMessage());
             log.error("[Notif-v2.0] Failed to send email to {}: {}", email, e.getMessage());
         }
     }

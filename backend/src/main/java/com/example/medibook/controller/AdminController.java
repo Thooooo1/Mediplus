@@ -30,6 +30,13 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class AdminController {
+  
+  public static final java.util.List<String> RECENT_LOGS = java.util.Collections.synchronizedList(new java.util.ArrayList<>());
+
+  public static void addLog(String msg) {
+      RECENT_LOGS.add(0, "[" + java.time.LocalDateTime.now() + "] " + msg);
+      if (RECENT_LOGS.size() > 50) RECENT_LOGS.remove(50);
+  }
 
   private final AppUserRepository userRepo;
   private final SpecialtyRepository specialtyRepo;
@@ -108,13 +115,14 @@ public class AdminController {
   @GetMapping("/logs")
   public String getLogs(@RequestParam(value = "secret", required = false) String secret) {
     if (!"medi-check".equals(secret)) return "Forbidden";
-    // We can't easily read file system logs on Render, so we'll return a simple status
-    // But we can store recent logs in a static buffer if we really wanted.
-    // For now, let's return a confirmation of the last important actions.
-    return "Log system is active. Latest trigger version: v2.1. \n" +
-           "Please check Render console logs if this endpoint doesn't show enough. \n" + 
-           "Mail Enabled: " + mailEnabled + "\n" +
-           "Timezone: " + timezone;
+    
+    StringBuilder sb = new StringBuilder("--- MEDIBOOK LIVE LOGS (v2.2) ---\n\n");
+    if (RECENT_LOGS.isEmpty()) {
+        sb.append("No logs yet. Try booking an appointment or triggering a test.");
+    } else {
+        RECENT_LOGS.forEach(log -> sb.append(log).append("\n"));
+    }
+    return sb.toString();
   }
 
   // ─── Doctor Management ─────────────────────────────────
