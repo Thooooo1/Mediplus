@@ -17,6 +17,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.List;
 
@@ -35,10 +37,13 @@ public class NotificationListener {
 
     @Async
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleAppointmentBooked(AppointmentBookedEvent event) {
         Appointment appt = appointmentRepo.findById(event.appointmentId()).orElse(null);
-        if (appt == null) return;
+        if (appt == null) {
+            log.warn("[NotifDebug] Appointment {} NOT FOUND in listener. Transaction might still be in progress.", event.appointmentId());
+            return;
+        }
 
         String title = "Lịch hẹn mới";
         String message = String.format("Bệnh nhân %s đã đặt lịch vào lúc %s", 
@@ -169,10 +174,13 @@ public class NotificationListener {
 
     @Async
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleAppointmentCancelled(AppointmentCancelledEvent event) {
         Appointment appt = appointmentRepo.findById(event.appointmentId()).orElse(null);
-        if (appt == null) return;
+        if (appt == null) {
+            log.warn("[NotifDebug] Cancelled Appointment {} NOT FOUND in listener.", event.appointmentId());
+            return;
+        }
 
         String title = "Lịch hẹn đã bị hủy";
         String message = String.format("Lịch hẹn lúc %s của bệnh nhân %s đã bị hủy bởi %s",
@@ -239,10 +247,13 @@ public class NotificationListener {
 
     @Async
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleAppointmentConfirmed(AppointmentConfirmedEvent event) {
         Appointment appt = appointmentRepo.findById(event.appointmentId()).orElse(null);
-        if (appt == null) return;
+        if (appt == null) {
+            log.warn("[NotifDebug] Confirmed Appointment {} NOT FOUND in listener.", event.appointmentId());
+            return;
+        }
 
         // Notify Patient
         Notification confNotif = Notification.builder()
