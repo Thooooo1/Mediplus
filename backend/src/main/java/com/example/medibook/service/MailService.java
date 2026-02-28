@@ -39,8 +39,15 @@ public class MailService {
      * For Debugging: Returns the actual response body from Resend for analysis.
      */
     public String sendHtmlDebug(String to, String subject, String htmlContent) {
-        if (resendApiKey != null && !resendApiKey.trim().isEmpty()) {
+        String cleanKey = resendApiKey != null ? resendApiKey.trim() : "";
+        if (!cleanKey.isEmpty()) {
             log.info("[MailDebug] Manual test attempt to: {}", to);
+            
+            String effectiveFrom = fromEmail;
+            if (fromEmail.contains("@gmail.com") || fromEmail.contains("local")) {
+                effectiveFrom = "onboarding@resend.dev";
+            }
+
             String jsonBody = String.format("""
                 {
                     "from": "%s",
@@ -48,18 +55,19 @@ public class MailService {
                     "subject": "%s",
                     "html": %s
                 }
-                """, fromEmail, to, subject, escapeJson(htmlContent));
+                """, effectiveFrom, to, subject, escapeJson(htmlContent));
 
             try {
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create("https://api.resend.com/emails"))
-                        .header("Authorization", "Bearer " + resendApiKey)
+                        .header("Authorization", "Bearer " + cleanKey)
                         .header("Content-Type", "application/json")
                         .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                         .build();
 
                 HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-                return String.format("Status: %d | Body: %s", response.statusCode(), response.body());
+                return String.format("Status: %d | Body: %s | UsedFrom: %s", 
+                    response.statusCode(), response.body(), effectiveFrom);
             } catch (Exception e) {
                 return "Debug Error: " + e.getMessage();
             }
@@ -69,9 +77,17 @@ public class MailService {
 
 
     private void sendViaResend(String to, String subject, String html) {
+        String cleanKey = resendApiKey != null ? resendApiKey.trim() : "";
         log.info("[Mail] Attempting to send via Resend API to: {}", to);
         
-        // Resend Payload: https://resend.com/docs/api-reference/emails/send-email
+        // Resilience: If using a personal email as sender for non-verified domains, Resend often fails.
+        // We use a safe default if the current sender looks like a personal email or placeholder.
+        String effectiveFrom = fromEmail;
+        if (fromEmail.contains("@gmail.com") || fromEmail.contains("local") || fromEmail.contains("example.com")) {
+            effectiveFrom = "MediBook <onboarding@resend.dev>";
+            log.warn("[Mail] Using safe-sender 'onboarding@resend.dev' instead of '{}' for reliability.", fromEmail);
+        }
+
         String jsonBody = String.format("""
             {
                 "from": "%s",
@@ -80,7 +96,7 @@ public class MailService {
                 "html": %s
             }
             """, 
-            fromEmail, 
+            effectiveFrom, 
             to, 
             subject, 
             escapeJson(html)
@@ -89,7 +105,7 @@ public class MailService {
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create("https://api.resend.com/emails"))
-                    .header("Authorization", "Bearer " + resendApiKey)
+                    .header("Authorization", "Bearer " + cleanKey)
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                     .build();
@@ -97,8 +113,10 @@ public class MailService {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             log.info("[Mail] Resend Response: Status={}, Body={}", response.statusCode(), response.body());
             
-            if (response.statusCode() >= 400) {
-                log.error("[Mail] Resend Error details: {}. Likely cause: 'From' address [{}] not verified in Resend Dashboard.", response.body(), fromEmail);
+            if (response.statusCode() == 401) {
+                log.error("[Mail] 401 Unauthorized: The RESEND_API_KEY is definitively invalid. Please check Render Environment Variables.");
+            } else if (response.statusCode() >= 400) {
+                log.error("[Mail] Resend Error: {}. Ensure from address is verified or use onboarding@resend.dev", response.body());
             }
         } catch (Exception e) {
             log.error("[Mail] Resend API failed: {}. Falling back to SMTP if possible...", e.getMessage());

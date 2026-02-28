@@ -32,8 +32,17 @@ public class MailDebugController {
         Map<String, Object> status = new HashMap<>();
         status.put("mailEnabled", mailEnabled);
         status.put("fromEmail", fromEmail);
-        status.put("resendApiKeyPresent", resendApiKey != null && !resendApiKey.trim().isEmpty());
-        status.put("resendApiKeyLength", resendApiKey != null ? resendApiKey.length() : 0);
+        
+        String key = resendApiKey != null ? resendApiKey.trim() : "";
+        status.put("resendApiKeyPresent", !key.isEmpty());
+        status.put("resendApiKeyLength", key.length());
+        
+        if (!key.isEmpty() && key.length() > 10) {
+            status.put("resendApiKeyMasked", key.substring(0, 5) + "..." + key.substring(key.length() - 4));
+        } else {
+            status.put("resendApiKeyMasked", "Key too short or missing");
+        }
+        
         return status;
     }
 
