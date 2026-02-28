@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.medibook.events.AppointmentBookedEvent;
+import com.example.medibook.listener.NotificationListener;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -39,6 +40,7 @@ public class AdminController {
   private final PasswordEncoder encoder;
   private final com.example.medibook.service.MailService mailService;
   private final ApplicationEventPublisher publisher;
+  private final NotificationListener notificationListener;
 
   @Value("${app.mail.enabled:false}")
   private boolean mailEnabled;
