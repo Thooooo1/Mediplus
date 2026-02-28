@@ -48,8 +48,7 @@ public class NotificationListener {
         
         Appointment appt = appointmentRepo.findDetailsById(event.appointmentId()).orElse(null);
         if (appt == null) {
-            String msg = "[NotifDebug] Appointment " + event.appointmentId() + " NOT FOUND in listener.";
-            log.warn(msg);
+            String msg = "Appointment " + event.appointmentId() + " NOT FOUND.";
             return report.append("ERROR: ").append(msg).toString();
         }
 
@@ -62,11 +61,10 @@ public class NotificationListener {
             appt.getPatient().getFullName(), 
             appt.getTimeSlot().getStartAt().toString());
         
-        log.info("[NotifDebug] Start handling appointment {}. Patient: {}. mailEnabled={}", appt.getId(), appt.getPatient().getFullName(), mailEnabled);
-        
         String officialAdminEmail = "tnguyenanh189@gmail.com";
 
         // 1. Notify the Doctor
+        report.append("\n--- Step 1: Notify Doctor ---\n");
         Notification docNotif = Notification.builder()
             .user(appt.getDoctor().getUser())
             .title(title)
@@ -75,9 +73,8 @@ public class NotificationListener {
             .relatedId(appt.getId())
             .build();
         notificationRepo.save(docNotif);
-        log.info("[NotifDebug] Saved in-app notification for doctor: {}", appt.getDoctor().getUser().getEmail());
+        report.append("In-app saved: ").append(appt.getDoctor().getUser().getEmail()).append("\n");
 
-        // Send Email to Doctor
         if (mailEnabled) {
             String docEmail = appt.getDoctor().getUser().getEmail();
             String html = String.format("""
@@ -88,70 +85,19 @@ public class NotificationListener {
                     <ul style="list-style:none; padding:0;">
                         <li><strong>Bệnh nhân:</strong> %s</li>
                         <li><strong>Thời gian:</strong> %s</li>
-                        <li><strong>Ghi chú:</strong> %s</li>
                     </ul>
-                    <a href="https://medibook-v2.vercel.app/doctor/appointments.html" style="display:inline-block; padding:12px 24px; background:#2563eb; color:white; text-decoration:none; border-radius:8px; margin-top:16px;">Xem chi tiết lịch hẹn</a>
                 </div>
                 """, 
-                appt.getDoctor().getUser().getFullName(),
-                appt.getPatient().getFullName(),
-                appt.getTimeSlot().getStartAt().toString(),
-                appt.getPatientNote() != null ? appt.getPatientNote() : "Không có"
+                appt.getDoctor().getUser().getFullName(), appt.getPatient().getFullName(), appt.getTimeSlot().getStartAt()
             );
-            try {
-                mailService.sendHtml(docEmail, "MediBook — Thông báo lịch khám mới", html);
-            } catch (Exception e) {
-                log.error("[NotifDebug] Failed to send email to doctor: {}", e.getMessage());
-            }
-        }
-
-        // 2. Notify all Admins + Always notify officialAdminEmail
-        List<AppUser> admins = userRepo.findByRole(Role.ADMIN);
-        log.info("[NotifDebug] Found {} admins in DB to notify.", admins.size());
-
-        // Ensure officialAdminEmail is always in the loop for email
-        boolean officialAdminInDb = admins.stream().anyMatch(u -> u.getEmail().equalsIgnoreCase(officialAdminEmail));
-        
-        for (AppUser admin : admins) {
-            Notification adminNotif = Notification.builder()
-                .user(admin)
-                .title("Admin: " + title)
-                .message(message + " (Bác sĩ: " + appt.getDoctor().getUser().getFullName() + ")")
-                .type("APPOINTMENT_BOOKED")
-                .relatedId(appt.getId())
-                .build();
-            notificationRepo.save(adminNotif);
-            log.info("[NotifDebug] Saved in-app notification for admin: {}", admin.getEmail());
-
-            // Send Email to Admin
-            if (mailEnabled) {
-                sendAdminEmail(admin.getEmail(), appt);
-            }
-        }
-
-        // 1. Notify the Doctor
-        report.append("--- Step 1: Notify Doctor ---\n");
-        Notification docNotif = Notification.builder()
-            .user(appt.getDoctor().getUser())
-            .title(title)
-            .message(message)
-            .type("APPOINTMENT_BOOKED")
-            .relatedId(appt.getId())
-            .build();
-        notificationRepo.save(docNotif);
-        report.append("In-app notification saved for doctor: ").append(appt.getDoctor().getUser().getEmail()).append("\n");
-
-        if (mailEnabled) {
-            String docEmail = appt.getDoctor().getUser().getEmail();
-            String html = String.format("<p>Chào Bác sĩ %s, có lịch hẹn mới.</p>", appt.getDoctor().getUser().getFullName());
-            report.append("Sending email to doctor: ").append(docEmail).append(" -> ");
+            report.append("Email to doctor: ").append(docEmail).append(" -> ");
             report.append(mailService.sendHtmlDebug(docEmail, "MediBook — Thông báo lịch khám mới", html)).append("\n");
         }
 
         // 2. Notify Admins
         report.append("\n--- Step 2: Notify Admins ---\n");
         List<AppUser> admins = userRepo.findByRole(Role.ADMIN);
-        report.append("Found ").append(admins.size()).append(" admins in DB.\n");
+        report.append("Found ").append(admins.size()).append(" admins.\n");
         
         boolean officialAdminInDb = admins.stream().anyMatch(u -> u.getEmail().equalsIgnoreCase(officialAdminEmail));
         
@@ -166,13 +112,13 @@ public class NotificationListener {
             notificationRepo.save(adminNotif);
             
             if (mailEnabled) {
-                report.append("Sending to admin: ").append(admin.getEmail()).append(" -> ");
+                report.append("Email to admin: ").append(admin.getEmail()).append(" -> ");
                 report.append(sendAdminEmailDebug(admin.getEmail(), appt)).append("\n");
             }
         }
 
         if (mailEnabled && !officialAdminInDb) {
-            report.append("Force sending to official admin: ").append(officialAdminEmail).append(" -> ");
+            report.append("Email to official admin: ").append(officialAdminEmail).append(" -> ");
             report.append(sendAdminEmailDebug(officialAdminEmail, appt)).append("\n");
         }
 
@@ -181,7 +127,7 @@ public class NotificationListener {
         if (mailEnabled) {
             String patientEmail = appt.getPatient().getEmail();
             String patientHtml = String.format("<p>Chào bạn %s, đặt lịch thành công.</p>", appt.getPatient().getFullName());
-            report.append("Sending email to patient: ").append(patientEmail).append(" -> ");
+            report.append("Email to patient: ").append(patientEmail).append(" -> ");
             report.append(mailService.sendHtmlDebug(patientEmail, "MediBook — Xác nhận đặt lịch", patientHtml)).append("\n");
         }
 
@@ -194,8 +140,9 @@ public class NotificationListener {
             .build();
         notificationRepo.save(patientNotif);
 
-        report.append("\nExecution finished. All steps traceable.");
+        report.append("\n--- Execution Finished ---");
         return report.toString();
+    }
     }
 
     private String sendAdminEmailDebug(String email, Appointment appt) {
