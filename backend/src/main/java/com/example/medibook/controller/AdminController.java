@@ -61,14 +61,38 @@ public class AdminController {
 
   @GetMapping("/test-notif")
   @org.springframework.transaction.annotation.Transactional
-  public String testNotif(@RequestParam("id") UUID appointmentId, @RequestParam(value = "secret", required = false) String secret) {
+  public String testNotif(@RequestParam("id") String idStr, @RequestParam(value = "secret", required = false) String secret) {
     if (!"medi-check".equals(secret)) return "Forbidden";
+    
+    UUID appointmentId;
     try {
+      if (idStr.startsWith("[") && idStr.endsWith("]")) {
+          idStr = idStr.substring(1, idStr.length() - 1);
+      }
+      if (idStr.startsWith("#")) {
+          idStr = idStr.substring(1);
+      }
+
+      if (idStr.length() == 36) {
+        appointmentId = UUID.fromString(idStr);
+      } else {
+        // Search by prefix (Short ID)
+        log.info("[DeepDebug] Searching for appointment with short ID prefix: {}", idStr);
+        List<Appointment> matches = appointmentRepo.findAll().stream()
+            .filter(a -> a.getId().toString().toUpperCase().startsWith(idStr.toUpperCase()))
+            .toList();
+        
+        if (matches.isEmpty()) return "Error: No appointment found starting with " + idStr;
+        if (matches.size() > 1) return "Error: Multiple appointments found starting with " + idStr + ". Please provide more characters.";
+        appointmentId = matches.get(0).getId();
+      }
+
       log.info("[DeepDebug] Manually triggering notification for appt: {}", appointmentId);
       com.example.medibook.events.AppointmentBookedEvent event = new com.example.medibook.events.AppointmentBookedEvent(appointmentId);
       publisher.publishEvent(event);
-      return "Successfully triggered notification event for ID: " + appointmentId + ". Check server logs for [NotifDebug]";
+      return "Successfully triggered notification event for ID: " + appointmentId + ". Current MAIL_ENABLED: " + mailEnabled;
     } catch (Exception e) {
+      log.error("[DeepDebug] Error: {}", e.getMessage());
       return "Error: " + e.getMessage();
     }
   }
