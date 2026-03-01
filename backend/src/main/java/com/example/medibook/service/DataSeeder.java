@@ -208,6 +208,7 @@ public class DataSeeder implements ApplicationRunner {
         .country(d.country())
         .rating(d.rating())
         .ratingCount(d.ratingCount())
+        .status(DoctorStatus.ACTIVE)
         .build());
 
       // Working hours Mon-Sat

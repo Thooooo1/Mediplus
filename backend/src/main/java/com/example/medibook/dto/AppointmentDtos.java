@@ -32,6 +32,6 @@ public class AppointmentDtos {
     String email, String fullName, String password,
     UUID specialtyId,
     String title, Long consultFeeVnd, String clinicName,
-    Integer yearsExperience, String bio
+    Integer yearsExperience, String bio, String status
   ) {}
 }

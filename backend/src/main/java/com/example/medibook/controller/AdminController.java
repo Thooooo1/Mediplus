@@ -154,6 +154,7 @@ public class AdminController {
       .clinicName(req.clinicName())
       .yearsExperience(req.yearsExperience())
       .bio(req.bio())
+      .status(req.status() != null ? DoctorStatus.valueOf(req.status().toUpperCase()) : DoctorStatus.PENDING)
       .build());
 
     log.info("Created doctor {} with profile {}", du.getEmail(), dp.getId());
@@ -313,5 +314,32 @@ public class AdminController {
     userRepo.save(u);
     log.info("Toggled user {} enabled={}", u.getEmail(), u.isEnabled());
     return Map.of("id", u.getId(), "enabled", u.isEnabled());
+  }
+
+  @GetMapping("/doctors")
+  @PreAuthorize("hasRole('ADMIN')")
+  public Page<CatalogDtos.DoctorRes> listDoctors(
+    @RequestParam(value = "q", required = false) String q,
+    @RequestParam(value = "specialtyId", required = false) UUID specialtyId,
+    @RequestParam(value = "status", required = false) String status,
+    @RequestParam(value = "page", defaultValue = "0") int page,
+    @RequestParam(value = "size", defaultValue = "10") int size,
+    @RequestParam(value = "sort", defaultValue = "user.fullName,asc") String sort
+  ) {
+    String[] sortParts = sort.split(",");
+    Sort s = Sort.by(sortParts[1].equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC, sortParts[0]);
+    PageRequest pr = PageRequest.of(page, size, s);
+
+    // Using catalogService logic for simplicity, but can be customized
+    return com.example.medibook.service.CatalogService.adminDoctors(doctorRepo, q, specialtyId, status, pr);
+  }
+
+  @PutMapping("/doctors/{id}/status")
+  @PreAuthorize("hasRole('ADMIN')")
+  public void updateDoctorStatus(@PathVariable("id") UUID id, @RequestBody Map<String, String> body) {
+    DoctorProfile dp = doctorRepo.findById(id).orElseThrow();
+    dp.setStatus(DoctorStatus.valueOf(body.get("status").toUpperCase()));
+    doctorRepo.save(dp);
+    log.info("Updated doctor {} status to {}", dp.getUser().getEmail(), dp.getStatus());
   }
 }

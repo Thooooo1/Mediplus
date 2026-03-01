@@ -8,7 +8,8 @@ public class CatalogDtos {
   public record DoctorRes(
     UUID id, String fullName, String title, String specialtyName,
     Long consultFeeVnd, String clinicName, Integer yearsExperience, String bio,
-    String avatarUrl, Double rating, Integer ratingCount, String country
+    String avatarUrl, Double rating, Integer ratingCount, String country,
+    String status
   ) {}
   public record SlotRes(
       UUID id,

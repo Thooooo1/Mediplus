@@ -203,11 +203,10 @@
             // Add to current
             if (el) el.classList.add('active');
             
-            selectedSpecialty = id;
             currentPage = 0;
-            const title = document.getElementById('gridTitle'); // Changed from sectionTitle to gridTitle
+            const title = document.getElementById('gridTitle');
             if (title) title.textContent = `Bác sĩ chuyên khoa ${name}`;
-            loadDoctors();
+            loadDoctors(id);
         }
     </script>
 </body>

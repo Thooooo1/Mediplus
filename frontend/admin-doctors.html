@@ -102,6 +102,14 @@
                                 <option value="">Tất cả chuyên khoa</option>
                             </select>
                         </div>
+                        <div class="col">
+                            <select id="statusFilter" class="input" onchange="handleFilter()">
+                                <option value="">Tất cả trạng thái</option>
+                                <option value="ACTIVE">Hoạt động</option>
+                                <option value="INACTIVE">Tạm khóa</option>
+                                <option value="PENDING">Chờ duyệt</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
@@ -176,6 +184,8 @@
         let curPage = 0;
         let curSearch = '';
         let curSpecialty = '';
+        let curStatus = '';
+        let curSort = 'user.fullName,asc';
 
         (async () => {
             const me = await requireAuth('ADMIN');
@@ -213,9 +223,10 @@
             showSkeleton(container, 'table');
             
             try {
-                let url = `/api/doctors?page=${page}&size=10`;
+                let url = `/api/admin/doctors?page=${page}&size=10&sort=${curSort}`;
                 if(curSearch) url += `&q=${encodeURIComponent(curSearch)}`;
                 if(curSpecialty) url += `&specialtyId=${curSpecialty}`;
+                if(curStatus) url += `&status=${curStatus}`;
 
                 const r = await API(url);
                 if (r.ok) {
@@ -227,15 +238,21 @@
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th>Bác sĩ</th>
+                                        <th onclick="handleSort('user.fullName')" style="cursor:pointer">Bác sĩ <span class="material-icons-round" style="font-size:14px;vertical-align:middle">sort</span></th>
                                         <th>Chuyên khoa</th>
-                                        <th>Kinh nghiệm</th>
-                                        <th>Phòng khám</th>
+                                        <th onclick="handleSort('yearsExperience')" style="cursor:pointer">Kinh nghiệm <span class="material-icons-round" style="font-size:14px;vertical-align:middle">sort</span></th>
+                                        <th>Trạng thái</th>
                                         <th class="text-right">Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    ${data.content.map(d => `
+                                    ${data.content.map(d => {
+                                        let statusBadge = 'badge-secondary';
+                                        let statusLabel = 'Chờ duyệt';
+                                        if (d.status === 'ACTIVE') { statusBadge = 'badge-success'; statusLabel = 'Hoạt động'; }
+                                        else if (d.status === 'INACTIVE') { statusBadge = 'badge-danger'; statusLabel = 'Tạm khóa'; }
+
+                                        return `
                                         <tr>
                                             <td>
                                                 <div class="row items-center gap-3">
@@ -248,17 +265,20 @@
                                             </td>
                                             <td><span class="badge badge-primary">${d.specialtyName}</span></td>
                                             <td>${d.yearsExperience || 0} năm</td>
-                                            <td class="text-secondary">${d.clinicName || '-'}</td>
+                                            <td><span class="badge ${statusBadge}">${statusLabel}</span></td>
                                             <td class="text-right">
-                                                <button class="btn btn-ghost btn-sm icon-only" onclick="location.href='doctor-schedule-config.html?id=${d.id}'" title="Cấu hình lịch làm việc">
+                                                <button class="btn btn-ghost btn-sm icon-only" onclick="location.href='doctor-details.html?id=${d.id}'" title="Xem chi tiết">
+                                                    <span class="material-icons-round">visibility</span>
+                                                </button>
+                                                <button class="btn btn-ghost btn-sm icon-only" onclick="location.href='doctor-schedule-config.html?id=${d.id}'" title="Cấu hình lịch">
                                                     <span class="material-icons-round">calendar_month</span>
                                                 </button>
-                                                <button class="btn btn-ghost btn-sm icon-only" title="Chỉnh sửa">
-                                                    <span class="material-icons-round">edit</span>
+                                                <button class="btn btn-ghost btn-sm icon-only" onclick="toggleDoctorStatus('${d.id}', '${d.status}')" title="${d.status === 'ACTIVE' ? 'Khóa bác sĩ' : 'Kích hoạt'}">
+                                                    <span class="material-icons-round">${d.status === 'ACTIVE' ? 'block' : 'check_circle'}</span>
                                                 </button>
                                             </td>
-                                        </tr>
-                                    `).join('')}
+                                        </tr>`;
+                                    }).join('')}
                                 </tbody>
                             </table>
                         `;
@@ -280,7 +300,33 @@
 
         function handleFilter() {
             curSpecialty = document.getElementById('specialtyFilter').value;
+            curStatus = document.getElementById('statusFilter').value;
             loadDoctors(0);
+        }
+
+        function handleSort(field) {
+            let [f, dir] = curSort.split(',');
+            if (f === field) {
+                dir = dir === 'asc' ? 'desc' : 'asc';
+            } else {
+                dir = 'asc';
+            }
+            curSort = `${field},${dir}`;
+            loadDoctors(0);
+        }
+
+        async function toggleDoctorStatus(id, currentStatus) {
+            const nextStatus = currentStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+            try {
+                const r = await API(`/api/admin/doctors/${id}/status`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ status: nextStatus })
+                });
+                if (r.ok) {
+                    toast('Thành công', `Đã chuyển trạng thái sang ${nextStatus}`, 'success');
+                    loadDoctors(curPage);
+                }
+            } catch(e) { toast('Lỗi', 'Không thể cập nhật trạng thái', 'danger'); }
         }
 
         function showAddDoctorModal() {
@@ -302,6 +348,7 @@
             // Convert types
             data.yearsExperience = parseInt(data.yearsExperience) || 0;
             data.consultFeeVnd = 200000; // Default if not provided
+            data.status = 'PENDING';
 
             try {
                 const r = await API('/api/admin/doctors', {

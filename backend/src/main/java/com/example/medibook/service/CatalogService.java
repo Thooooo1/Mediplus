@@ -5,6 +5,8 @@ import com.example.medibook.model.DoctorProfile;
 import com.example.medibook.repo.DoctorProfileRepository;
 import com.example.medibook.repo.SpecialtyRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -41,6 +43,32 @@ public class CatalogService {
     return page.map(this::mapDoctor);
   }
 
+  public static Page<CatalogDtos.DoctorRes> adminDoctors(
+      DoctorProfileRepository repo, String q, UUID specId, String status, Pageable pageable
+  ) {
+      // Basic implementation - can be enhanced with Specifications
+      Page<DoctorProfile> page;
+      if (q != null && !q.isBlank()) {
+          page = repo.searchDoctors(q.trim(), pageable);
+      } else if (specId != null) {
+          page = repo.findBySpecialtyId(specId, pageable);
+      } else {
+          page = repo.findAll(pageable);
+      }
+      
+      return page.map(d -> new CatalogDtos.DoctorRes(
+          d.getId(), d.getUser().getFullName(), d.getTitle(), d.getSpecialty().getName(),
+          d.getConsultFeeVnd(), d.getClinicName(), d.getYearsExperience(), d.getBio(),
+          d.getAvatarUrl(), d.getRating(), d.getRatingCount(), d.getCountry(),
+          d.getStatus() != null ? d.getStatus().name() : "PENDING"
+      ));
+  }
+
+  public org.springframework.data.domain.Page<CatalogDtos.DoctorRes> publicDoctors(UUID specialtyId, String q, org.springframework.data.domain.Pageable pageable) {
+      // Future: filter by status=ACTIVE for public view
+      return doctors(specialtyId, q, null, null, pageable);
+  }
+
   public CatalogDtos.DoctorRes doctorDetail(UUID id) {
     DoctorProfile d = doctorRepo.findById(id).orElseThrow();
     return mapDoctor(d);
@@ -59,7 +87,8 @@ public class CatalogService {
       d.getAvatarUrl(),
       d.getRating(),
       d.getRatingCount(),
-      d.getCountry()
+      d.getCountry(),
+      d.getStatus() != null ? d.getStatus().name() : "PENDING"
     );
   }
 }

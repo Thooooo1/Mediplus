@@ -44,4 +44,8 @@ public class DoctorProfile {
 
   @Column(name="rating_count")
   private Integer ratingCount;
+
+  @Enumerated(EnumType.STRING)
+  @Builder.Default
+  private DoctorStatus status = DoctorStatus.PENDING;
 }
