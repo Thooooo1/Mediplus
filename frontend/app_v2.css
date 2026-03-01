@@ -195,7 +195,7 @@ body {
   font-family: var(--font-sans);
   background: var(--neutral-50);
   color: var(--neutral-800);
-  font-size: 15px; /* Giảm nhẹ font mặc định, nhường chỗ cho chữ to ở các khu vực quan trọng */
+  font-size: 16px; /* Increased from 15px for better readability */
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -227,9 +227,10 @@ small { color: var(--neutral-500); font-size: 15px; }
 
 .btn-primary {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 12px 24px; border: 1px solid transparent; border-radius: var(--radius-md); /* Không bo góc quá tròn */
-  background: var(--primary); color: white; font-weight: 600; font-size: 15px;
-  cursor: pointer; transition: background 0.2s, border-color 0.2s; font-family: var(--font-sans);
+  padding: 14px 28px; border: 1px solid transparent; border-radius: var(--radius-lg);
+  background: var(--primary); color: white; font-weight: 700; font-size: 16px;
+  cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-family: var(--font-sans);
+  box-shadow: 0 4px 12px rgba(0, 113, 186, 0.2);
 }
 .btn-primary:hover { background: var(--primary-dark); }
 .btn-primary:active { transform: translateY(1px); }
@@ -271,9 +272,9 @@ small { color: var(--neutral-500); font-size: 15px; }
   margin-bottom: 8px;
 }
 .form-input, .input {
-  width: 100%; padding: 12px 16px; border: 1px solid var(--neutral-300);
-  border-radius: var(--radius-md); font-size: 15px; font-family: var(--font-sans);
-  color: var(--neutral-900); background: white; transition: border-color 0.2s;
+  width: 100%; padding: 14px 18px; border: 1.5px solid var(--neutral-200);
+  border-radius: var(--radius-lg); font-size: 16px; font-family: var(--font-sans);
+  color: var(--neutral-900); background: white; transition: all 0.2s;
   box-sizing: border-box;
 }
 .form-input:focus, .input:focus {
@@ -365,10 +366,11 @@ select.form-input {
 }
 .data-table th:first-child { border-top-left-radius: 16px; }
 .data-table th:last-child { border-top-right-radius: 16px; }
-.data-table td {
-  padding: 20px 24px; border-bottom: 1px solid var(--neutral-100);
+.data-table td, .table td {
+  padding: 24px 24px; border-bottom: 1px solid var(--neutral-100);
   color: var(--neutral-800); vertical-align: middle; background: white;
   transition: all 0.2s ease;
+  font-size: 16px;
 }
 .data-table tr:last-child td { border-bottom: none; }
 .data-table tr:hover td { background: #f1f5f9; }
@@ -384,10 +386,16 @@ select.form-input {
   font-size: 12px; font-weight: 600; white-space: nowrap;
 }
 .badge {
-  display: inline-block; padding: 3px 10px; border-radius: var(--radius-full);
-  font-size: 12px; font-weight: 600; background: var(--neutral-100);
+  display: inline-block; padding: 6px 14px; border-radius: 8px;
+  font-size: 13px; font-weight: 700; background: var(--neutral-100);
   color: var(--neutral-600);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
+.badge-primary { background: var(--primary-50); color: var(--primary); border: 1px solid var(--primary-100); }
+.badge-success { background: #ecfdf5; color: #059669; border: 1px solid #d1fae5; }
+.badge-danger { background: #fef2f2; color: #dc2626; border: 1px solid #fee2e2; }
+.badge-secondary { background: #f9fafb; color: #6b7280; border: 1px solid #f3f4f6; }
 
 /* ─── Navbar ──────────────────────────────────── */
 .nav {

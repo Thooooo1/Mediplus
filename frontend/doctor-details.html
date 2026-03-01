@@ -194,7 +194,7 @@
                     const data = await r.json().catch(() => ({}));
                     throw new Error(data.error || 'Đặt lịch thất bại');
                 }
-                showToast('Đặt lịch thành công! 🎉', 'success');
+                showToast('! 🎉', 'success');
                 setTimeout(() => { location.href = 'my-appointments.html'; }, 1000);
             } catch (err) {
                 showToast(err.message, 'error');

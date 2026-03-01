@@ -90,21 +90,21 @@
             <div class="content-body">
                 <!-- Search & Filters -->
                 <div class="card mb-6 p-4">
-                    <div class="row items-center gap-4">
-                        <div class="col flex-grow">
+                    <div class="row items-center gap-6">
+                        <div class="col-6">
                             <div class="input-group">
-                                <span class="material-icons-round text-secondary">search</span>
-                                <input type="text" id="searchInput" class="input" placeholder="Tìm kiếm theo tên hoặc email..." oninput="handleSearch()">
+                                <span class="material-icons-round text-secondary" style="font-size:24px">search</span>
+                                <input type="text" id="searchInput" class="input" placeholder="Tìm kiếm theo tên hoặc email bác sĩ..." oninput="handleSearch()" style="height:56px">
                             </div>
                         </div>
-                        <div class="col">
-                            <select id="specialtyFilter" class="input" onchange="handleFilter()">
-                                <option value="">Tất cả chuyên khoa</option>
+                        <div class="col-3">
+                            <select id="specialtyFilter" class="input" onchange="handleFilter()" style="height:56px">
+                                <option value="">Chuyên khoa: Tất cả</option>
                             </select>
                         </div>
-                        <div class="col">
-                            <select id="statusFilter" class="input" onchange="handleFilter()">
-                                <option value="">Tất cả trạng thái</option>
+                        <div class="col-3">
+                            <select id="statusFilter" class="input" onchange="handleFilter()" style="height:56px">
+                                <option value="">Trạng thái: Tất cả</option>
                                 <option value="ACTIVE">Hoạt động</option>
                                 <option value="INACTIVE">Tạm khóa</option>
                                 <option value="PENDING">Chờ duyệt</option>
