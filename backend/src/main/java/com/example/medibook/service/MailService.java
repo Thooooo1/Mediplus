@@ -117,11 +117,16 @@ public class MailService {
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             log.info("[Mail] Resend Response: Status={}, Body={}", response.statusCode(), response.body());
+            com.example.medibook.controller.AdminController.addLog("Resend API to " + to + ": Status=" + response.statusCode());
             
             if (response.statusCode() == 401) {
-                log.error("[Mail] 401 Unauthorized: The RESEND_API_KEY is definitively invalid. Please check Render Environment Variables.");
+                log.error("[Mail] 401 Unauthorized: The RESEND_API_KEY is definitively invalid.");
+                com.example.medibook.controller.AdminController.addLog("CRITICAL: Resend 401 (API Key invalid)");
             } else if (response.statusCode() >= 400) {
-                log.error("[Mail] Resend Error: {}. Ensure from address is verified or use onboarding@resend.dev", response.body());
+                log.error("[Mail] Resend Error: {}.", response.body());
+                com.example.medibook.controller.AdminController.addLog("ERROR: Resend " + response.statusCode() + " (" + response.body() + ")");
+            } else {
+                com.example.medibook.controller.AdminController.addLog("Resend Success to: " + to);
             }
         } catch (Exception e) {
             log.error("[Mail] Resend API failed: {}. Falling back to SMTP if possible...", e.getMessage());
