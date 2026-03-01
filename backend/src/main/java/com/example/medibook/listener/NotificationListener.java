@@ -21,7 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
+import com.example.medibook.utils.EmailTemplateUtils;
 import java.util.List;
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -70,22 +72,19 @@ public class NotificationListener {
 
         if (mailEnabled) {
             String docEmail = appt.getDoctor().getUser().getEmail();
-            String html = String.format("""
-                <div style="font-family:Arial,sans-serif; max-width:600px; margin:0 auto; border:1px solid #e5e7eb; border-radius:12px; padding:24px;">
-                    <h2 style="color:#2563eb;">Lịch khám mới — MediBook</h2>
-                    <p>Chào Bác sĩ <strong>%s</strong>,</p>
-                    <p>Bạn vừa có một lịch hẹn mới được đặt qua hệ thống:</p>
-                    <ul style="list-style:none; padding:0;">
-                        <li><strong>Bệnh nhân:</strong> %s</li>
-                        <li><strong>Thời gian:</strong> %s</li>
-                        <li><strong>Ghi chú:</strong> %s</li>
-                    </ul>
-                    <a href="https://medibook-v2.vercel.app/doctor/appointments.html" style="display:inline-block; padding:12px 24px; background:#2563eb; color:white; text-decoration:none; border-radius:8px; margin-top:16px;">Xem chi tiết lịch hẹn</a>
-                </div>
-                """, 
-                appt.getDoctor().getUser().getFullName(), appt.getPatient().getFullName(), 
-                appt.getTimeSlot().getStartAt().toString(),
-                appt.getPatientNote() != null ? appt.getPatientNote() : "Không có"
+            String html = EmailTemplateUtils.getProfessionalTemplate(
+                "THÔNG BÁO LỊCH KHÁM MỚI",
+                "Bác sĩ " + appt.getDoctor().getUser().getFullName(),
+                "Bạn vừa có một lịch hẹn mới được đặt qua hệ thống MediBook. Vui lòng kiểm tra và xác nhận lịch hẹn này.",
+                Map.of(
+                    "Bệnh nhân", appt.getPatient().getFullName(),
+                    "Thời gian", appt.getTimeSlot().getStartAt().toString(),
+                    "Phòng khám", appt.getDoctor().getClinicName(),
+                    "Ghi chú", appt.getPatientNote() != null ? appt.getPatientNote() : "Không có"
+                ),
+                "https://medibook-v2.vercel.app/doctor/appointments.html",
+                "Xem chi tiết lịch hẹn",
+                "#2563eb"
             );
             mailService.sendHtml(docEmail, "MediBook — Thông báo lịch khám mới", html);
         }
@@ -115,14 +114,19 @@ public class NotificationListener {
         // 3. Notify Patient
         if (mailEnabled) {
             String patientEmail = appt.getPatient().getEmail();
-            String patientHtml = String.format("""
-                <div style="font-family:Arial,sans-serif; max-width:600px; margin:0 auto; border:1px solid #10b981; border-radius:12px; padding:24px;">
-                    <h2 style="color:#10b981;">Xác nhận đặt lịch thành công — MediBook</h2>
-                    <p>Chào bạn <strong>%s</strong>,</p>
-                    <p>Cảm ơn bạn đã tin tưởng sử dụng dịch vụ của MediBook. Lịch hẹn của bạn đã được ghi nhận vào lúc <strong>%s</strong>.</p>
-                </div>
-                """, 
-                appt.getPatient().getFullName(), appt.getTimeSlot().getStartAt().toString()
+            String patientHtml = EmailTemplateUtils.getProfessionalTemplate(
+                "ĐẶT LỊCH KHÁM THÀNH CÔNG",
+                appt.getPatient().getFullName(),
+                "Chúc mừng bạn đã đặt lịch khám thành công tại MediBook. Dưới đây là thông tin chi tiết lịch hẹn của bạn.",
+                Map.of(
+                    "Bác sĩ", appt.getDoctor().getUser().getFullName(),
+                    "Thời gian", appt.getTimeSlot().getStartAt().toString(),
+                    "Địa điểm", appt.getDoctor().getClinicName(),
+                    "Chuyên khoa", appt.getDoctor().getSpecialty().getName()
+                ),
+                "https://medibook-v2.vercel.app/patient/appointments.html",
+                "Quản lý lịch hẹn",
+                "#10b981"
             );
             mailService.sendHtml(patientEmail, "MediBook — Xác nhận lịch hẹn thành công", patientHtml);
         }
@@ -186,24 +190,18 @@ public class NotificationListener {
             String patientEmail = appt.getPatient().getEmail();
             String docEmail = appt.getDoctor().getUser().getEmail();
             
-            String html = String.format("""
-                <div style="font-family:Arial,sans-serif; max-width:600px; margin:0 auto; border:1px solid #ef4444; border-radius:12px; padding:24px;">
-                    <h2 style="color:#ef4444;">Thông báo hủy lịch hẹn — MediBook</h2>
-                    <p>Chào bạn,</p>
-                    <p>Chúng tôi rất tiếc phải thông báo rằng lịch hẹn sau đã bị hủy:</p>
-                    <div style="background:#fef2f2; padding:16px; border-radius:8px; border-left:4px solid #ef4444;">
-                        <p><strong>Bệnh nhân:</strong> %s</p>
-                        <p><strong>Bác sĩ:</strong> %s</p>
-                        <p><strong>Thời gian:</strong> %s</p>
-                        <p><strong>Người thực hiện hủy:</strong> %s</p>
-                    </div>
-                    <p style="margin-top:16px;">Vui lòng truy cập hệ thống nếu bạn muốn đặt lại lịch mới.</p>
-                </div>
-                """, 
-                appt.getPatient().getFullName(),
-                appt.getDoctor().getUser().getFullName(),
-                appt.getTimeSlot().getStartAt().toString(),
-                event.cancelledBy().equals("DOCTOR") ? "Bác sĩ" : "Bệnh nhân"
+            String html = EmailTemplateUtils.getProfessionalTemplate(
+                "THÔNG BÁO HỦY LỊCH HẸN",
+                "Bạn",
+                "Chúng tôi rất tiếc phải thông báo rằng lịch hẹn của bạn đã bị hủy trên hệ thống MediBook.",
+                Map.of(
+                    "Bệnh nhân", appt.getPatient().getFullName(),
+                    "Bác sĩ", appt.getDoctor().getUser().getFullName(),
+                    "Thời gian", appt.getTimeSlot().getStartAt().toString(),
+                    "Người thực hiện hủy", event.cancelledBy().equals("DOCTOR") ? "Bác sĩ" : "Bệnh nhân"
+                ),
+                null, null,
+                "#ef4444"
             );
 
             try {
@@ -248,23 +246,18 @@ public class NotificationListener {
         // Send Email to Patient
         if (mailEnabled) {
             String patientEmail = appt.getPatient().getEmail();
-            String html = String.format("""
-                <div style="font-family:Arial,sans-serif; max-width:600px; margin:0 auto; border:1px solid #2563eb; border-radius:12px; padding:24px;">
-                    <h2 style="color:#2563eb;">Lịch hẹn đã được xác nhận — MediBook</h2>
-                    <p>Chào bạn <strong>%s</strong>,</p>
-                    <p>Bác sĩ đã xác nhận lịch hẹn của bạn. Thông tin chi tiết:</p>
-                    <div style="background:#eff6ff; padding:16px; border-radius:8px;">
-                        <p><strong>Bác sĩ:</strong> %s</p>
-                        <p><strong>Thời gian:</strong> %s</p>
-                        <p><strong>Địa điểm:</strong> %s</p>
-                    </div>
-                    <p style="margin-top:16px;">Hẹn gặp lại bạn tại phòng khám!</p>
-                </div>
-                """, 
+            String html = EmailTemplateUtils.getProfessionalTemplate(
+                "LỊCH HẸN ĐÃ ĐƯỢC XÁC NHẬN",
                 appt.getPatient().getFullName(),
-                appt.getDoctor().getUser().getFullName(),
-                appt.getTimeSlot().getStartAt().toString(),
-                appt.getDoctor().getClinicName()
+                "Bác sĩ đã xác nhận lịch hẹn của bạn. Thông tin chi tiết lịch hẹn như sau:",
+                Map.of(
+                    "Bác sĩ", appt.getDoctor().getUser().getFullName(),
+                    "Thời gian", appt.getTimeSlot().getStartAt().toString(),
+                    "Địa điểm", appt.getDoctor().getClinicName()
+                ),
+                "https://medibook-v2.vercel.app/patient/appointments.html",
+                "Xem lịch hẹn của tôi",
+                "#2563eb"
             );
             try {
                 mailService.sendHtml(patientEmail, "MediBook — Lịch hẹn đã được xác nhận", html);
@@ -279,25 +272,21 @@ public class NotificationListener {
     }
 
     private void notifyAdmin(String email, Appointment appt, String subject) {
-        String adminHtml = String.format("""
-            <div style="font-family:Arial,sans-serif; padding:24px; border:2px solid #2563eb; border-radius:12px; max-width:600px;">
-                <h3 style="color:#2563eb;">%s</h3>
-                <hr style="border:0; border-top:1px solid #e5e7eb; margin:16px 0;">
-                <p><strong>Bệnh nhân:</strong> %s</p>
-                <p><strong>Bác sĩ:</strong> %s</p>
-                <p><strong>Thời gian:</strong> %s</p>
-                <p><strong>Trạng thái hiện tại:</strong> <span style="color:#2563eb; font-weight:bold;">%s</span></p>
-                <p><strong>Ghi chú:</strong> %s</p>
-                <hr style="border:0; border-top:1px solid #e5e7eb; margin:16px 0;">
-                <p style="font-size:12px; color:#6b7280;">Hệ thống thông báo MediBook v2.4</p>
-            </div>
-            """, 
+        String adminHtml = EmailTemplateUtils.getProfessionalTemplate(
             subject,
-            appt.getPatient().getFullName(),
-            appt.getDoctor().getUser().getFullName(),
-            appt.getTimeSlot().getStartAt().toString(),
-            appt.getStatus().toString(),
-            appt.getPatientNote() != null ? appt.getPatientNote() : "Không có"
+            "Quản trị viên",
+            "Hệ thống vừa ghi nhận một thay đổi quan trọng đối với lịch hẹn sau đây:",
+            Map.of(
+                "Sự kiện", subject,
+                "Bệnh nhân", appt.getPatient().getFullName(),
+                "Bác sĩ", appt.getDoctor().getUser().getFullName(),
+                "Thời gian", appt.getTimeSlot().getStartAt().toString(),
+                "Trạng thái", appt.getStatus().toString(),
+                "Ghi chú", appt.getPatientNote() != null ? appt.getPatientNote() : "Không có"
+            ),
+            "https://medibook-v2.vercel.app/admin/appointments.html",
+            "Quản lý hệ thống",
+            "#2563eb"
         );
         try {
             AdminController.addLog("Attempting Admin email (" + subject + ") to: " + email);

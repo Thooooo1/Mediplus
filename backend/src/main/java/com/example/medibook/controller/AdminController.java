@@ -18,6 +18,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.medibook.events.AppointmentBookedEvent;
 import com.example.medibook.listener.NotificationListener;
+import com.example.medibook.dto.CatalogDtos;
+import com.example.medibook.service.CatalogService;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -331,7 +333,7 @@ public class AdminController {
     PageRequest pr = PageRequest.of(page, size, s);
 
     // Using catalogService logic for simplicity, but can be customized
-    return com.example.medibook.service.CatalogService.adminDoctors(doctorRepo, q, specialtyId, status, pr);
+    return CatalogService.adminDoctors(doctorRepo, q, specialtyId, status, pr);
   }
 
   @PutMapping("/doctors/{id}/status")
