@@ -28,9 +28,14 @@ public class MailService {
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
     public void sendHtml(String to, String subject, String htmlContent) {
-        if (resendApiKey != null && !resendApiKey.trim().isEmpty()) {
+        String cleanKey = resendApiKey != null ? resendApiKey.trim() : "";
+        log.info("[Mail] sendHtml request to: {}. Resend Key Present: {}, Key prefix: {}", 
+            to, !cleanKey.isEmpty(), cleanKey.length() > 4 ? cleanKey.substring(0, 4) + "..." : "N/A");
+            
+        if (!cleanKey.isEmpty()) {
             sendViaResend(to, subject, htmlContent);
         } else {
+            log.warn("[Mail] Resend API Key is missing, falling back to SMTP...");
             sendViaSmtp(to, subject, htmlContent);
         }
     }
