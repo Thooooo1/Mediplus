@@ -78,6 +78,7 @@ public class NotificationListener {
         notificationRepo.save(docNotif);
 
         if (mailEnabled) {
+            log.info("[Notif] Sending email to Doctor: {}", appt.getDoctor().getUser().getEmail());
             String docEmail = appt.getDoctor().getUser().getEmail();
             String html = EmailTemplateUtils.getProfessionalTemplate(
                 "THÔNG BÁO LỊCH KHÁM MỚI",
