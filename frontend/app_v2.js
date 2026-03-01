@@ -192,12 +192,11 @@ const renderNotifications = async () => {
         const r = await API("/api/notifications?size=10");
         if (r.ok) {
             const data = await r.json();
-                const unreadOnly = data.content.filter(n => !n.read);
-                if (unreadOnly.length === 0) {
-                    list.innerHTML = '<div class="notif-empty"><span class="material-icons-round">notifications_off</span><span>Không có thông báo mới</span></div>';
-                } else {
-                    list.innerHTML = unreadOnly.map(n => `
-                        <div class="notif-item unread" onclick="markNotifAsRead('${n.id}', '${n.type}', '${n.relatedId}')">
+            if (data.content.length === 0) {
+                list.innerHTML = '<div class="notif-empty"><span class="material-icons-round">notifications_off</span><span>Không có thông báo mới</span></div>';
+            } else {
+                list.innerHTML = data.content.map(n => `
+                    <div class="notif-item ${n.read ? '' : 'unread'}" onclick="markNotifAsRead('${n.id}', '${n.type}', '${n.relatedId}')">
                         <div class="notif-title">${n.title}</div>
                         <div class="notif-msg">${n.message}</div>
                         <div class="notif-time">${fmt(n.createdAt)}</div>
@@ -215,24 +214,38 @@ const markNotifAsRead = async (id, type, relatedId) => {
         await API(`/api/notifications/${id}/read`, { method: 'POST' });
         updateNotificationBadge();
         // Redirect based on type if needed
-        if (type === 'APPOINTMENT_BOOKED' || type === 'APPOINTMENT_CANCELLED' || type === 'APPOINTMENT_CONFIRMED') {
+        if (type === 'APPOINTMENT_BOOKED' || type === 'APPOINTMENT_CANCELLED' || type === 'APPOINTMENT_CONFIRMED' || type === 'DOCTOR_STATUS_UPDATE') {
             const role = localStorage.getItem("role");
-            if (role === 'DOCTOR') location.href = 'doctor-dashboard.html';
+            if (role === 'DOCTOR') location.href = 'doctor-appointments.html';
             else if (role === 'ADMIN') location.href = 'admin-appointments.html';
             else if (role === 'USER') location.href = 'my-appointments.html';
-            else renderNotifications();
         } else {
             renderNotifications();
         }
     } catch(e) {}
 };
 
-const toggleNotifDropdown = (e) => {
+const toggleNotifDropdown = async (e) => {
     if (e) e.stopPropagation();
     const dropdown = document.getElementById("notifDropdown");
     if (dropdown) {
         const isShowing = dropdown.classList.toggle("show");
-        if (isShowing) renderNotifications();
+        if (isShowing) {
+            renderNotifications();
+            // Mark all as read when opening
+            try {
+                const r = await API("/api/notifications/mark-all-read", { method: 'POST' });
+                if (r.ok) {
+                    const badge = document.getElementById("notifBadge");
+                    if (badge) {
+                        badge.classList.remove("show");
+                        badge.style.display = 'none';
+                        badge.textContent = "0";
+                        badge.setAttribute("data-count", "0");
+                    }
+                }
+            } catch(err) {}
+        }
     }
 };
 

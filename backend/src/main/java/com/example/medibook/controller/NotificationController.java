@@ -45,4 +45,11 @@ public class NotificationController {
         }
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/mark-all-read")
+    @org.springframework.transaction.annotation.Transactional
+    public ResponseEntity<?> markAllRead(@AuthenticationPrincipal UserPrincipal principal) {
+        notificationRepo.markAllReadByUserId(principal.getId());
+        return ResponseEntity.ok().build();
+    }
 }
