@@ -149,9 +149,7 @@
         async function refreshLogs() {
             const logContainer = document.getElementById('systemLogs');
             try {
-                const r = await fetch(API_BASE + '/api/admin/logs?secret=medi-check', {
-                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-                });
+                const r = await API('/api/admin/logs?secret=medi-check');
                 if (r.ok) {
                     const text = await r.text();
                     const lines = text.split('\n').filter(l => l.trim()).map(line => {
@@ -180,9 +178,7 @@
             
             showToast('Đang gửi mail thử nghiệm...', 'info');
             try {
-                const r = await fetch(API_BASE + `/api/admin/test-email?to=${encodeURIComponent(email)}&secret=medi-check`, {
-                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-                });
+                const r = await API(`/api/admin/test-email?to=${encodeURIComponent(email)}&secret=medi-check`);
                 const result = await r.text();
                 if (r.ok) {
                     showToast('Đã yêu cầu gửi mail! Xem kết quả phía trên.', 'success');

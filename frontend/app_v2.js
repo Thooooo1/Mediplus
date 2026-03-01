@@ -3,9 +3,9 @@
    ═══════════════════════════════════════════════ */
 
 /* ─── Config ──────────────────────────────────── */
-const API_BASE = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" 
-    ? "http://localhost:8080" 
-    : "https://medibook-api-yd85.onrender.com"; // URL chính thức của Backend API trên Render
+const API_BASE = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+    ? (localStorage.getItem("use_remote_api") ? "https://medibook-api-yd85.onrender.com" : "http://localhost:8080")
+    : "https://medibook-api-yd85.onrender.com";
 const APP_TIMEZONE = "Asia/Ho_Chi_Minh";
 const APP_TIMEZONE_LABEL = "Giờ Việt Nam (GMT+7)";
 
@@ -21,6 +21,15 @@ const API = async (path, opt = {}) => {
     const res = await fetch(API_BASE + path, { ...opt, headers });
     return res;
   } catch (err) {
+    if (API_BASE.includes("localhost")) {
+        console.warn("Local API unreachable, trying Render fallback...");
+        try {
+            const fallbackRes = await fetch("https://medibook-api-yd85.onrender.com" + path, { ...opt, headers });
+            return fallbackRes;
+        } catch (fallbackErr) {
+            console.error("Render fallback also failed:", fallbackErr);
+        }
+    }
     console.error("API Error:", err);
     throw err;
   }
