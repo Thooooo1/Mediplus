@@ -23,8 +23,8 @@ public class Appointment {
   @JoinColumn(name="patient_id", nullable = false)
   private AppUser patient;
 
-  @OneToOne(optional = false)
-  @JoinColumn(name="time_slot_id", nullable = false, unique = true)
+  @ManyToOne(optional = false)
+  @JoinColumn(name="time_slot_id", nullable = false)
   private TimeSlot timeSlot;
 
   @Enumerated(EnumType.STRING)
