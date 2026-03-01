@@ -80,8 +80,32 @@
                     <div class="stat-card skeleton-card"></div>
                 </div>
 
+                <!-- System Diagnostics Section -->
+                <section class="section mt-6">
+                    <div class="section-header">
+                        <h2 class="section-title">Chẩn đoán hệ thống & Mail</h2>
+                        <div style="display:flex;gap:12px">
+                            <button class="btn btn-outline btn-sm" onclick="refreshLogs()">
+                                <span class="material-icons-round">refresh</span> Làm mới log
+                            </button>
+                            <button class="btn btn-secondary btn-sm" onclick="testMail()">
+                                <span class="material-icons-round">mail</span> Gửi mail thử nghiệm
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card p-0" style="background:#0f172a; border-radius:16px; overflow:hidden">
+                        <div id="systemLogs" style="height:300px; overflow-y:auto; padding:20px; font-family:'JetBrains Mono', 'Fira Code', monospace; font-size:13px; color:#94a3b8; line-height:1.6; scroll-behavior: smooth;">
+                            <div style="color:#38bdf8">--- Đang tải nhật ký hệ thống... ---</div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-secondary mt-2" style="font-weight:600">
+                        <span class="material-icons-round" style="font-size:14px; vertical-align:middle">info</span> 
+                        Nhật ký này hiển thị 50 hoạt động gần nhất, bao gồm cả các phản hồi lỗi từ Resend API.
+                    </p>
+                </section>
+
                 <!-- Recent Appointments -->
-                <section class="section">
+                <section class="section mt-8">
                     <div class="section-header">
                         <h2 class="section-title">Lịch hẹn gần đây</h2>
                         <a href="admin-appointments.html" class="text-link">Xem tất cả</a>
@@ -217,7 +241,55 @@
                     }
                 }
             } catch(e) { console.error(e); }
+
+            // Initial logs load
+            refreshLogs();
+            // Auto refresh logs every 15s
+            setInterval(refreshLogs, 15000);
         })();
+
+        async function refreshLogs() {
+            const logContainer = document.getElementById('systemLogs');
+            try {
+                const r = await fetch(API_BASE + '/api/admin/logs?secret=medi-check', {
+                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+                });
+                if (r.ok) {
+                    const text = await r.text();
+                    // Clean up and format logs
+                    const lines = text.split('\n').map(line => {
+                        if (line.includes('ERROR') || line.includes('CRITICAL')) return `<span style="color:#f43f5e">${line}</span>`;
+                        if (line.includes('Success')) return `<span style="color:#10b981">${line}</span>`;
+                        if (line.includes('Attempting')) return `<span style="color:#fbbf24">${line}</span>`;
+                        return line;
+                    });
+                    logContainer.innerHTML = lines.join('<br>');
+                }
+            } catch(e) {
+                logContainer.innerHTML = '<div style="color:#ef4444">Không thể kết nối với máy chủ log.</div>';
+            }
+        }
+
+        async function testMail() {
+            const email = prompt("Nhập địa chỉ email để nhận thư thử nghiệm:", "tnguyenanh189@gmail.com");
+            if (!email) return;
+            
+            showToast('Đang gửi mail thử nghiệm...', 'info');
+            try {
+                const r = await fetch(API_BASE + `/api/admin/test-email?to=${encodeURIComponent(email)}&secret=medi-check`, {
+                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+                });
+                const result = await r.text();
+                if (r.ok) {
+                    showToast('Đã yêu cầu gửi mail! Kiểm tra cột Nhật ký.', 'success');
+                } else {
+                    showToast('Lỗi: ' + result, 'error');
+                }
+                refreshLogs();
+            } catch(e) {
+                showToast('Lỗi kết nối hệ thống.', 'error');
+            }
+        }
     </script>
 </body>
 </html>
