@@ -90,11 +90,42 @@
                     </div>
                 </div>
 
-                <div class="card p-6 border-danger-light">
+                <div class="card p-6 border-danger-light mb-6">
                     <h2 class="mb-2 text-danger">Khu vực nguy hiểm</h2>
                     <p class="text-secondary text-sm mb-4">Các thao tác dưới đây có thể ảnh hưởng nghiêm trọng đến dữ liệu hệ thống.</p>
                     <button class="btn btn-danger-ghost">Khôi phục cài đặt gốc</button>
                 </div>
+
+                <!-- System Diagnostics Section -->
+                <section class="section mt-10">
+                    <div class="section-header" style="text-align:left; margin-bottom:24px; padding:0">
+                        <h2 class="section-title">Chẩn đoán hệ thống & Mail</h2>
+                        <p class="text-secondary text-sm">Công cụ dành cho kỹ thuật viên để kiểm tra trạng thái vận hành của server.</p>
+                    </div>
+                    
+                    <div class="console-box">
+                        <div class="console-header">
+                            <div class="d-flex items-center gap-2">
+                                <div style="width:8px; height:8px; border-radius:50%; background:#10b981"></div>
+                                <span style="font-size:11px; color:#94a3b8; font-weight:700">SYSTEM LIVE LOGS</span>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button class="btn-icon btn-sm" onclick="refreshLogs()" style="color:#94a3b8; background:none; border:none" title="Làm mới">
+                                    <span class="material-icons-round" style="font-size:16px">refresh</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="systemLogs" class="console-body" style="height:250px">
+                            <div style="color:#38bdf8">--- Đang tải dữ liệu... ---</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <button class="btn btn-secondary btn-sm" onclick="testMail()">
+                             <span class="material-icons-round">send</span> Kiểm tra Email API
+                        </button>
+                    </div>
+                </section>
             </div>
         </main>
     </div>
@@ -110,7 +141,59 @@
             
             document.getElementById('profileName').value = me.fullName || '';
             document.getElementById('profileEmail').value = me.email || '';
+
+            refreshLogs();
+            setInterval(refreshLogs, 15000);
         })();
+
+        async function refreshLogs() {
+            const logContainer = document.getElementById('systemLogs');
+            try {
+                const r = await fetch(API_BASE + '/api/admin/logs?secret=medi-check', {
+                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+                });
+                if (r.ok) {
+                    const text = await r.text();
+                    const lines = text.split('\n').filter(l => l.trim()).map(line => {
+                        let typeClass = 'log-info';
+                        if (line.includes('ERROR') || line.includes('CRITICAL')) typeClass = 'log-error';
+                        else if (line.includes('Success')) typeClass = 'log-success';
+                        else if (line.includes('Attempting')) typeClass = 'log-warn';
+                        
+                        const match = line.match(/^\[(.*?)\] (.*)$/);
+                        if (match) {
+                            const time = match[1].split('T')[1].substring(0,8);
+                            return `<div class="log-line"><span class="log-time">[${time}]</span><span class="${typeClass}">${match[2]}</span></div>`;
+                        }
+                        return `<div class="log-line ${typeClass}">${line}</div>`;
+                    });
+                    logContainer.innerHTML = lines.length ? lines.join('') : '<div style="color:#64748b">--- Trống ---</div>';
+                }
+            } catch(e) {
+                logContainer.innerHTML = '<div style="color:#f43f5e">Mất kết nối console.</div>';
+            }
+        }
+
+        async function testMail() {
+            const email = prompt("Nhập địa chỉ email để nhận thư thử nghiệm:", "tnguyenanh189@gmail.com");
+            if (!email) return;
+            
+            showToast('Đang gửi mail thử nghiệm...', 'info');
+            try {
+                const r = await fetch(API_BASE + `/api/admin/test-email?to=${encodeURIComponent(email)}&secret=medi-check`, {
+                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+                });
+                const result = await r.text();
+                if (r.ok) {
+                    showToast('Đã yêu cầu gửi mail! Xem kết quả phía trên.', 'success');
+                } else {
+                    showToast('Lỗi: ' + result, 'error');
+                }
+                refreshLogs();
+            } catch(e) {
+                showToast('Lỗi kết nối hệ thống.', 'error');
+            }
+        }
     </script>
 </body>
 </html>
