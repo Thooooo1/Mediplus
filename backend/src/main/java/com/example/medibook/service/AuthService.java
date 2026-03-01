@@ -9,6 +9,8 @@ import com.example.medibook.repo.AppUserRepository;
 import com.example.medibook.repo.PasswordResetTokenRepository;
 import com.example.medibook.security.JwtService;
 import com.example.medibook.security.UserPrincipal;
+import com.example.medibook.events.SystemAlertEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,6 +35,7 @@ public class AuthService {
   private final JwtService jwtService;
   private final PasswordResetTokenRepository resetTokenRepo;
   private final MailService mailService;
+  private final ApplicationEventPublisher publisher;
 
   @Value("${app.mail.enabled:false}")
   private boolean mailEnabled;
@@ -51,6 +54,18 @@ public class AuthService {
       .build();
 
     userRepo.save(u);
+
+    publisher.publishEvent(new SystemAlertEvent(
+        "NEW_USER_REGISTRATION",
+        "Người dùng mới đăng ký",
+        "Có một bệnh nhân vừa tạo tài khoản mới trên MediBook.",
+        java.util.Map.of(
+            "Họ tên", u.getFullName(),
+            "Email", u.getEmail(),
+            "Số điện thoại", u.getPhone() != null ? u.getPhone() : "Chưa có"
+        )
+    ));
+
     String token = jwtService.generateToken(u.getId().toString(), u.getEmail(), u.getRole().name());
     return new AuthDtos.AuthRes(token, u.getRole().name(), u.getEmail(), u.getFullName());
   }

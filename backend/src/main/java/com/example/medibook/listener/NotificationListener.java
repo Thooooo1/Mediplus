@@ -4,6 +4,7 @@ import com.example.medibook.controller.AdminController;
 import com.example.medibook.events.AppointmentBookedEvent;
 import com.example.medibook.events.AppointmentCancelledEvent;
 import com.example.medibook.events.AppointmentConfirmedEvent;
+import com.example.medibook.events.SystemAlertEvent;
 import com.example.medibook.model.AppUser;
 import com.example.medibook.model.Appointment;
 import com.example.medibook.model.Notification;
@@ -295,6 +296,32 @@ public class NotificationListener {
         } catch (Exception e) {
             AdminController.addLog("ERROR sending to Admin " + email + ": " + e.getMessage());
             log.error("[Notif] Error notifying admin {}: {}", email, e.getMessage());
+        }
+    }
+
+    @Async
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void handleSystemAlert(SystemAlertEvent event) {
+        String officialAdminEmail = "tnguyenanh189@gmail.com";
+        log.info("[SystemAlert] {}: {}", event.type(), event.title());
+        AdminController.addLog("System Alert Event: " + event.title());
+
+        if (mailEnabled) {
+            String html = EmailTemplateUtils.getProfessionalTemplate(
+                "HỆ THỐNG: " + event.title(),
+                "Quản trị viên",
+                event.message(),
+                event.details(),
+                "https://medibook-v2.vercel.app/admin/dashboard.html",
+                "Truy cập Dashboard",
+                "#4b5563"
+            );
+            try {
+                mailService.sendHtml(officialAdminEmail, "MediBook Alert — " + event.title(), html);
+            } catch (Exception e) {
+                log.error("[SystemAlert] Failed to notify admin: {}", e.getMessage());
+            }
         }
     }
 }

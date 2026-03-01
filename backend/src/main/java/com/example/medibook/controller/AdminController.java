@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.medibook.events.AppointmentBookedEvent;
+import com.example.medibook.events.SystemAlertEvent;
 import com.example.medibook.listener.NotificationListener;
 import com.example.medibook.dto.CatalogDtos;
 import com.example.medibook.service.CatalogService;
@@ -160,6 +161,19 @@ public class AdminController {
       .build());
 
     log.info("Created doctor {} with profile {}", du.getEmail(), dp.getId());
+    
+    publisher.publishEvent(new SystemAlertEvent(
+        "NEW_DOCTOR",
+        "Có bác sĩ mới đăng ký",
+        "Một tài khoản bác sĩ mới vừa được tạo thông qua trang quản trị.",
+        Map.of(
+            "Họ tên", du.getFullName(),
+            "Email", du.getEmail(),
+            "Chuyên khoa", sp.getName(),
+            "Kinh nghiệm", dp.getYearsExperience() + " năm"
+        )
+    ));
+
     return dp.getId();
   }
 
@@ -343,5 +357,16 @@ public class AdminController {
     dp.setStatus(DoctorStatus.valueOf(body.get("status").toUpperCase()));
     doctorRepo.save(dp);
     log.info("Updated doctor {} status to {}", dp.getUser().getEmail(), dp.getStatus());
+
+    publisher.publishEvent(new SystemAlertEvent(
+        "DOCTOR_STATUS_UPDATE",
+        "Cập nhật trạng thái bác sĩ",
+        "Trạng thái hoạt động của bác sĩ đã được thay đổi bởi Admin.",
+        Map.of(
+            "Bác sĩ", dp.getUser().getFullName(),
+            "Email", dp.getUser().getEmail(),
+            "Trạng thái mới", dp.getStatus().name()
+        )
+    ));
   }
 }

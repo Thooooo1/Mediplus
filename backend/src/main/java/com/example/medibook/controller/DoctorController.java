@@ -8,6 +8,8 @@ import com.example.medibook.model.AppointmentStatus;
 import com.example.medibook.repo.*;
 import com.example.medibook.security.UserPrincipal;
 import com.example.medibook.service.AppointmentService;
+import com.example.medibook.events.SystemAlertEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,6 +38,7 @@ public class DoctorController {
   private final ChatMessageRepository chatRepo;
   private final AppUserRepository userRepo;
   private final TimeSlotRepository timeSlotRepo;
+  private final ApplicationEventPublisher publisher;
 
   @Value("${app.timezone:Asia/Ho_Chi_Minh}")
   private String timezone;
@@ -244,6 +247,17 @@ public class DoctorController {
 
       if (req.bio() != null) doctor.setBio(req.bio());
       doctorRepo.save(doctor);
+
+      publisher.publishEvent(new SystemAlertEvent(
+          "DOCTOR_PROFILE_UPDATE",
+          "Bác sĩ cập nhật hồ sơ",
+          "Bác sĩ vừa thực hiện thay đổi thông tin cá nhân hoặc tiểu sử.",
+          Map.of(
+              "Bác sĩ", user.getFullName(),
+              "Email", user.getEmail(),
+              "Số điện thoại", user.getPhone() != null ? user.getPhone() : "N/A"
+          )
+      ));
   }
 
   @GetMapping("/time-slots")
