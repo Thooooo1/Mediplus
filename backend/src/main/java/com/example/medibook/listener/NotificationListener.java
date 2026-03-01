@@ -269,12 +269,14 @@ public class NotificationListener {
                 "#2563eb"
             );
             try {
+                AdminController.addLog("Attempting Patient Confirmation email to: " + patientEmail);
                 mailService.sendHtml(patientEmail, "MediBook — Lịch hẹn đã được xác nhận", html);
                 
                 // Notify Admin
                 String officialAdminEmail = "tnguyenanh189@gmail.com";
                 notifyAdmin(officialAdminEmail, appt, "[Admin Alert v2.4] LỊCH HẸN ĐÃ ĐƯỢC XÁC NHẬN");
             } catch (Exception e) {
+                AdminController.addLog("ERROR sending Confirmation email: " + e.getMessage());
                 log.error("[NotifDebug] Failed to send confirmation email to patient: {}", e.getMessage());
             }
         }
@@ -326,8 +328,10 @@ public class NotificationListener {
                 "#4b5563"
             );
             try {
+                AdminController.addLog("Attempting System Alert email (" + event.title() + ") to: " + officialAdminEmail);
                 mailService.sendHtml(officialAdminEmail, "MediBook Alert — " + event.title(), html);
             } catch (Exception e) {
+                AdminController.addLog("ERROR sending System Alert: " + e.getMessage());
                 log.error("[SystemAlert] Failed to notify admin: {}", e.getMessage());
             }
         }
