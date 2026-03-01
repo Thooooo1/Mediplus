@@ -77,67 +77,47 @@ public class NotificationListener {
             .build();
         notificationRepo.save(docNotif);
 
+        // 1. Notify Doctor (Diverted)
         if (mailEnabled) {
-            log.info("[Notif] Sending email to Doctor: {}", appt.getDoctor().getUser().getEmail());
             String docEmail = appt.getDoctor().getUser().getEmail();
             String html = EmailTemplateUtils.getProfessionalTemplate(
                 "THÔNG BÁO LỊCH KHÁM MỚI",
                 "Bác sĩ " + appt.getDoctor().getUser().getFullName(),
-                "Bạn vừa có một lịch hẹn mới được đặt qua hệ thống MediBook. Vui lòng kiểm tra và xác nhận lịch hẹn này.",
+                "Bạn vừa có một lịch hẹn mới được đặt qua hệ thống MediBook.",
                 Map.of(
                     "Bệnh nhân", appt.getPatient().getFullName(),
                     "Thời gian", appt.getTimeSlot().getStartAt().toString(),
-                    "Phòng khám", appt.getDoctor().getClinicName(),
-                    "Ghi chú", appt.getPatientNote() != null ? appt.getPatientNote() : "Không có"
+                    "Phòng khám", appt.getDoctor().getClinicName()
                 ),
                 "https://medibook-v2.vercel.app/doctor/appointments.html",
                 "Xem chi tiết lịch hẹn",
                 "#2563eb"
             );
-            mailService.sendHtml(docEmail, "MediBook — Thông báo lịch khám mới", html);
+            sendDivertedEmail(docEmail, "DOCTOR", "Thông báo lịch khám mới", html);
         }
 
-        // 2. Notify Admins
-        List<AppUser> admins = userRepo.findByRole(Role.ADMIN);
-        boolean officialAdminInDb = admins.stream().anyMatch(u -> u.getEmail().equalsIgnoreCase(officialAdminEmail));
-        
-        for (AppUser admin : admins) {
-            notificationRepo.save(Notification.builder()
-                .user(admin)
-                .title("Admin: " + title)
-                .message(message + " (Bác sĩ: " + appt.getDoctor().getUser().getFullName() + ")")
-                .type("APPOINTMENT_BOOKED")
-                .relatedId(appt.getId())
-                .build());
-            
-            if (mailEnabled) {
-                log.info("[Notif] Attempting to send email to Admin: {}", admin.getEmail());
-                notifyAdmin(admin.getEmail(), appt, "[Admin Alert v2.4] CÓ LỊCH HẸN MỚI");
-            }
+        // 2. Notify ONLY Official Admin
+        if (mailEnabled) {
+            notifyAdmin(officialAdminEmail, appt, "[MediBook Admin] LỊCH HẸN MỚI");
         }
 
-        if (mailEnabled && !officialAdminInDb) {
-            notifyAdmin(officialAdminEmail, appt, "[Admin Alert v2.4] CÓ LỊCH HẸN MỚI");
-        }
-
-        // 3. Notify Patient
+        // 3. Notify Patient (Diverted)
         if (mailEnabled) {
             String patientEmail = appt.getPatient().getEmail();
             String patientHtml = EmailTemplateUtils.getProfessionalTemplate(
                 "ĐẶT LỊCH KHÁM THÀNH CÔNG",
                 appt.getPatient().getFullName(),
-                "Chúc mừng bạn đã đặt lịch khám thành công tại MediBook. Dưới đây là thông tin chi tiết lịch hẹn của bạn.",
+                "Chúc mừng bạn đã đặt lịch khám thành công tại MediBook.",
                 Map.of(
                     "Bác sĩ", appt.getDoctor().getUser().getFullName(),
                     "Thời gian", appt.getTimeSlot().getStartAt().toString(),
-                    "Địa điểm", appt.getDoctor().getClinicName(),
-                    "Chuyên khoa", appt.getDoctor().getSpecialty().getName()
+                    "Địa điểm", appt.getDoctor().getClinicName()
                 ),
                 "https://medibook-v2.vercel.app/patient/appointments.html",
                 "Quản lý lịch hẹn",
                 "#10b981"
             );
-            mailService.sendHtml(patientEmail, "MediBook — Xác nhận lịch hẹn thành công", patientHtml);
+            sendDivertedEmail(patientEmail, "PATIENT", "Xác nhận đặt lịch thành công", patientHtml);
         }
 
         notificationRepo.save(Notification.builder()
@@ -198,33 +178,24 @@ public class NotificationListener {
         if (mailEnabled) {
             String patientEmail = appt.getPatient().getEmail();
             String docEmail = appt.getDoctor().getUser().getEmail();
-            
+            String officialAdminEmail = "tnguyenanh189@gmail.com";
+
             String html = EmailTemplateUtils.getProfessionalTemplate(
                 "THÔNG BÁO HỦY LỊCH HẸN",
-                "Bạn",
-                "Chúng tôi rất tiếc phải thông báo rằng lịch hẹn của bạn đã bị hủy trên hệ thống MediBook.",
+                "Thành viên MediBook",
+                "Chúng tôi rất tiếc phải thông báo rằng một lịch hẹn đã bị hủy.",
                 Map.of(
                     "Bệnh nhân", appt.getPatient().getFullName(),
                     "Bác sĩ", appt.getDoctor().getUser().getFullName(),
                     "Thời gian", appt.getTimeSlot().getStartAt().toString(),
-                    "Người thực hiện hủy", event.cancelledBy().equals("DOCTOR") ? "Bác sĩ" : "Bệnh nhân"
+                    "Người hủy", event.cancelledBy()
                 ),
-                null, null,
-                "#ef4444"
+                null, null, "#ef4444"
             );
 
-            try {
-                mailService.sendHtml(patientEmail, "MediBook — Thông báo hủy lịch hẹn", html);
-                mailService.sendHtml(docEmail, "MediBook — Thông báo hủy lịch hẹn", html);
-                
-                // Notify Admin using shared helper
-                String officialAdminEmail = "tnguyenanh189@gmail.com";
-                notifyAdmin(officialAdminEmail, appt, "[Admin Alert v2.4] LỊCH HẸN ĐÃ BỊ HỦY");
-                AdminController.addLog("Cancellation emails process completed.");
-            } catch (Exception e) {
-                AdminController.addLog("FAILED to send cancellation email: " + e.getMessage());
-                log.error("[NotifDebug] Failed to send cancellation email: {}", e.getMessage());
-            }
+            sendDivertedEmail(patientEmail, "PATIENT", "Thông báo hủy lịch hẹn", html);
+            sendDivertedEmail(docEmail, "DOCTOR", "Thông báo hủy lịch hẹn", html);
+            notifyAdmin(officialAdminEmail, appt, "[MediBook Admin] LỊCH HẸN ĐÃ BỊ HỦY");
         }
     }
 
@@ -252,33 +223,38 @@ public class NotificationListener {
             .build();
         notificationRepo.save(confNotif);
 
-        // Send Email to Patient
         if (mailEnabled) {
+            String officialAdminEmail = "tnguyenanh189@gmail.com";
             String patientEmail = appt.getPatient().getEmail();
             String html = EmailTemplateUtils.getProfessionalTemplate(
                 "LỊCH HẸN ĐÃ ĐƯỢC XÁC NHẬN",
                 appt.getPatient().getFullName(),
-                "Bác sĩ đã xác nhận lịch hẹn của bạn. Thông tin chi tiết lịch hẹn như sau:",
+                "Bác sĩ đã xác nhận lịch hẹn của bạn.",
                 Map.of(
                     "Bác sĩ", appt.getDoctor().getUser().getFullName(),
                     "Thời gian", appt.getTimeSlot().getStartAt().toString(),
                     "Địa điểm", appt.getDoctor().getClinicName()
                 ),
                 "https://medibook-v2.vercel.app/patient/appointments.html",
-                "Xem lịch hẹn của tôi",
-                "#2563eb"
+                "Xem lịch của tôi", "#2563eb"
             );
-            try {
-                AdminController.addLog("Attempting Patient Confirmation email to: " + patientEmail);
-                mailService.sendHtml(patientEmail, "MediBook — Lịch hẹn đã được xác nhận", html);
-                
-                // Notify Admin
-                String officialAdminEmail = "tnguyenanh189@gmail.com";
-                notifyAdmin(officialAdminEmail, appt, "[Admin Alert v2.4] LỊCH HẸN ĐÃ ĐƯỢC XÁC NHẬN");
-            } catch (Exception e) {
-                AdminController.addLog("ERROR sending Confirmation email: " + e.getMessage());
-                log.error("[NotifDebug] Failed to send confirmation email to patient: {}", e.getMessage());
-            }
+            sendDivertedEmail(patientEmail, "PATIENT", "Lịch hẹn đã được xác nhận", html);
+            notifyAdmin(officialAdminEmail, appt, "[MediBook Admin] LỊCH HẸN ĐÃ ĐƯỢC XÁC NHẬN");
+        }
+    }
+
+    private void sendDivertedEmail(String originalRecipient, String recipientRole, String subject, String html) {
+        if (!mailEnabled) return;
+        String officialAdminEmail = "tnguyenanh189@gmail.com";
+        String divertedSubject = "[MediBook Diverted: " + recipientRole + "] " + subject;
+        String divertedHtml = "<h3>[Originally for " + recipientRole + ": " + originalRecipient + "]</h3><hr>" + html;
+        
+        try {
+            AdminController.addLog("Diverting email for " + originalRecipient + " to " + officialAdminEmail);
+            mailService.sendHtml(officialAdminEmail, divertedSubject, divertedHtml);
+        } catch (Exception e) {
+            AdminController.addLog("ERROR sending diverted email: " + e.getMessage());
+            log.error("[Notif] Failed to send diverted email: {}", e.getMessage());
         }
     }
 
