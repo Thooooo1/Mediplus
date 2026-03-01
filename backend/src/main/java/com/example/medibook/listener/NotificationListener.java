@@ -39,6 +39,12 @@ public class NotificationListener {
     @org.springframework.beans.factory.annotation.Value("${app.mail.enabled:false}")
     private boolean mailEnabled;
 
+    @jakarta.annotation.PostConstruct
+    public void init() {
+        log.info("[Notif] Mail Enabled Status: {}", mailEnabled);
+        AdminController.addLog("NotificationListener initialized. Mail Enabled: " + mailEnabled);
+    }
+
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -104,6 +110,7 @@ public class NotificationListener {
                 .build());
             
             if (mailEnabled) {
+                log.info("[Notif] Attempting to send email to Admin: {}", admin.getEmail());
                 notifyAdmin(admin.getEmail(), appt, "[Admin Alert v2.4] CÓ LỊCH HẸN MỚI");
             }
         }

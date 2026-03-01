@@ -165,10 +165,10 @@ const updateNotificationBadge = async () => {
                 if (!isShowing) badge.style.display = 'none';
                 else badge.style.display = 'flex';
                 
-                // Alert if count increased
-                if (count > prevCount && prevCount >= 0) {
-                    showToast("Bạn có thông báo mới!", "info");
-                }
+                // Alert if count increased (disabled as per user request)
+                // if (count > prevCount && prevCount >= 0) {
+                //     showToast("Bạn có thông báo mới!", "info");
+                // }
             }
         }
     } catch(e) {}
