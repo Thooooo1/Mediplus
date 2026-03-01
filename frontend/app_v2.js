@@ -370,7 +370,7 @@ const hidePageLoader = () => {
 };
 
 /* ─── Toast Notifications ─────────────────────── */
-const showToast = (message, type = "success") => {
+const showToast = (message, type = "success", options = {}) => {
   const colorMap = {
     success: { bg: '#dcfce7', border: '#bbf7d0', color: '#166534', icon: 'check_circle' },
     error:   { bg: '#fee2e2', border: '#fecaca', color: '#991b1b', icon: 'error' },
@@ -382,8 +382,11 @@ const showToast = (message, type = "success") => {
   const toast = document.createElement("div");
   toast.className = "toast-notification";
   toast.style.cssText = `background:${c.bg};border:1px solid ${c.border};color:${c.color}`;
+  
+  const iconHtml = options.noIcon ? '' : `<span class="material-icons-round" style="font-size:20px">${c.icon}</span>`;
+  
   toast.innerHTML = `
-    <span class="material-icons-round" style="font-size:20px">${c.icon}</span>
+    ${iconHtml}
     <p style="flex:1;margin:0;font-size:14px;font-weight:500">${message}</p>
     <button onclick="this.parentElement.remove()" style="background:none;border:none;cursor:pointer;opacity:0.6;color:inherit">
       <span class="material-icons-round" style="font-size:18px">close</span>
