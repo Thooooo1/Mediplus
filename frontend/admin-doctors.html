@@ -256,11 +256,11 @@
                                         <tr>
                                             <td>
                                                 <div class="row items-center gap-3">
-                                                    <img src="${d.avatarUrl || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(d.fullName)}" class="avatar avatar-sm">
-                                                    <div>
-                                                        <div class="font-bold">${d.fullName}</div>
-                                                        <div class="text-xs text-secondary">${d.title || ''}</div>
-                                                    </div>
+                                                     <img src="${d.avatarUrl || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(d.fullName)}" class="avatar" style="width:56px;height:56px;box-shadow:var(--shadow-sm);border:2px solid white">
+                                                     <div>
+                                                         <div class="font-bold" style="font-size:18px;color:var(--neutral-900)">${d.fullName}</div>
+                                                         <div class="text-xs text-secondary" style="font-weight:600;margin-top:2px">${d.title || ''}</div>
+                                                     </div>
                                                 </div>
                                             </td>
                                             <td><span class="badge badge-primary">${d.specialtyName}</span></td>
